@@ -1,0 +1,5 @@
+{
+    "--title": "CentiryLink API Loader Docs",
+    "--warnings": "-all",
+    "--categories": "jsduck-categories.json"
+}
