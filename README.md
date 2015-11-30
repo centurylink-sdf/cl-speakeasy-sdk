@@ -1,6 +1,6 @@
 # CtlApi
 
-A CenturyLink API loader javascript sdk. Check out the demo in https://bitbucket.org/centurylink/ctlapi/master/example/example1.html.
+A CenturyLink API loader javascript sdk. Check out the demo in example/example1.html
 
 ### 1. Installation
 
