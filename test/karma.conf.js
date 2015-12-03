@@ -8,13 +8,18 @@ module.exports = function(config){
 
             // the reason we load unit tests next is because they don't depend on the app. On the contrary,
             // they set mocks ahead of time for the units so they have to be loaded first
-            'test/unit/**/*.js',
+            // 'test/unit/**/*.js',
 
             // now all the dependencies have been sorted, the app code can be loaded
-            'src/*/*/*/*.js',
-            'src/*/*/*.js',
-            'src/*/*.js',
-            'src/**/*.js'
+            // 'src/*/*/*/*.js',
+            // 'src/*/*/*.js',
+            // 'src/*/*.js',
+            // 'src/**/*.js',
+
+            {pattern: 'src/*.js', included: false},
+            {pattern: 'test/unit/**/*Spec.js', included: false}//,
+            // {pattern: 'test/test-main.js', included: false}
+            // 'test/test-main.js'
         ],
 
         // list of files to exclude
@@ -24,7 +29,7 @@ module.exports = function(config){
             'karma.conf.js'
         ],
 
-        frameworks : ['jasmine'],
+        frameworks : ['jasmine','requirejs'],
 
         coverageReporter : {
             type: 'text-summary',

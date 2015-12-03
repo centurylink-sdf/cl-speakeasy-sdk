@@ -28,7 +28,6 @@ var tasklist = require('gulp-task-listing');
 var runSequence = require('run-sequence');
 var GJSDuck = require("gulp-jsduck");
 var gjsduck = new GJSDuck(["--out", "docs"]);
-var requirejsOptimize = require('gulp-requirejs-optimize');
 var amdclean  = require('gulp-amdclean');
 
 var PROJECT_BASE_PATH = __dirname + '';
@@ -47,18 +46,14 @@ gulp.task('default', tasklist.withFilters(function(task) {
  * ***********************************************************************************************
  */
 
-gulp.task('build', ['clean'], function (cb) {
+gulp.task('build-require', function (cb) {
+    executeCommand('r.js -o build.json', cb);
+});
+
+gulp.task('build-optimize', function (cb) {
     var pkg = require('./package.json');
 
-    return gulp.src('./src/CtlApiLoader.js')
-        .pipe(requirejsOptimize(function(file) {
-            return {
-                name: 'CtlApiLoader',
-                optimize: 'none',
-                baseUrl: 'src',
-                include: 'lib/require'
-            };
-        }))
+    return gulp.src('./dist/ctlapi.js')
         // .pipe(amdclean.gulp({
         //     'prefixMode': 'standard',
         //     'wrap': {
@@ -72,6 +67,10 @@ gulp.task('build', ['clean'], function (cb) {
         .pipe(uglify())
         .pipe(size({showFiles:true}))
         .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('build', function (cb) {
+    runSequence('clean', 'build-require', 'build-optimize', cb);
 });
 
 gulp.task('stream', function (cb) {
@@ -97,7 +96,7 @@ gulp.task('bump-major', function(cb) {
 
 gulp.task('test', ['lint', 'karma-tests']);
 
-gulp.task("doc", function()
+gulp.task("doc", function(cb)
 {
     return gulp.src("./src/*.js")
         .pipe(gjsduck.doc());

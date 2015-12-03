@@ -7,12 +7,12 @@ define('Utils', [], function () {
     function Utils() {
 
         /**
-         * [isValidUrl description]
+         * Check if the URL is valid
          * @param  {[type]}  url [description]
          * @return {Boolean}     [description]
          */
         function isValidUrl(url) {
-            if (!url) return false;
+            if (!url) { return false; }
             var doc, base, anchor, isValid = false;
             try {
                 doc = document.implementation.createHTMLDocument("");
@@ -22,7 +22,7 @@ define('Utils', [], function () {
                 anchor = doc.createElement("a");
                 anchor.href = url;
                 doc.body.appendChild(anchor);
-                isValid = !(anchor.href === "");
+                isValid = (anchor.href !== "");
             } catch (e) {
                 console.error(e);
             } finally {
@@ -38,9 +38,8 @@ define('Utils', [], function () {
         /**
          * Method to encode the query string parameters
          *
-         * @method encodeParams
-         * @param {object} params - an object of name value pairs that will be urlencoded
-         * @return {string} Returns the encoded string
+         * @param   {Object} params - an object of name value pairs that will be urlencoded
+         * @return  {String} Returns the encoded string
          */
         function encodeParams(params) {
             var queryString;
@@ -73,9 +72,8 @@ define('Utils', [], function () {
         /**
          * Method to determine whether or not the passed variable is a function
          *
-         * @method isFunction
-         * @param {any} f - any variable
-         * @return {Boolean} Returns true or false
+         * @param   {any} f - any variable
+         * @return  {Boolean} Returns true or false
          */
         function isFunction(f) {
             return f && f !== null && typeof f === "function";
@@ -84,11 +82,10 @@ define('Utils', [], function () {
         /**
          * A safe wrapper for executing a callback
          *
-         * @method doCallback
-         * @param {Function} callback   the passed-in callback method
-         * @param {Array} params        an array of arguments to pass to the callback
-         * @param {Object} context      an optional calling context for the callback
-         * @return Returns whatever would be returned by the callback. or false.
+         * @param   {Function}  callback    the passed-in callback method
+         * @param   {Array}     params      an array of arguments to pass to the callback
+         * @param   {Object}    context     an optional calling context for the callback
+         * @return  Returns whatever would be returned by the callback. or false.
          */
         function doCallback(callback, params, context) {
             var returnValue;

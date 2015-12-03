@@ -1,0 +1,7 @@
+{
+    "mainConfigFile": "src/require.config.js",
+    "name": "CtlApiLoader",
+    "optimize": "none",
+    "baseUrl": "src",
+    "include": ["lib/require", "Services"]
+}

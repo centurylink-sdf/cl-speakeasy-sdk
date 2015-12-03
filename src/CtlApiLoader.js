@@ -1,4 +1,4 @@
-define('CtlApiLoader', ['Logger', 'Promise', 'Ajax', 'Utils'], function (Logger, Promise, Ajax, Utils) {
+define('CtlApiLoader', ['Config', 'Logger', 'Promise', 'Ajax', 'Utils'], function (Config, Logger, Promise, Ajax, Utils) {
 
     /**
      * Main CenturyLink API loader class
@@ -10,11 +10,7 @@ define('CtlApiLoader', ['Logger', 'Promise', 'Ajax', 'Utils'], function (Logger,
      */
     function CtlApiLoader() {
 
-        var self = this;
-        var name = "CtlApiLoader";
-
-        self.logger = new Logger(name);
-        self.endpoint = 'https://auth.veuxdu.centurylink.com/token';
+        var logger = new Logger('CtlApiLoader');
 
         var p = new Promise();
 
@@ -42,7 +38,7 @@ define('CtlApiLoader', ['Logger', 'Promise', 'Ajax', 'Utils'], function (Logger,
 
             /* a callback to make the request */
             var request = function() {
-                return Ajax.post(this.endpoint, data);
+                return Ajax.post(Config.services.authenticate, data);
             }.bind(this);
 
             /* a callback to process the response */
@@ -53,7 +49,7 @@ define('CtlApiLoader', ['Logger', 'Promise', 'Ajax', 'Utils'], function (Logger,
             /* a callback to clean up and return data to the client */
             var oncomplete = function(err, response) {
                 p.done(err, response);
-                self.logger.info("REQUEST", err, response);
+                logger.info("REQUEST", err, response);
                 Utils.doCallback(callback, [ err, response ]);
             }.bind(this);
 
@@ -63,12 +59,12 @@ define('CtlApiLoader', ['Logger', 'Promise', 'Ajax', 'Utils'], function (Logger,
         }
 
         /**
-         * Get a version of the API loader
+         * Get a version of the API loader 111
          *
          * @return {String} Contains API loader version
          */
         function version() {
-            self.logger.info('version');
+            logger.info('version');
         }
 
         /**
@@ -79,14 +75,15 @@ define('CtlApiLoader', ['Logger', 'Promise', 'Ajax', 'Utils'], function (Logger,
          * @param  {Function} callback Callback to call after API is loaded and initialized
          */
         function load(name, version, callback) {
-
-            // TODO: Implement dynamic loading of the remote module
-            // self.logger.info('load');
-            // require('http://localhost:8000/example/speakeasy.js', ['require'], function(SpeakEasy) {
-            //     console.log('loaded...');
-            //     console.log(SpeakEasy);
-            // });
-            // Utils.doCallback(callback, [ err, response ]);
+            require(
+                [name],
+                function(api) {
+                    Utils.doCallback(callback, [null, api]);
+                },
+                function(err) {
+                    Utils.doCallback(callback, [err]);
+                }
+            );
         }
 
         /**

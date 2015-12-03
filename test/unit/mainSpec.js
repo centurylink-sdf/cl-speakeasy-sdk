@@ -1,18 +1,16 @@
-(function () {
-    "use strict";
+define(['CtlApiLoader'], function (CtlApiLoader) {
 
-    describe("WikiSampleSDK", function () {
+    describe("CtlApiLoader", function () {
         it("sanity check", function () {
             expect(true).toBe(true);
         });
 
         it("should expose the sdk", function () {
-            expect( WikiSampleSDK ).toBeDefined();
-            expect( WikiSampleSDK.WikiTextHelper ).toBeDefined();
+            expect( CtlApiLoader ).toBeDefined();
         });
 
-        it("should have a method called GetPage", function () {
-            expect( WikiSampleSDK.GetPage ).toBeDefined();
+        it("should have a method called authenticate", function () {
+            expect( CtlApiLoader.authenticate ).toBeDefined();
         });
 
         it("should call the requestSample method when getting a page", function () {
@@ -29,4 +27,4 @@
         });
     });
 
-})();
+});
