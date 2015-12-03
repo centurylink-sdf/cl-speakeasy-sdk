@@ -173,9 +173,8 @@ gulp.task('upgrade-version', function(){
     var file = 'src/Version.js';
 
     return gulp.src([file])
-        // define('Version', '0.1.0');
-        .pipe(replace(/define(\'Version\', \'([\d.]+)\')\;/g, 'define(\'Version\', \'' + v + '\');'))
-        .pipe(gulp.dest('example'));
+        .pipe(replace(/[\d.]+/g, v))
+        .pipe(gulp.dest('src'));
 });
 
 // continous integration tasks
