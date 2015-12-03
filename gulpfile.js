@@ -167,7 +167,7 @@ gulp.task('example-upgrade-tag', function(){
         .pipe(gulp.dest('example'));
 });
 
-gulp.task('example-upgrade-version', function(){
+gulp.task('upgrade-version', function(){
     var pkg = require('./package.json');
     var v = pkg.version;
     var file = 'src/Version.js';
@@ -215,5 +215,5 @@ function puts(error, stdout, stderr) {
 
 // will execute the needed stuff to bump successfully
 function bumpHelper(bumpType, cb) {
-    runSequence('npm-bump-'+bumpType, 'build', 'example-upgrade-tag', 'example-upgrade-version', 'git-tag-commit', 'git-tag', cb);
+    runSequence('npm-bump-'+bumpType, 'upgrade-version', 'build', 'example-upgrade-tag', 'git-tag-commit', 'git-tag', cb);
 }
