@@ -1,4 +1,4 @@
-define('CtlApiLoader', ['Config', 'Logger', 'Promise', 'Ajax', 'Utils'], function (Config, Logger, Promise, Ajax, Utils) {
+define('CtlApiLoader', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils'], function (Version, Config, Logger, Promise, Ajax, Utils) {
 
     /**
      * Main CenturyLink API loader class
@@ -64,7 +64,8 @@ define('CtlApiLoader', ['Config', 'Logger', 'Promise', 'Ajax', 'Utils'], functio
          * @return {String} Contains API loader version
          */
         function version() {
-            logger.info('version');
+            logger.info(Version);
+            return Version;
         }
 
         /**

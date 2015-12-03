@@ -167,6 +167,17 @@ gulp.task('example-upgrade-tag', function(){
         .pipe(gulp.dest('example'));
 });
 
+gulp.task('example-upgrade-version', function(){
+    var pkg = require('./package.json');
+    var v = pkg.version;
+    var file = 'src/Version.js';
+
+    return gulp.src([file])
+        // define('Version', '0.1.0');
+        .pipe(replace(/define(\'Version\', \'([\d.]+)\')\;/g, 'define(\'Version\', \'' + v + '\');'))
+        .pipe(gulp.dest('example'));
+});
+
 // continous integration tasks
 
 gulp.task('lint', function (cb) {
@@ -204,5 +215,5 @@ function puts(error, stdout, stderr) {
 
 // will execute the needed stuff to bump successfully
 function bumpHelper(bumpType, cb) {
-    runSequence('npm-bump-'+bumpType, 'build', 'example-upgrade-tag', 'git-tag-commit', 'git-tag', cb);
+    runSequence('npm-bump-'+bumpType, 'build', 'example-upgrade-tag', 'example-upgrade-version', 'git-tag-commit', 'git-tag', cb);
 }
