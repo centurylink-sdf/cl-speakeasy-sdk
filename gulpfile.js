@@ -28,7 +28,7 @@ var tasklist = require('gulp-task-listing');
 var runSequence = require('run-sequence');
 var GJSDuck = require("gulp-jsduck");
 var gjsduck = new GJSDuck(["--out", "docs"]);
-var amdclean  = require('gulp-amdclean');
+// var amdclean  = require('gulp-amdclean');
 
 var PROJECT_BASE_PATH = __dirname + '';
 
