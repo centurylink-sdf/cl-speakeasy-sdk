@@ -3,6 +3,8 @@ require(['CtlApiLoader'], function(CtlApiLoader){
     var username = 'test01',
         password = 'password1234';
 
+    console.log('Running CtlApi v' + CtlApiLoader.version());
+
     // authenticate
     CtlApiLoader.authenticate(username, password, function() {
         console.info('Successfully authenticated. Now you can load any CenturyLink API.');

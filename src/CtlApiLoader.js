@@ -64,7 +64,6 @@ define('CtlApiLoader', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils
          * @return {String} Contains API loader version
          */
         function version() {
-            logger.info(Version);
             return Version;
         }
 
@@ -94,6 +93,7 @@ define('CtlApiLoader', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils
          * @param   {String} token
          */
         function setToken(token) {
+            // TODO: Store token in cookies
             Utils.set("token", token);
         }
 
