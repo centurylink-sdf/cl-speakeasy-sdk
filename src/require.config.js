@@ -7,9 +7,9 @@ require.config({
         "Utils": "Utils",
         "Ajax": "Ajax",
         "Promise": "Promise",
-        "CtlApiLoader": "CtlApiLoader"
+        "Ctl": "Ctl"
     },
-    name: "CtlApiLoader",
+    name: "Ctl",
     out: "../dist/ctlapi.js",
     optimize: "none"
 });

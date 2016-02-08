@@ -1,4 +1,4 @@
-define('CtlApiLoader', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils'], function (Version, Config, Logger, Promise, Ajax, Utils) {
+define('Ctl', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils'], function (Version, Config, Logger, Promise, Ajax, Utils) {
 
     /**
      * Main CenturyLink API loader class
@@ -8,9 +8,9 @@ define('CtlApiLoader', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils
      * @requires Ajax
      * @requires Utils
      */
-    function CtlApiLoader() {
+    function Ctl() {
 
-        var logger = new Logger('CtlApiLoader');
+        var logger = new Logger('Ctl');
 
         var p = new Promise();
 
@@ -24,7 +24,7 @@ define('CtlApiLoader', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils
          *
          * ## Sample usage:
          *
-         *     CtlApiLoader.authenticate('username', 'password', function(response) {
+         *     Ctl.authenticate('username', 'password', function(response) {
          *     	alert(response);
          *     });
          *
@@ -59,7 +59,7 @@ define('CtlApiLoader', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils
         }
 
         /**
-         * Get a version of the API loader 111
+         * Get a version of the API loader
          *
          * @return {String} Contains API loader version
          */
@@ -112,6 +112,6 @@ define('CtlApiLoader', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils
         this.load = load;
     }
 
-    return new CtlApiLoader();
+    return new Ctl();
 
 });
