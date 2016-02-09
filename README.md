@@ -5,6 +5,7 @@ A CenturyLink API loader javascript sdk. Check out the demo in example/example1.
 ### 1. Installation
 
 You will need to have [nodejs](http://nodejs.org/download) installed.
+Also you will need to have [r.js](https://github.com/jrburke/r.js) installed.
 
 ### 2. Getting started
 
