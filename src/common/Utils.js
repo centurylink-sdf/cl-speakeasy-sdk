@@ -1,4 +1,4 @@
-define('Utils', [], function () {
+define([], function () {
 
     /**
      * This module is a collection of classes designed to make working with

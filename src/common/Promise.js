@@ -1,4 +1,4 @@
-define('Promise', [], function () {
+define([], function () {
 
     /**
      * Promise implementation

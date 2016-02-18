@@ -1,4 +1,7 @@
-define('Ajax', ['Logger', 'Promise'], function (Logger, Promise) {
+define([
+    'Ctl.common.Logger',
+    'Ctl.common.Promise'
+], function (Logger, Promise) {
 
     function partial() {
         var args = Array.prototype.slice.call(arguments);
@@ -50,12 +53,12 @@ define('Ajax', ['Logger', 'Promise'], function (Logger, Promise) {
          * @param  {Object} data Data to send
          * @return {Promise} p
          */
-        function request(method, url, data) {
+        function request(method, url, data, headers) {
             var p = new Promise(), timeout;
             self.logger.time(method + " " + url);
             (function(xhr) {
                 xhr.onreadystatechange = function() {
-                    if (this.readyState === 4) {
+                    if (this.readyState === 4 && this.status === 200) {
                         self.logger.timeEnd(method + " " + url);
                         clearTimeout(timeout);
                         p.done(null, this);
@@ -71,13 +74,18 @@ define('Ajax', ['Logger', 'Promise'], function (Logger, Promise) {
                     self.info("%s request to %s returned %s", method, url, this.status);
                 };
                 xhr.open(method, url);
-                if (data) {
+                xhr.responseType = 'json';
+                if (headers) {
                     // if ("object" === typeof data) {
                     //     data = JSON.stringify(data);
                     // }
                     // xhr.setRequestHeader("Content-Type", "application/json");
-                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    xhr.setRequestHeader("Accept", "application/json");
+
+                    for (var i = 0; i < headers.length; i++) {
+                        xhr.setRequestHeader(headers[i][0], headers[i][1]);
+                    }
+                    // xhr.setRequestHeader("Content-Type", headers.contentType ? headers.contentType : "application/x-www-form-urlencoded");
+                    // xhr.setRequestHeader("Accept", "application/json");
                 }
                 timeout = setTimeout(function() {
                     xhr.abort();

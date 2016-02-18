@@ -46,14 +46,14 @@ gulp.task('default', tasklist.withFilters(function(task) {
  * ***********************************************************************************************
  */
 
-gulp.task('build-require', function (cb) {
-    executeCommand('r.js -o build.json', cb);
+gulp.task('build-require-apiloader', function (cb) {
+    executeCommand('r.js -o src/apiloader/build.json', cb);
 });
 
-gulp.task('build-optimize', function (cb) {
+gulp.task('build-optimize-apiloader', function (cb) {
     var pkg = require('./package.json');
 
-    return gulp.src('./dist/ctlapi.js')
+    return gulp.src('./dist/' + pkg.name + '.js')
         // .pipe(amdclean.gulp({
         //     'prefixMode': 'standard',
         //     'wrap': {
@@ -69,12 +69,20 @@ gulp.task('build-optimize', function (cb) {
         .pipe(gulp.dest('./dist'));
 });
 
+gulp.task('build-apiloader', function (cb) {
+    runSequence('clean', 'build-require-apiloader', 'build-optimize-apiloader', cb);
+});
+
+gulp.task('build-require-speakeasy', function (cb) {
+    executeCommand('r.js -o src/speakeasy/build.json', cb);
+});
+
 gulp.task('build', function (cb) {
-    runSequence('clean', 'build-require', 'build-optimize', cb);
+    runSequence('clean', 'build-require-apiloader', 'build-optimize-apiloader', 'build-require-speakeasy', cb);
 });
 
 gulp.task('stream', function (cb) {
-    gulp.watch(['./src/*.js'], ['build']);
+    gulp.watch(['./src/**/*.js'], ['build']);
 });
 
 gulp.task('clean', function (cb) {
@@ -98,7 +106,7 @@ gulp.task('test', ['lint', 'karma-tests']);
 
 gulp.task("doc", function(cb)
 {
-    return gulp.src("./src/*.js")
+    return gulp.src(["./src/**/*.js", "!./src/lib/*"])
         .pipe(gjsduck.doc());
 });
 

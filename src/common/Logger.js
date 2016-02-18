@@ -1,4 +1,4 @@
-define('Logger', [], function () {
+define([], function () {
 
     var name = "Logger";
 
@@ -40,7 +40,7 @@ define('Logger', [], function () {
 
     /**
      * Initialize logger
-     * 
+     *
      * @private
      * @param  {String} name       [description]
      * @param  {Boolean} logEnabled [description]

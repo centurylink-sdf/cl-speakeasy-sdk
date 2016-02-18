@@ -3,18 +3,31 @@
         "name": "Base",
         "groups": [
             {
-                "name": "API Loader",
-                "classes": [
-                    "CtlApiLoader"
-                ]
-            },
-            {
                 "name": "Common",
                 "classes": [
                     "Utils",
                     "Logger",
                     "Promise",
                     "Ajax"
+                ]
+            },
+            {
+                "name": "API Loader",
+                "classes": [
+                    "Ctl"
+                ]
+            }
+
+        ]
+    },
+    {
+        "name": "APIs",
+        "groups": [
+            {
+                "name": "SpeakEasy",
+                "classes": [
+                    "CallManager",
+                    "Call"
                 ]
             }
 

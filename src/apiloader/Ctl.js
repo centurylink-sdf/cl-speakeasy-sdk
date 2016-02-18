@@ -1,4 +1,16 @@
-define('Ctl', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils'], function (Version, Config, Logger, Promise, Ajax, Utils) {
+//@tag foundation,core
+//@define Ctl
+
+define([
+    'Ctl.apiloader.Version',
+    'Ctl.apiloader.Config',
+    'Ctl.common.Logger',
+    'Ctl.common.Promise',
+    'Ctl.common.Ajax',
+    'Ctl.common.Utils',
+    'model/request/BaseRequest',
+    'model/request/AccessTokenRequest',
+], function (Version, Config, Logger, Promise, Ajax, Utils, BaseRequest, AccessTokenRequest) {
 
     /**
      * Main CenturyLink API loader class
@@ -11,8 +23,6 @@ define('Ctl', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils'], funct
     function Ctl() {
 
         var logger = new Logger('Ctl');
-
-        var p = new Promise();
 
         /**
          * Authenticate client with OAuth method and store tokens for later use
@@ -30,32 +40,36 @@ define('Ctl', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils'], funct
          *
          */
         function authenticate(username, password, callback) {
-            var data = {
-    			grant_type: 'password',
-    			username: username,
-    			password: password
-    		};
+
+            var atRequest = new AccessTokenRequest(username, password);
 
             /* a callback to make the request */
-            var request = function() {
-                return Ajax.post(Config.services.authenticate, data);
+            var accessTokenRequest = function() {
+                return Ajax.request(atRequest.type, atRequest.getRequestUrl(), atRequest.objectify(), atRequest.requestHeaders);
             }.bind(this);
 
-            /* a callback to process the response */
-            // var response = function(err, request) {
-            //     return new Usergrid.Response(err, request);
-            // }.bind(this);
+            var response = function(err, request) {
+                var p = new Promise();
+
+                return p;
+            }.bind(this);
 
             /* a callback to clean up and return data to the client */
             var oncomplete = function(err, response) {
-                p.done(err, response);
+
                 logger.info("REQUEST", err, response);
+
+                if (!err && response) {
+                    BaseRequest.prototype.accessToken = response.response.access_token;
+                    setAccessToken(response.response.access_token);
+                    setRefreshToken(response.response.refresh_token);
+                }
+
                 Utils.doCallback(callback, [ err, response ]);
             }.bind(this);
 
             /* and a promise to chain them all together */
-            Promise.chain([ request ]).then(oncomplete);
-            return p;
+            Promise.chain([ accessTokenRequest ]).then(oncomplete);
         }
 
         /**
@@ -87,24 +101,45 @@ define('Ctl', ['Version', 'Config', 'Logger', 'Promise', 'Ajax', 'Utils'], funct
         }
 
         /**
-         * Store the OAuth token for later use - uses localstorage if available
+         * Store the OAuth access token for later use - uses localstorage if available
          *
          * @private
          * @param   {String} token
          */
-        function setToken(token) {
+        function setAccessToken(token) {
             // TODO: Store token in cookies
-            Utils.set("token", token);
+            Utils.set("access_token", token);
         }
 
         /**
-         * Get the OAuth token
+         * Get the OAuth access token
          *
          * @private
          * @return  {String} token
          */
-        function getToken() {
-            return Utils.get("token");
+        function getAccessToken() {
+            return Utils.get("access_token");
+        }
+
+        /**
+         * Store the OAuth refresh token for later use - uses localstorage if available
+         *
+         * @private
+         * @param   {String} token
+         */
+        function setRefreshToken(token) {
+            // TODO: Store token in cookies
+            Utils.set("refresh_token", token);
+        }
+
+        /**
+         * Get the OAuth refresh token
+         *
+         * @private
+         * @return  {String} token
+         */
+        function getRefreshToken() {
+            return Utils.get("refresh_token");
         }
 
         this.authenticate = authenticate;

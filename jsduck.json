@@ -1,5 +1,5 @@
 {
-    "--title": "CentiryLink API Loader Docs",
+    "--title": "CenturyLink API Docs",
     "--warnings": "-all",
     "--categories": "jsduck-categories.json"
 }

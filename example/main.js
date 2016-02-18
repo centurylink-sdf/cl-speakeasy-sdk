@@ -6,9 +6,13 @@ require(['Ctl'], function(Ctl){
     console.log('Running CtlApi v' + Ctl.version());
 
     // authenticate
-    Ctl.authenticate(username, password, function() {
-        console.info('Successfully authenticated. Now you can load any CenturyLink API.');
-        loadSpeakEasy();
+    Ctl.authenticate(username, password, function(error, response) {
+        if (!error) {
+            console.info('Successfully authenticated. Now you can load any CenturyLink API.');
+            loadSpeakEasy();
+        } else {
+            console.error('Authentication failed: ', error);
+        }
     });
 
     function loadSpeakEasy() {
@@ -20,7 +24,13 @@ require(['Ctl'], function(Ctl){
                 console.log(err);
             } else {
                 console.log('SpeakEasy has been loaded');
-                speakEasy.sayHello();
+                console.log('Running SpeakEasy v' + speakEasy.version());
+
+                var callButton = document.getElementById('callButton');
+                callButton.addEventListener("click", function() {
+                    speakEasy.CallManager.createCall('7202839129');
+                });
+                
             }
 
         });
