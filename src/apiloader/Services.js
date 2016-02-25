@@ -1,5 +1,5 @@
 require.config({
     "paths": {
-        "SpeakEasy": "http://localhost:8000/dist/speakeasy"
+        "SpeakEasy": "https://communicator.lab.centurylink.com/ctlapi/dist/speakeasy"
     }
 });

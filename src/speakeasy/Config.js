@@ -6,7 +6,8 @@ define({
         'postImByUseridURI': '/rest/version/{versionId}/user/{userId}/instantmessage',
         'postImByDeviceidURI': '/rest/version/{versionId}/device/{deviceId}/instantmessage',
         'proxyForURLPatterns': ['/rest/version/[0-9]+/user','/rest/version/latest'],
-        'SEProxyPrependURL': '/SpeakEasy'
+        'SEProxyPrependURL': '/SpeakEasy/',
+        "defaultOutgoingCallDomain": "ctlvoip.lab.centurylink"
     },
     fcsapi: {
         'notificationType': 'websocket',
@@ -18,7 +19,7 @@ define({
         'clientControlled': 'true',
         'services':['CallControl', 'custom'],
         'websocketProtocol': 'wss',
-        'websocketIP': '137.107.64.104',
+        'websocketIP': 'www.intg105.centurylink.com',
         'websocketPort': '8591',
         'earlyMedia': true
     }

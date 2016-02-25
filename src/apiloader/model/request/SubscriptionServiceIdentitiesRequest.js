@@ -1,4 +1,4 @@
-define(['Ctl.apiloader.Config'], function (Config) {
+define(['Ctl.apiloader.Config', 'model/request/BaseRequest'], function (Config, BaseRequest) {
     /**
      * Refresh Token Request
      *
@@ -8,27 +8,16 @@ define(['Ctl.apiloader.Config'], function (Config) {
      * @param {String} refreshToken The resource owner refresh_token
      * @constructor
      */
-    function SubscriptionServiceIdentitiesRequest(refreshToken) {
-        this.refreshToken = refreshToken;
-        this.grantType = 'refresh_token';
+    function SubscriptionServiceIdentitiesRequest() {
+        BaseRequest.call(this);
     }
 
-    SubscriptionServiceIdentitiesRequest.prototype = {
-        getData: function() {
-            return JSON.stringify(this.objectify());
-        },
-        objectify: function () {
-            var o = {
-                'grant_type': this.grantType,
-                'refresh_token': this.refreshToken
-            };
+    SubscriptionServiceIdentitiesRequest.prototype = Object.create(BaseRequest.prototype);
 
-            return o;
-        },
-        getRequestUrl: function () {
+    SubscriptionServiceIdentitiesRequest.prototype.getRequestUrl = function () {
             return Config.settings.ctlServerURL + Config.settings.getSubscriptionServiceIdentitiesURI;
-        },
-        type: "GET"
     };
+    SubscriptionServiceIdentitiesRequest.prototype.type = "GET";
+
     return SubscriptionServiceIdentitiesRequest;
 });

@@ -76,16 +76,9 @@ define([
                 xhr.open(method, url);
                 xhr.responseType = 'json';
                 if (headers) {
-                    // if ("object" === typeof data) {
-                    //     data = JSON.stringify(data);
-                    // }
-                    // xhr.setRequestHeader("Content-Type", "application/json");
-
                     for (var i = 0; i < headers.length; i++) {
-                        xhr.setRequestHeader(headers[i][0], headers[i][1]);
+                        if (headers[i][1]) { xhr.setRequestHeader(headers[i][0], headers[i][1]); }
                     }
-                    // xhr.setRequestHeader("Content-Type", headers.contentType ? headers.contentType : "application/x-www-form-urlencoded");
-                    // xhr.setRequestHeader("Accept", "application/json");
                 }
                 timeout = setTimeout(function() {
                     xhr.abort();

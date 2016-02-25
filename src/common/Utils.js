@@ -133,6 +133,14 @@ define([], function () {
             return value;
         }
 
+        function removeAll() {
+            for (var i = localStorage.length; i--;){
+                if (localStorage.key(i).indexOf('ctlapi_') > -1) {
+                    localStorage.removeItem(localStorage.key(i));
+                }
+            }
+        }
+
         this.isValidUrl = isValidUrl;
         this.encodeParams = encodeParams;
         this.isFunction = isFunction;
@@ -141,6 +149,7 @@ define([], function () {
         this.set = set;
         this.getObject = getObject;
         this.get = get;
+        this.removeAll = removeAll;
 
     }
 

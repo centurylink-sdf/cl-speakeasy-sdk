@@ -1,4 +1,4 @@
-define(['Ctl.apiloader.Config'], function (Config) {
+define(['Ctl.apiloader.Config', 'model/request/BaseRequest'], function (Config, BaseRequest) {
     /**
      * Refresh Token Request
      *
@@ -9,26 +9,28 @@ define(['Ctl.apiloader.Config'], function (Config) {
      * @constructor
      */
     function RefreshTokenRequest(refreshToken) {
+        BaseRequest.call(this);
         this.refreshToken = refreshToken;
         this.grantType = 'refresh_token';
     }
 
-    RefreshTokenRequest.prototype = {
-        getData: function() {
-            return JSON.stringify(this.objectify());
-        },
-        objectify: function () {
-            var o = {
-                'grant_type': this.grantType,
-                'refresh_token': this.refreshToken
-            };
+    RefreshTokenRequest.prototype = Object.create(BaseRequest.prototype);
 
-            return o;
-        },
-        getRequestUrl: function () {
-            return Config.settings.ctlServerURL + Config.settings.loginURI;
-        },
-        type: "POST"
+    RefreshTokenRequest.prototype.getData = function() {
+        return JSON.stringify(this.objectify());
     };
+    RefreshTokenRequest.prototype.objectify = function () {
+        var o = {
+            'grant_type': this.grantType,
+            'refresh_token': this.refreshToken
+        };
+
+        return o;
+    };
+    RefreshTokenRequest.prototype.getRequestUrl = function () {
+        return Config.settings.ctlServerURL + Config.settings.loginURI;
+    };
+    RefreshTokenRequest.prototype.type = 'POST';
+
     return RefreshTokenRequest;
 });

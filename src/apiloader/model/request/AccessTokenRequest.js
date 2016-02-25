@@ -18,23 +18,22 @@ define(['Ctl.apiloader.Config', 'model/request/BaseRequest'], function (Config, 
 
     AccessTokenRequest.prototype = Object.create(BaseRequest.prototype);
 
-    AccessTokenRequest.prototype = {
-        getData: function() {
-            return JSON.stringify(this.objectify());
-        },
-        objectify: function () {
-            var o = {
-                'grant_type': this.grantType,
-                'username': this.username,
-                'password': this.password
-            };
-
-            return o;
-        },
-        getRequestUrl: function () {
-            return Config.settings.ctlServerURL + Config.settings.loginURI;
-        },
-        type: "POST"
+    AccessTokenRequest.prototype.getData = function() {
+        return JSON.stringify(this.objectify());
     };
+    AccessTokenRequest.prototype.objectify = function () {
+        var o = {
+            'grant_type': this.grantType,
+            'username': this.username,
+            'password': this.password
+        };
+
+        return o;
+    };
+    AccessTokenRequest.prototype.getRequestUrl = function () {
+        return Config.settings.ctlServerURL + Config.settings.loginURI;
+    };
+    AccessTokenRequest.prototype.type = 'POST';
+
     return AccessTokenRequest;
 });

@@ -4,8 +4,9 @@ define([
     'Ctl.common.Promise',
     'Ctl.common.Ajax',
     'Ctl.common.Utils',
-    'fcs'
-], function (Config, Logger, Promise, Ajax, Utils, fcs) {
+    'fcs',
+    'Ctl.speakeasy.Call'
+], function (Config, Logger, Promise, Ajax, Utils, fcs, Call) {
 
     /**
      * Manage calls
@@ -30,13 +31,15 @@ define([
          *
          */
         function getCalls() {
+            return self.calls;
         }
 
         /**
          * Get active call
          *
          */
-        function getActiveCall() {
+        function getCurrentCall() {
+            return self.currentCall;
         }
 
         /**
@@ -60,10 +63,12 @@ define([
          *
          * @return  {Call} Contains call object with required info
          */
-        function createCall(numToCall) {
+        function createCall(numToCall, callback) {
+
+            var domain = Config.settings.defaultOutgoingCallDomain;
+            var numToCall = !/@/.test(numToCall) ?  numToCall + "@" + domain : numToCall;
 
             var currentUser = fcs.getUser();
-            debugger;
             fcs.call.startCall(
                 currentUser,
                 null,
@@ -78,18 +83,25 @@ define([
                     };
 
                     outgoingCall.onStreamAdded = function(streamURL) {
-                        self.onStreamAddedHandler(outgoingCall, streamURL);
+                        onStreamAddedHandler(outgoingCall, streamURL);
+                    };
+
+
+                    outgoingCall.onLocalStreamAdded = function(streamURL) {
+                        onLocalStreamAddedHandler(outgoingCall, streamURL);
                     };
 
                     self.calls[callId] = outgoingCall;
                     self.currentCall = outgoingCall;
+
+                    Utils.doCallback(callback, [ null, outgoingCall ]);
 
                 },
                 function(errorMessage) {
                     if (errorMessage === 2) {
                         self.logger.log("CREATE_PEER_FAILED", "error");
                     } else {
-                        self.logger.log("CALL_FAILED", "error");
+                        self.logger.log("CALL_FAILED", errorMessage);
                     }
                 },
                 true,
@@ -120,18 +132,30 @@ define([
          */
         function onStreamAddedHandler(call, streamURL) {
 
-            self.logger.log("Incoming call remote stream added: " + streamURL);
+            self.logger.log("Outgoing call remote stream added: " + streamURL);
             self.logger.log('canReceiveVideo: ' + call.canReceiveVideo());
             self.logger.log('canSendVideo: ' + call.canSendVideo());
 
             if (streamURL) {
                 call.remoteStreamURL = streamURL;
-                self.setRemoteStream(streamURL);
+                setRemoteStream(streamURL);
             } else {
                 var remoteUserDisabledVideo = !call.canReceiveVideo() && call.canSendVideo();
                 if (remoteUserDisabledVideo) {
                     self.logger.log('Remote user has disabled video feature');
                 }
+            }
+        }
+
+        function onLocalStreamAddedHandler(call, streamURL) {
+
+            self.logger.log("Outgoing call local stream added: " + streamURL);
+            self.logger.log('canReceiveVideo: ' + call.canReceiveVideo());
+            self.logger.log('canSendVideo: ' + call.canSendVideo());
+
+            if (streamURL) {
+                call.localStreamURL = streamURL;
+                setLocalStream(streamURL);
             }
         }
 
@@ -145,11 +169,71 @@ define([
 
         }
 
+        function setLocalStream(streamUrl) {
+            var video = document.getElementById('localVideo');
+
+            video.pause();
+            video.src = streamUrl;
+            video.load();
+            video.play();
+
+        }
+
+        function onCallReceived(incomingCall) {
+            self.logger.info("There is an incomming call...");
+
+            self.currentCall = incomingCall;
+
+            //This function listens call state changes in JSL API level
+            incomingCall.onStateChange = function (state) {
+                onStateChange(incomingCall, state);
+            };
+
+            incomingCall.onStreamAdded = function (streamURL) {
+                self.logger.info("Remote stream added...");
+                setRemoteStream(streamURL);
+            };
+
+            incomingCall.onLocalStreamAdded = function (streamURL) {
+                self.logger.info("Remote stream added...");
+                setLocalStream(streamURL) ;
+            };
+
+            // Call dialog box
+            var r = confirm("Incoming call! Would you like to answer?");
+            if (r === true) {
+                self.logger.info("Answering the incomming call...");
+                incomingCall.answer(
+                    function () {
+                        self.logger.info("You are on call.");
+                    },
+                    function () {
+                        self.logger.error("Call answer is failed!");
+                    },
+                    false
+                );
+            } else {
+                // Rejecting the incomming call
+                incomingCall.eject(
+                function () {
+                    self.logger.info("Rejected incomming call...");
+                },
+                function () {
+                    self.logger.error("Call reject is failed!");
+                });
+            }
+        }
+
+        function onStateChange(call, state) {
+
+        }
+
         this.getCalls = getCalls;
-        this.getActiveCall = getActiveCall;
+        this.getCurrentCall = getCurrentCall;
         this.subscribeEvents = subscribeEvents;
         this.get = get;
         this.createCall = createCall;
+        this.onCallReceived = onCallReceived;
     }
 
     return new CallManager();
