@@ -1,12 +1,13 @@
 define([
-    'Ctl.speakeasy.Config',
-    'Ctl.common.Logger',
-    'Ctl.common.Promise',
-    'Ctl.common.Ajax',
-    'Ctl.common.Utils'
+    'Ctl.speakeasy/Config',
+    'Ctl/Logger',
+    'Ctl/Promise',
+    'Ctl/Ajax',
+    'Ctl/Utils'
 ], function (Config, Logger, Promise, Ajax, Utils) {
 
     /**
+     * @class Ctl.speakeasy.Call
      * Manage calls
      *
      * @requires Config

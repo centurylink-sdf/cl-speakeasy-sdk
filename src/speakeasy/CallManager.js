@@ -1,14 +1,15 @@
 define([
-    'Ctl.speakeasy.Config',
-    'Ctl.common.Logger',
-    'Ctl.common.Promise',
-    'Ctl.common.Ajax',
-    'Ctl.common.Utils',
+    'Ctl.speakeasy/Config',
+    'Ctl/Logger',
+    'Ctl/Promise',
+    'Ctl/Ajax',
+    'Ctl/Utils',
     'fcs',
-    'Ctl.speakeasy.Call'
+    'Ctl.speakeasy/Call'
 ], function (Config, Logger, Promise, Ajax, Utils, fcs, Call) {
 
     /**
+     * @class Ctl.speakeasy.CallManager
      * Manage calls
      *
      * @requires Config
@@ -23,8 +24,6 @@ define([
         self.logger = new Logger('CallManager');
         self.calls = [];
         self.currentCall = null;
-
-        var p = new Promise();
 
         /**
          * Get all calls

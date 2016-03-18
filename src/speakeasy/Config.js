@@ -19,8 +19,8 @@ define({
         'clientControlled': 'true',
         'services':['CallControl', 'custom'],
         'websocketProtocol': 'wss',
-        'websocketIP': 'www.intg105.centurylink.com',
-        'websocketPort': '8591',
+        'websocketIP': 'www.intg104.centurylink.com',
+        'websocketPort': '8590',
         'earlyMedia': true
     }
 });

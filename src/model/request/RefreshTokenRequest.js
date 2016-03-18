@@ -1,5 +1,7 @@
-define(['Ctl.apiloader.Config', 'model/request/BaseRequest'], function (Config, BaseRequest) {
+define(['Ctl.apiloader/Config', 'Ctl.model.request/BaseRequest'], function (Config, BaseRequest) {
     /**
+     * @class Ctl.model.request.RefreshTokenRequest
+     * @extends Ctl.model.request.BaseRequest
      * Refresh Token Request
      *
      * The Token endpoint authenticates refresh token and in response provides

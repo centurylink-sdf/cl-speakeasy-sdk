@@ -1,5 +1,10 @@
+/**
+ * @class Ctl.apiloader.Services
+ * @param  {[type]} [description]
+ * @return {[type]} [description]
+ */
 require.config({
     "paths": {
-        "SpeakEasy": "https://communicator.lab.centurylink.com/ctlapi/dist/speakeasy"
+        "SpeakEasy": "http://localhost:8000/dist/speakeasy"
     }
 });

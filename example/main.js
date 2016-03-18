@@ -1,12 +1,12 @@
-require(['Ctl'], function(Ctl){
+require(['ApiLoader'], function(Ctl){
 
-    var username = 'test02',
+    var username = 'test01',
         password = 'password1234';
 
     console.log('Running CtlApi v' + Ctl.version());
 
     // login into CTL service
-    Ctl.login(username, password, function(error, response) {
+    Ctl.Auth.login(username, password, function(error, response) {
         if (!error) {
             console.info('Successfully authenticated. Now you can load any CenturyLink API.');
             loadSpeakEasy();

@@ -1,3 +1,8 @@
+/**
+ * @class Ctl.apiloader.Config
+ * @param  {[type]} [description]
+ * @return {[type]} [description]
+ */
 define({
     settings: {
         'ctlServerURL': 'https://auth.veuxdu.centurylink.com',

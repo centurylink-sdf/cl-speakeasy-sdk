@@ -3,6 +3,9 @@ define([], function () {
     /**
      * This module is a collection of classes designed to make working with
      * the CenturyLink Services API as easy as possible.
+     *
+     * @class Ctl.common.Utils
+     *
      */
     function Utils() {
 

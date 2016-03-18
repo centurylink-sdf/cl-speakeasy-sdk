@@ -1,3 +1,8 @@
+/**
+ * @class Ctl.model.request.BaseRequest
+ * @param  {[type]} [description]
+ * @return {[type]} [description]
+ */
 define(function(){
 
         function BaseRequest(){

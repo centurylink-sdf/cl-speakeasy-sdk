@@ -1,5 +1,7 @@
-define(['Ctl.apiloader.Config', 'model/request/BaseRequest'], function (Config, BaseRequest) {
+define(['Ctl.apiloader/Config', 'Ctl.model.request/BaseRequest'], function (Config, BaseRequest) {
     /**
+     * @class Ctl.model.request.AccessTokenRequest
+     * @extends Ctl.model.request.BaseRequest
      * Access Token Request
      *
      * The Token endpoint authenticates user credentials and in response

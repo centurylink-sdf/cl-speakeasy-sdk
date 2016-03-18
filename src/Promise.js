@@ -2,6 +2,7 @@ define([], function () {
 
     /**
      * Promise implementation
+     * @class Ctl.common.Promise
      */
     function Promise() {
         this.complete = false;

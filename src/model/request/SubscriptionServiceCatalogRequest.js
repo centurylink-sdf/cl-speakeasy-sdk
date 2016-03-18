@@ -1,5 +1,11 @@
-define(['Ctl.apiloader.Config', 'model/request/BaseRequest'], function (Config, BaseRequest) {
+define(['Ctl.apiloader/Config', 'Ctl.model.request/BaseRequest'], function (Config, BaseRequest) {
 
+    /**
+     * @class Ctl.model.request.SubscriptionServiceCatalogRequest
+     * @extends Ctl.model.request.BaseRequest
+     * @param {[type]} serviceName [description]
+     * @param {[type]} publicId    [description]
+     */
     function SubscriptionServiceCatalogRequest(serviceName, publicId) {
         BaseRequest.call(this);
         this.serviceName = serviceName;

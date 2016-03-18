@@ -1,28 +1,35 @@
 define([
-    'Ctl.speakeasy.Version',
-    'Ctl.speakeasy.Config',
-    'Ctl.common.Logger',
-    'Ctl.common.Promise',
-    'Ctl.common.Ajax',
-    'Ctl.common.Utils',
+    'Ctl.speakeasy/Version',
+    'Ctl.speakeasy/Config',
+    'Ctl.speakeasy/Notification',
+    'Ctl/Logger',
+    'Ctl/Promise',
+    'Ctl/Ajax',
+    'Ctl/Utils',
+    'Ctl/Auth',
     'fcs',
-    'CallManager'
-], function (Version, Config, Logger, Promise, Ajax, Utils, fcs, CallManager) {
+    'Ctl.speakeasy/CallManager'
+], function (Version, Config, Notification, Logger, Promise, Ajax, Utils, Auth, fcs, CallManager) {
 
     /**
-     * Main CenturyLink API loader class
+     * @class Ctl.speakeasy.SpeakEasy
+     * Main SpeakEasy class
      *
-     * @requires Logger
-     * @requires Promise
-     * @requires Ajax
-     * @requires Utils
+     * @requires Ctl.speakeasy.Version
+     * @requires Ctl.speakeasy.Config
+     * @requires Ctl.common.Logger
+     * @requires Ctl.common.Promise
+     * @requires Ctl.common.Ajax
+     * @requires Ctl.common.Utils
+     * @requires fcs
+     * @requires CallManager
      */
     function SpeakEasy() {
 
         var self = this;
         self.logger = new Logger('SpeakEasy');
 
-        (function init() {
+        function init() {
             self.logger.info('Initializing calling features');
 
             initFcsLogger();
@@ -34,10 +41,7 @@ define([
 
             fcs.setup(Config.fcsapi);
 
-            // Notification system is being started in order to receive notification messages.
-            // The user is authenticated in this function too.
-            fcs.notification.start(
-                //Success callback
+            Notification.start(
                 function() {
                     self.logger.log("You are logged in successfully!");
                     self.logger.log("Notification system is started up successfully!");
@@ -54,13 +58,17 @@ define([
                     fcs.call.onReceived = CallManager.onCallReceived;
 
                 },
-                // Failure callback
-                function() {
+                function(e) {
                     self.logger.log("An error occurred! Notification subsystem couldn't be started!");
+                    if (e === fcs.Errors.AUTH) {
+                        self.logger.log("Authentication error occured");
+                    }
                 }
             );
 
-        })();
+        }
+
+        init();
 
         function initFcsLogger() {
             function jslLogHandler(loggerName, level, logObject) {
@@ -90,15 +98,12 @@ define([
          * a third-party URL that is to be proxied through CTL Application Framework (AF),
          * prepend the AF RequestServlet URL to the third-party URL.
          *
-         * @param target
+         * @param xhr
          * @param settings
          * @returns {*}
          */
-        function customAjaxSetup(target, scope, settings) {
-            var ajaxObj = settings;
-
+        function customAjaxSetup(xhr, scope, settings) {
             if (settings) {
-
 
                 //Use browser to parse out the pathname...
                 var anch = document.createElement('a');
@@ -124,19 +129,30 @@ define([
                 for (var i = 0; i < Config.settings.proxyForURLPatterns.length; i++) {
                     var curRE = new RegExp(Config.settings.proxyForURLPatterns[i]);
                     if (curRE.test(settings.url)) {
-                        // debugger;
                         var sePrependURL = Config.settings.SEProxyPrependURL + pubUserId;
                         settings.url = anch.origin + sePrependURL + curPathname;
-
                         break;
                     }
                 }
+                var originalOnload = xhr.onload;
+                xhr.onload = function(e) {
+                    if (e.target && e.target.status === 401) {
+                        Auth.reAuthenticate(function(error, response) {
+                            if(!error) {
+                                init();
+                            } else {
+                                self.logger.error('reAuthenticate error', response);
+                            }
 
-                ajaxObj.headers['Authorization'] = 'Bearer ' +  Utils.get("access_token");
-                ajaxObj.url = settings.url;
+                        });
+                    }
+                    originalOnload(arguments);
+                };
+
+                settings.headers['Authorization'] = 'Bearer ' +  Utils.get("access_token");
             }
 
-            return ajaxObj;
+            return settings;
         }
 
         function getPublicUserId() {

@@ -1,6 +1,6 @@
 define([
-    'Ctl.common.Logger',
-    'Ctl.common.Promise'
+    'Ctl/Logger',
+    'Ctl/Promise'
 ], function (Logger, Promise) {
 
     function partial() {
@@ -11,8 +11,9 @@ define([
 
     /**
      * Wrapper for AJAX calls
-     * @requires Logger
-     * @requires Promise
+     * @class Ctl.common.Ajax
+     * @requires Ctl.common.Logger
+     * @requires Ctl.common.Promise
      */
     function Ajax() {
 
@@ -51,7 +52,7 @@ define([
          * @param  {String} method Request method. POST, GET, PUT, DELETE etc.
          * @param  {String} url Url to make request
          * @param  {Object} data Data to send
-         * @return {Promise} p
+         * @return {Ctl.common.Promise} p
          */
         function request(method, url, data, headers) {
             var p = new Promise(), timeout;
@@ -84,7 +85,7 @@ define([
                     xhr.abort();
                     p.done("API Call timed out.", null);
                 }, 3e4);
-                //TODO stick that timeout in a config variable
+                //BACKLOG:0 stick that timeout in a config variable
                 xhr.send(encode(data));
             })(new XMLHttpRequest());
             return p;
@@ -97,7 +98,7 @@ define([
          * @method get      Do AJAX GET request
          * @param  {String} url     Url to make request
          * @param  {Object} data    Data to send
-         * @return {Promise} p
+         * @return {Ctl.common.Promise} p
          */
         this.get = partial(request, "GET");
 
@@ -105,7 +106,7 @@ define([
          * @method post      Do AJAX POST request
          * @param  {String} url     Url to make request
          * @param  {Object} data    Data to send
-         * @return {Promise} p
+         * @return {Ctl.common.Promise} p
          */
         this.post = partial(request, "POST");
 
@@ -113,7 +114,7 @@ define([
          * @method put      Do AJAX PUT request
          * @param  {String} url     Url to make request
          * @param  {Object} data    Data to send
-         * @return {Promise} p
+         * @return {Ctl.common.Promise} p
          */
         this.put = partial(request, "PUT");
 
@@ -121,7 +122,7 @@ define([
          * @method delete      Do AJAX DELETE request
          * @param  {String} url     Url to make request
          * @param  {Object} data    Data to send
-         * @return {Promise} p
+         * @return {Ctl.common.Promise} p
          */
         this.delete = partial(request, "DELETE");
     }

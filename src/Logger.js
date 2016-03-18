@@ -4,6 +4,7 @@ define([], function () {
 
     /**
      * [Logger description]
+     * @class Ctl.common.Logger
      * @param {String} name Name of the logger to expose
      */
     function Logger(name) {
