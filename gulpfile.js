@@ -7,6 +7,7 @@
  * ***********************************************************************************************
  */
 
+var os = require('os');
 var gulp = require('gulp');
 var args   = require('yargs').argv;
 var gutil = require('gulp-util');
@@ -32,6 +33,13 @@ var gjsduck = new GJSDuck(["--out", "docs"]);
 
 var PROJECT_BASE_PATH = __dirname + '';
 
+// detect os type and specify requirejs command
+var rJsCommand = 'r.js';
+var isWin = /^win/.test(os.platform());
+if(isWin) {
+    rJsCommand = 'r.js.cmd';
+}
+
 /*
  * gulp default task
  * ***********************************************************************************************
@@ -47,7 +55,7 @@ gulp.task('default', tasklist.withFilters(function(task) {
  */
 
 gulp.task('build-require-apiloader', function (cb) {
-    executeCommand('r.js -o src/apiloader/build.json', cb);
+    executeCommand(rJsCommand + ' -o src/apiloader/build.json', cb);
 });
 
 gulp.task('build-optimize-apiloader', function (cb) {
@@ -74,7 +82,7 @@ gulp.task('build-apiloader', function (cb) {
 });
 
 gulp.task('build-require-speakeasy', function (cb) {
-    executeCommand('r.js -o src/speakeasy/build.json', cb);
+    executeCommand(rJsCommand + ' -o src/speakeasy/build.json', cb);
 });
 
 gulp.task('build', function (cb) {
