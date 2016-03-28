@@ -1,5 +1,12 @@
+#OS junk files
+[Tt]humbs.db
+*.DS_Store
+
 node_modules
 *.log
 build
 docs
 dist
+
+#IDE files
+.idea
