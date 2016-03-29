@@ -34,14 +34,21 @@ require(['ApiLoader'], function(Ctl){
                 var btnHoldCall = document.getElementById('btnHoldCall');
                 var btnUnHoldCall = document.getElementById('btnUnHoldCall');
 
+                speakEasy.CallManager.setup(
+                    {
+                        localVideoContainer: "localVideo",
+                        remoteVideoContainer: "remoteVideo"
+                    }
+                );
+
                 btnMakeCall.addEventListener("click", function (e) {
                     var numToCall = confDestination.value;
-                    speakEasy.CallManager.createCall(numToCall);
+                    speakEasy.CallManager.createCall(numToCall, true);
                 });
 
                 btnEndCall.addEventListener("click", function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
-                    currentCall.end(function() {
+                    currentCall.hangUp(function() {
                         showInfoMessage("Call is ended!");
                     }, function() {
                         showErrorMessage("Call couldn't be ended!");
@@ -50,7 +57,7 @@ require(['ApiLoader'], function(Ctl){
 
                 btnStartVideo.addEventListener("click", function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
-                    currentCall.videoStart(
+                    currentCall.startVideo(
                        function() {
                            showInfoMessage("Video is started!");
                        },
@@ -62,7 +69,7 @@ require(['ApiLoader'], function(Ctl){
 
                 btnStopVideo.addEventListener("click", function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
-                    currentCall.videoStop(
+                    currentCall.stopVideo(
                        function() {
                            showInfoMessage("Video is stopped!");
                        },
