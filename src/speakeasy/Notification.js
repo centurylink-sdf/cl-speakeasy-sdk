@@ -14,7 +14,8 @@ define([
 
     /**
      * [Notification description]
-     * @class Ctl.common.Notification
+     * @class Ctl.speakeasy.Notification
+     * @private
      */
     function Notification() {
 

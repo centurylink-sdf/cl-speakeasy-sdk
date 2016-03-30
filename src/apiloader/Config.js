@@ -1,7 +1,7 @@
 /**
  * @class Ctl.apiloader.Config
- * @param  {[type]} [description]
- * @return {[type]} [description]
+ *
+ * List of configuration options for Ctl.apiloader.ApiLoader.
  */
 define({
     settings: {

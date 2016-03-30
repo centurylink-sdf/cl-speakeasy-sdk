@@ -1,4 +1,10 @@
-define(['Ctl.apiloader/Config', 'Ctl.model.request/BaseRequest'], function (Config, BaseRequest) {
+define([
+    'Ctl.apiloader/Config',
+    'Ctl.model.request/BaseRequest'
+], function (
+    Config,
+    BaseRequest
+) {
     /**
      * @class Ctl.model.request.AccessTokenRequest
      * @extends Ctl.model.request.BaseRequest
@@ -20,9 +26,18 @@ define(['Ctl.apiloader/Config', 'Ctl.model.request/BaseRequest'], function (Conf
 
     AccessTokenRequest.prototype = Object.create(BaseRequest.prototype);
 
+    /**
+     * Retrieves data as a string of the AccessTokenRequest
+     * @return {String} string with all the data about AccessTokenRequest
+     */
     AccessTokenRequest.prototype.getData = function() {
         return JSON.stringify(this.objectify());
     };
+
+    /**
+     * Retrieves data as an object of the AccessTokenRequest
+     * @return {Object} object with all the data about AccessTokenRequest
+     */
     AccessTokenRequest.prototype.objectify = function () {
         var o = {
             'grant_type': this.grantType,
@@ -32,9 +47,19 @@ define(['Ctl.apiloader/Config', 'Ctl.model.request/BaseRequest'], function (Conf
 
         return o;
     };
+
+    /**
+     * Retrieves request URL of the AccessTokenRequest
+     * @return {String} string with URL for AccessTokenRequest
+     */
     AccessTokenRequest.prototype.getRequestUrl = function () {
         return Config.settings.ctlServerURL + Config.settings.loginURI;
     };
+
+    /**
+     * Type of the Ajax request
+     * @type {String}
+     */
     AccessTokenRequest.prototype.type = 'POST';
 
     return AccessTokenRequest;

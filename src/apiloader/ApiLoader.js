@@ -1,6 +1,3 @@
-//@tag foundation,core
-//@define ApiLoader
-
 define([
     'Ctl.apiloader/Version',
     'Ctl.apiloader/Config',
@@ -16,32 +13,39 @@ define([
 ) {
 
     /**
-     * Main CenturyLink API loader class
+     * @class Ctl.apiloader.ApiLoader
      *
-     * @class Ctl
-     * @requires Ctl.common.Logger
-     * @requires Promise
-     * @requires Ajax
-     * @requires Utils
+     * @author Andrew Kovalenko <andrew@cybind.net>
+     * @docauthor Andrew Kovalenko <andrew@cybind.net>
+     *
+     * Ctl.apiloader.ApiLoader is the heart of the CenturyLink JavaScript API loading capability. It is most commonly used
+     * via the {@link Ctl.apiloader.ApiLoader#load} shorthand. Ctl.apiloader.ApiLoader is used for asynchronous loading approach
+     * and leverage it advantages for the best development flow.
+     *
+     * @requires Ctl.apiloader.Version
+     * @requires Ctl.apiloader.Config
+     * @requires Ctl.Logger
+     * @requires Ctl.Utils
+     * @requires Ctl.Auth
+     *
+     * @singleton
      */
     function ApiLoader() {
 
         var logger = new Logger('ApiLoader');
-
         var loadedApis = [];
 
-
         /**
-         * Get a version of the API loader
+         * Retrieves a version of the API loader
          *
          * @return {String} Contains API loader version
          */
-        function version() {
+        function getVersion() {
             return Version;
         }
 
         /**
-         * Load CneturyLink API
+         * Loads CenturyLink API
          *
          * @param  {String}   name     Name of the API to load
          * @param  {String}   version  Version of the API to load
@@ -60,12 +64,16 @@ define([
             );
         }
 
+        /**
+         * Retrieves list of loaded APIs
+         * @return {Array} list of APIs
+         */
         function getLoadedApis() {
             return loadedApis;
         }
 
         this.Auth = Auth;
-        this.version = version;
+        this.getVersion = getVersion;
         this.load = load;
         this.getLoadedApis = getLoadedApis;
     }

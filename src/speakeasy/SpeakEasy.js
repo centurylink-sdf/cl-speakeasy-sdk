@@ -13,16 +13,17 @@ define([
 
     /**
      * @class Ctl.speakeasy.SpeakEasy
+     * @singleton
      * Main SpeakEasy class
      *
      * @requires Ctl.speakeasy.Version
      * @requires Ctl.speakeasy.Config
-     * @requires Ctl.common.Logger
-     * @requires Ctl.common.Promise
-     * @requires Ctl.common.Ajax
-     * @requires Ctl.common.Utils
+     * @requires Ctl.Logger
+     * @requires Ctl.Promise
+     * @requires Ctl.Ajax
+     * @requires Ctl.Utils
      * @requires fcs
-     * @requires CallManager
+     * @requires Ctl.speakeasy.CallManager
      */
     function SpeakEasy() {
 

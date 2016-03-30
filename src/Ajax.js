@@ -11,9 +11,9 @@ define([
 
     /**
      * Wrapper for AJAX calls
-     * @class Ctl.common.Ajax
-     * @requires Ctl.common.Logger
-     * @requires Ctl.common.Promise
+     * @class Ctl.Ajax
+     * @requires Ctl.Logger
+     * @requires Ctl.Promise
      */
     function Ajax() {
 

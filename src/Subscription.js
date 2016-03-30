@@ -18,7 +18,7 @@ define([
 
     /**
      * [Subscription description]
-     * @class Ctl.common.Subscription
+     * @class Ctl.Subscription
      */
     function Subscription() {
 

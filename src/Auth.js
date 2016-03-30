@@ -20,7 +20,7 @@ define([
 
     /**
      * [Auth description]
-     * @class Ctl.common.Auth
+     * @class Ctl.Auth
      */
     function Auth() {
 

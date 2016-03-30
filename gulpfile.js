@@ -62,13 +62,6 @@ gulp.task('build-optimize-apiloader', function (cb) {
     var pkg = require('./package.json');
 
     return gulp.src('./dist/' + pkg.name + '.js')
-        // .pipe(amdclean.gulp({
-        //     'prefixMode': 'standard',
-        //     'wrap': {
-        //         'start': ';(function() {\n',
-        //         'end': '\n}());'
-        //       },
-        // }))
         .pipe(rename(pkg.name + '-' + pkg.version + '.js'))
         .pipe(gulp.dest('./dist'))
         .pipe(rename(pkg.name + '-' + pkg.version + '.min.js'))
@@ -85,8 +78,16 @@ gulp.task('build-require-speakeasy', function (cb) {
     executeCommand(rJsCommand + ' -o src/speakeasy/build.json', cb);
 });
 
+gulp.task('build-optimize-speakeasy', function (cb) {
+    var pkg = require('./package.json');
+
+    return gulp.src('./dist/speakeasy.js')
+        .pipe(rename('speakeasy-' + pkg.version + '.js'))
+        .pipe(gulp.dest('./dist'));
+});
+
 gulp.task('build', function (cb) {
-    runSequence('clean', 'build-require-apiloader', 'build-optimize-apiloader', 'build-require-speakeasy', cb);
+    runSequence('clean', 'build-require-apiloader', 'build-optimize-apiloader', 'build-require-speakeasy', 'build-optimize-speakeasy', cb);
 });
 
 gulp.task('stream', function (cb) {

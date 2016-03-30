@@ -17,7 +17,7 @@ require(['ApiLoader'], function(Ctl){
 
     function loadSpeakEasy() {
         // use the sdk for your needs, this call should load SpeakEasy API Client
-        Ctl.load('SpeakEasy', '0.1.0', function(err, speakEasy) {
+        Ctl.load('SpeakEasy', '0.1.4', function(err, speakEasy) {
 
             if (err) {
                 console.log('Error loading SpeakEasy');

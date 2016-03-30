@@ -1,7 +1,6 @@
 /**
  * @class Ctl.apiloader.Version
- * @param  {[type]} [description]
- * @param  {[type]} [description]
- * @return {[type]} [description]
+ *
+ * Holds version of the Ctl.apiloader JavaScript library.
  */
 define([], "0.1.4");
