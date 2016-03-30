@@ -22,5 +22,9 @@ define({
         'websocketIP': 'www.intg104.centurylink.com',
         'websocketPort': '8590',
         'earlyMedia': true
+    },
+    callManager: {
+        'localVideoContainer': '',
+        'remoteVideoContainer': ''
     }
 });

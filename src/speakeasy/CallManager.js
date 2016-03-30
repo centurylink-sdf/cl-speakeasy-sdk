@@ -5,8 +5,9 @@ define([
     'Ctl/Ajax',
     'Ctl/Utils',
     'fcs',
-    'Ctl.speakeasy/Call'
-], function (Config, Logger, Promise, Ajax, Utils, fcs, Call) {
+    'Ctl.speakeasy/IncomingCall',
+    'Ctl.speakeasy/OutgoingCall',
+], function (Config, Logger, Promise, Ajax, Utils, fcs, IncomingCall, OutgoingCall) {
 
     /**
      * @class Ctl.speakeasy.CallManager
@@ -24,6 +25,16 @@ define([
         self.logger = new Logger('CallManager');
         self.calls = [];
         self.currentCall = null;
+
+        /**
+         *
+         */
+        function setup(config) {
+
+            Config.callManager.localVideoContainer = config.localVideoContainer;
+            Config.callManager.remoteVideoContainer = config.remoteVideoContainer;
+
+        }
 
         /**
          * Get all calls
@@ -55,17 +66,25 @@ define([
          * @return  {Call} Contains call object with required info
          */
         function get(callID) {
+            return self.calls[callID];
         }
 
         /**
+         * Starts a call.
          *
+         * @param {String} numToCall The callee's address used to establish the call
+         * @param {Boolean} isVideoEnabled In order to make video call set this to true.
+         * @param {function} callback The callback function to be called after success
          *
-         * @return  {Call} Contains call object with required info
+         * @return  {OutgoingCall} Contains call object with required info
          */
-        function createCall(numToCall, callback) {
+        function createCall(numToCall, isVideoEnabled, callback) {
 
             var domain = Config.settings.defaultOutgoingCallDomain;
             var numToCall = !/@/.test(numToCall) ?  numToCall + "@" + domain : numToCall;
+
+
+            //TODO: get videoQuality from config
 
             var currentUser = fcs.getUser();
             fcs.call.startCall(
@@ -73,22 +92,13 @@ define([
                 null,
                 numToCall,
 
-                function(outgoingCall) {
-                    var callId = outgoingCall.getId();
+                function(call) {
+                    var callId = call.getId();
 
-                    outgoingCall.onStateChange = function(state, statusCode) {
-                        //Add statusCode that returned from the server property to the call
-                        self.logger.log('outgoingCall status changed: ' + statusCode);
-                    };
+                    var outgoingCall = new OutgoingCall();
+                    outgoingCall.setInternalCall(call);
 
-                    outgoingCall.onStreamAdded = function(streamURL) {
-                        onStreamAddedHandler(outgoingCall, streamURL);
-                    };
-
-
-                    outgoingCall.onLocalStreamAdded = function(streamURL) {
-                        onLocalStreamAddedHandler(outgoingCall, streamURL);
-                    };
+                    outgoingCall.getCalleeInfo();
 
                     self.calls[callId] = outgoingCall;
                     self.currentCall = outgoingCall;
@@ -103,128 +113,31 @@ define([
                         self.logger.log("CALL_FAILED", errorMessage);
                     }
                 },
-                true,
-                true,
+                isVideoEnabled,
+                isVideoEnabled,
                 '640x480'
             );
-
         }
 
-        /**
-         *
-         * @param call
-         * @param streamURL
-         *
-         * NOTE: Currently, all endpoints that CTLCommunicator works with always answer audio.
-         *
-         * call.canReceiveVideo returns with the GENBAND plugin:
-         *   'false' when we offer audio only ('inactive' (audio <--> audio))
-         *   'true' when we offer video  ('recvonly' from other end (video/audio <--> audio))
-         *
-         * call.canReceiveVideo returns with Chrome native RTC:
-         *   'false' when we offer audio only ('inactive' (audio <--> audio))
-         *   'false' when we offer video  ('recvonly' from other end (video/audio <--> audio))
-         *
-         *  NOTE the issue -- Chrome returns 'false', GENBAND plugin returns 'true' for recvonly
-         *
-         *    We  display a blank video screen with GENBAND plugin in 'recvonly' scenario
-         */
-        function onStreamAddedHandler(call, streamURL) {
 
-            self.logger.log("Outgoing call remote stream added: " + streamURL);
-            self.logger.log('canReceiveVideo: ' + call.canReceiveVideo());
-            self.logger.log('canSendVideo: ' + call.canSendVideo());
-
-            if (streamURL) {
-                call.remoteStreamURL = streamURL;
-                setRemoteStream(streamURL);
-            } else {
-                var remoteUserDisabledVideo = !call.canReceiveVideo() && call.canSendVideo();
-                if (remoteUserDisabledVideo) {
-                    self.logger.log('Remote user has disabled video feature');
-                }
-            }
-        }
-
-        function onLocalStreamAddedHandler(call, streamURL) {
-
-            self.logger.log("Outgoing call local stream added: " + streamURL);
-            self.logger.log('canReceiveVideo: ' + call.canReceiveVideo());
-            self.logger.log('canSendVideo: ' + call.canSendVideo());
-
-            if (streamURL) {
-                call.localStreamURL = streamURL;
-                setLocalStream(streamURL);
-            }
-        }
-
-        function setRemoteStream(streamUrl) {
-            var video = document.getElementById('remoteVideo');
-
-            video.pause();
-            video.src = streamUrl;
-            video.load();
-            video.play();
-
-        }
-
-        function setLocalStream(streamUrl) {
-            var video = document.getElementById('localVideo');
-
-            video.pause();
-            video.src = streamUrl;
-            video.load();
-            video.play();
-
-        }
-
-        function onCallReceived(incomingCall) {
+        function onCallReceived(call) {
             self.logger.info("There is an incomming call...");
 
+            var incomingCall = new IncomingCall();
+            incomingCall.setInternalCall(call);
+
+            //TODO: not sure shoud we set incoming call as active (we can already have outgoing call as active)
             self.currentCall = incomingCall;
-
-            //This function listens call state changes in JSL API level
-            incomingCall.onStateChange = function (state) {
-                onStateChange(incomingCall, state);
-            };
-
-            incomingCall.onStreamAdded = function (streamURL) {
-                self.logger.info("Remote stream added...");
-                setRemoteStream(streamURL);
-            };
-
-            incomingCall.onLocalStreamAdded = function (streamURL) {
-                self.logger.info("Remote stream added...");
-                setLocalStream(streamURL) ;
-            };
 
             // Call dialog box
             var r = confirm("Incoming call! Would you like to answer?");
             if (r === true) {
                 self.logger.info("Answering the incomming call...");
-                incomingCall.answer(
-                    function () {
-                        self.logger.info("You are on call.");
-                    },
-                    function () {
-                        self.logger.error("Call answer is failed!");
-                    },
-                    false
-                );
+                incomingCall.answer();
             } else {
                 // Rejecting the incomming call
-                incomingCall.eject(
-                function () {
-                    self.logger.info("Rejected incomming call...");
-                },
-                function () {
-                    self.logger.error("Call reject is failed!");
-                });
+                incomingCall.reject();
             }
-        }
-
-        function onStateChange(call, state) {
-
         }
 
         this.getCalls = getCalls;
@@ -233,6 +146,7 @@ define([
         this.get = get;
         this.createCall = createCall;
         this.onCallReceived = onCallReceived;
+        this.setup = setup;
     }
 
     return new CallManager();
