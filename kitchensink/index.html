@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- This is a very basic example -->
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0px;
+        padding: 30px
+      }
+      .left {
+          float: left;
+      }
+      .right {
+          float: right;
+      }
+      .margin10 {
+          margin: 10px;
+      }
+      .local-video {
+          width: 160px;
+          height: 120px;
+      }
+
+      .local-video video {
+          border: 1px solid blue;
+          width: 100%;
+          height: 100%;
+      }
+
+      .remote-video {
+          width: 320px;
+          height: 240px;
+      }
+
+      .remote-video video {
+          border: 1px solid green;
+          width: 100%;
+          height: 100%;
+      }
+
+      .clear {
+          clear: both;
+      }
+      .alert-danger {
+          color: red;
+      }
+      .alert-info {
+          color: blue;
+      }
+      .alert-success {
+          color: green;
+      }
+      .alert-warning {
+          color: yellow;
+      }
+       .logContainer {
+           height: 700px;
+           overflow: auto;
+       }
+
+    </style>
+    <title>Usage example for the ctlapi</title>
+
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+
+    <script src="../../dist/ctlapi-0.1.4.js"></script>
+    <script src="main.js"></script>
+  </head>
+  <body>
+
+    <nav>
+        <div class="nav-wrapper">
+            <a href="#!" class="brand-logo">Logo</a>
+            <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="speakeasy.html">SpeakEasy</a></li>
+            </ul>
+            <ul class="side-nav" id="mobile-demo">
+                <li><a href="sass.html">Sass</a></li>
+                <li><a href="badges.html">Components</a></li>
+                <li><a href="collapsible.html">Javascript</a></li>
+                <li><a href="mobile.html">Mobile</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <h3>Make a new call</h3>
+    <p>
+        <label for="confDestination">Destination</label>
+        <input id="confDestination" type="text" value="" placeholder="number to call" />
+        <button id="btnMakeCall" class="btn btn-success">Call</button>
+    </p>
+    <fieldset>
+        <legend>Call controls</legend>
+        <div class="btn-group">
+            <button id="btnEndCall" class="btn btn-danger">End Call</button>
+            <button id="btnStartVideo" class="btn btn-primary">Start Video</button>
+            <button id="btnStopVideo" class="btn btn-primary">Stop Video</button>
+            <button id="btnHoldCall" class="btn btn-primary">Hold</button>
+            <button id="btnUnHoldCall" class="btn btn-primary">Unhold</button>
+        </div>
+    </fieldset>
+    <div class="left margin10">
+        Local video: <br />
+        <div id="localVideo" class="local-video"></div>
+
+    </div>
+    <div class="left margin10">
+        Remote video: <br />
+        <div id="remoteVideo" class="remote-video"></div>
+    </div>
+    <br />
+    <br />
+    <div class="left margin10 clear">
+         <h2>Status</h2>
+
+        <div id="logContainer" class="logContainer"></div>
+    </div>
+  </body>
+</html>
