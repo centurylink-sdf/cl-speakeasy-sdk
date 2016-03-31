@@ -5,12 +5,20 @@ define([
     'Ctl/Promise',
     'Ctl/Ajax',
     'Ctl/Utils'
-], function (BaseCall, Config, Logger, Promise, Ajax, Utils) {
+], function (
+    BaseCall,
+    Config,
+    Logger,
+    Promise,
+    Ajax,
+    Utils
+) {
 
     var self = null;
 
     /**
      * @class Ctl.speakeasy.OutgoingCall
+     * @extends Ctl.speakeasy.BaseCall
      * Manage calls
      *
      * @requires Config

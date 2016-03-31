@@ -144,6 +144,28 @@ define([], function () {
             }
         }
 
+
+        /**
+         * Merge the contents of two objects together into the first object. If target object in null will be created new one.
+         * @param {Object} target
+         * @param {Object} object1
+         * @returns {Object} extended object
+         */
+        function extend(target , object1) {
+
+            if(target == null) {
+                target = {};
+            }
+
+            if(object1 != null) {
+                Object.keys(object1).forEach(function(key) {
+                    target[ key ] = object1[ key ];
+                });
+            }
+
+            return target;
+        }
+
         this.isValidUrl = isValidUrl;
         this.encodeParams = encodeParams;
         this.isFunction = isFunction;
@@ -153,6 +175,7 @@ define([], function () {
         this.getObject = getObject;
         this.get = get;
         this.removeAll = removeAll;
+        this.extend = extend;
 
     }
 

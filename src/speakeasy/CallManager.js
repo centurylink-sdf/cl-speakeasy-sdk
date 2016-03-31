@@ -6,8 +6,17 @@ define([
     'Ctl/Utils',
     'fcs',
     'Ctl.speakeasy/IncomingCall',
-    'Ctl.speakeasy/OutgoingCall',
-], function (Config, Logger, Promise, Ajax, Utils, fcs, IncomingCall, OutgoingCall) {
+    'Ctl.speakeasy/OutgoingCall'
+], function (
+    Config,
+    Logger,
+    Promise,
+    Ajax,
+    Utils,
+    fcs,
+    IncomingCall,
+    OutgoingCall
+) {
 
     /**
      * @class Ctl.speakeasy.CallManager
@@ -30,10 +39,7 @@ define([
          *
          */
         function setup(config) {
-
-            Config.callManager.localVideoContainer = config.localVideoContainer;
-            Config.callManager.remoteVideoContainer = config.remoteVideoContainer;
-
+            Utils.extend(Config.callManager, config);
         }
 
         /**
@@ -83,9 +89,6 @@ define([
             var domain = Config.settings.defaultOutgoingCallDomain;
             var numToCall = !/@/.test(numToCall) ?  numToCall + "@" + domain : numToCall;
 
-
-            //TODO: get videoQuality from config
-
             var currentUser = fcs.getUser();
             fcs.call.startCall(
                 currentUser,
@@ -95,10 +98,7 @@ define([
                 function(call) {
                     var callId = call.getId();
 
-                    var outgoingCall = new OutgoingCall();
-                    outgoingCall.setInternalCall(call);
-
-                    outgoingCall.getCalleeInfo();
+                    var outgoingCall = new OutgoingCall(call);
 
                     self.calls[callId] = outgoingCall;
                     self.currentCall = outgoingCall;
@@ -115,38 +115,29 @@ define([
                 },
                 isVideoEnabled,
                 isVideoEnabled,
-                '640x480'
+                Config.callManager.videoQuality
             );
         }
 
-
-        function onCallReceived(call) {
+        function processReceivedCall(call) {
             self.logger.info("There is an incomming call...");
 
-            var incomingCall = new IncomingCall();
-            incomingCall.setInternalCall(call);
+            var incomingCall = new IncomingCall(call);
 
             //TODO: not sure shoud we set incoming call as active (we can already have outgoing call as active)
             self.currentCall = incomingCall;
 
-            // Call dialog box
-            var r = confirm("Incoming call! Would you like to answer?");
-            if (r === true) {
-                self.logger.info("Answering the incomming call...");
-                incomingCall.answer();
-            } else {
-                // Rejecting the incomming call
-                incomingCall.reject();
-            }
+            Utils.doCallback(self.onCallReceived, [ null, incomingCall ]);
         }
 
+        this.setup = setup;
         this.getCalls = getCalls;
         this.getCurrentCall = getCurrentCall;
         this.subscribeEvents = subscribeEvents;
         this.get = get;
         this.createCall = createCall;
-        this.onCallReceived = onCallReceived;
-        this.setup = setup;
+        this.processReceivedCall = processReceivedCall;
+        this.onCallReceived = null;
     }
 
     return new CallManager();
