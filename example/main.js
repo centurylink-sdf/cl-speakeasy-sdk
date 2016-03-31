@@ -3,7 +3,7 @@ require(['ApiLoader'], function(Ctl){
     var username = 'test01',
         password = 'password1234';
 
-    console.log('Running CtlApi v' + Ctl.version());
+    console.log('Running CtlApi v' + Ctl.getVersion());
 
     // login into CTL service
     Ctl.Auth.login(username, password, function(error, response) {
