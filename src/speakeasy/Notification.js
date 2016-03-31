@@ -37,7 +37,7 @@ define([
         this.connectionAttemptCount = 0;
 
         //bind event handler
-        // this.connectionLostHandler = this.connectionLostHandler.bind(this);
+        this.connectionLostHandler = connectionLostHandler.bind(this);
 
         /**
          * Prepare for use by loading WebRTC server list and listening to events

@@ -1,3 +1,8 @@
+/**
+ * @class Ctl.speakeasy.Config
+ *
+ * List of configuration options for Ctl.speakeasy.ApiLoader.
+ */
 define({
     settings: {
         'subscribeServiceURI': '/{serviceName}/{identity}@{domain}/subscription',
