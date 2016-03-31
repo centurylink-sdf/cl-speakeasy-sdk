@@ -19,7 +19,7 @@ define([
     /**
      * @abstract
      * @class Ctl.speakeasy.BaseCall
-     * Manage calls
+     * A base class that implements call functionality
      *
      * @requires Config
      * @requires Logger
@@ -71,7 +71,7 @@ define([
     }
 
     /**
-     *
+     * End the call.
      */
     function hangUp(successCallback, failureCallback) {
 
@@ -323,15 +323,24 @@ define([
     BaseCall.prototype.videoStop = videoStop;
     BaseCall.prototype.getCallId = getCallId;
 
+    /**
+     * @event
+     * Raised when call state is changed
+     *
+     */
     BaseCall.prototype.onStateChanged = null;
 
+    /**
+     * Enum call states.
+     * @readonly
+     * @enum {number}
+     */
     BaseCall.prototype.events = {
         CALL_STARTED: 0,
         CALL_ENDED: 1,
         CALL_HELD: 2,
         CALL_REJECTED: 3
     };
-
 
     return BaseCall;
 });

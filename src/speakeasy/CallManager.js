@@ -137,6 +137,12 @@ define([
         this.get = get;
         this.createCall = createCall;
         this.processReceivedCall = processReceivedCall;
+
+        /**
+         * @event
+         * Raised when incoming call received
+         *
+         */
         this.onCallReceived = null;
     }
 
