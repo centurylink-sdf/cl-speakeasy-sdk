@@ -4,6 +4,7 @@ require.config({
       "app": "../app"
     },
     "shim": {
+        "app": ["jquery", "materialize"],
         "materialize": ["jquery"]
     }
 });

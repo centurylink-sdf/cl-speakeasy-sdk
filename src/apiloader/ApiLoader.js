@@ -55,7 +55,7 @@ define([
             require(
                 [name],
                 function(api) {
-                    loadedApis.push(api);
+                    // loadedApis.push(api);
                     Utils.doCallback(callback, [null, api]);
                 },
                 function(err) {

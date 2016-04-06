@@ -6,7 +6,7 @@ define(['jquery', 'materialize', 'ApiLoader'], function($, materialize, Ctl) {
     console.log('Running CtlApi v' + Ctl.getVersion());
 
     if (Ctl.Auth.isAuthenticated()) {
-        window.location.href = 'speakeasy.html';
+        window.location.href = 'call.html';
     }
 
     $('#formLogin').submit(function(e) {
@@ -55,7 +55,7 @@ define(['jquery', 'materialize', 'ApiLoader'], function($, materialize, Ctl) {
         Ctl.Auth.login(username, password, function(error, response) {
             if (!error) {
                 console.info('Successfully authenticated. Now you can load any CenturyLink API.');
-                window.location.href = 'speakeasy.html';
+                window.location.href = 'call.html';
             } else {
                 console.error('Authentication failed: ', error);
                 unBlockUI();

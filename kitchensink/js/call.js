@@ -1,3 +1,3 @@
 require(['./common'], function (common) {
-    require(['app/speakeasydemo1']);
+    require(['app/call']);
 });

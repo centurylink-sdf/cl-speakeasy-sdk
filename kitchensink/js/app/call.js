@@ -1,7 +1,4 @@
-define(['jquery', 'materialize', 'ApiLoader'], function($, materialize, Ctl) {
-
-    // $(".button-collapse").sideNav();
-    // $('.modal-trigger').leanModal();
+define(['jquery', 'ApiLoader'], function($, Ctl) {
 
     var btnLogin = $('.btn-login');
     var btnLogout = $('.btn-logout');
@@ -12,7 +9,7 @@ define(['jquery', 'materialize', 'ApiLoader'], function($, materialize, Ctl) {
     }
 
     function loadSpeakEasy() {
-        debugger;
+
         // use the sdk for your needs, this call should load SpeakEasy API Client
         Ctl.load('SpeakEasy', '0.1.4', function(err, speakEasy) {
 
