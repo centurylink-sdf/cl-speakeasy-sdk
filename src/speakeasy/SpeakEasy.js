@@ -56,7 +56,7 @@ define([
                         }
                     );
 
-                    fcs.call.onReceived = CallManager.onCallReceived;
+                    fcs.call.onReceived = CallManager.processReceivedCall;
 
                 },
                 function(e) {

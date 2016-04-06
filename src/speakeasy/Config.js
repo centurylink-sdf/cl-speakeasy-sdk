@@ -30,6 +30,8 @@ define({
     },
     callManager: {
         'localVideoContainer': '',
-        'remoteVideoContainer': ''
+        'remoteVideoContainer': '',
+        'videoQuality': '640x480'
+
     }
 });

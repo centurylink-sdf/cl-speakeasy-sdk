@@ -41,9 +41,49 @@ require(['ApiLoader'], function(Ctl){
                     }
                 );
 
+                speakEasy.CallManager.onCallReceived = function (call) {
+
+                    // Call dialog box
+                    var r = confirm("Incoming call! Would you like to answer?");
+                    if (r === true) {
+                        // Answering on the incoming call
+                        call.answer(function() {
+                            showInfoMessage("Call is answered!");
+                        }, function() {
+                            showErrorMessage("Call couldn't be answered!");
+                        });
+                    } else {
+                        // Rejecting the incomming call
+                        call.reject(function() {
+                            showInfoMessage("Call is rejected!");
+                        }, function() {
+                            showErrorMessage("Call couldn't be rejected!");
+                        });
+                    }
+                };
+
                 btnMakeCall.addEventListener("click", function (e) {
                     var numToCall = confDestination.value;
-                    speakEasy.CallManager.createCall(numToCall, true);
+                    speakEasy.CallManager.createCall(numToCall, false, function(call) {
+
+                        call.onStateChanged = function(state) {
+                            switch (state) {
+
+                                case call.events.CALL_STARTED:
+                                    howInfoMessage("Call is started!");
+                                    break;
+                                case call.events.CALL_ENDED:
+                                    showInfoMessage("Call was ended on other side!");
+                                    break;
+                                case call.events.CALL_HELD:
+                                    showInfoMessage("Call was held on other side!");
+                                    break;
+                                case call.events.CALL_REJECTED:
+                                    showInfoMessage("Call was rejected!");
+                                    break;
+                            }
+                        }
+                    });
                 });
 
                 btnEndCall.addEventListener("click", function (e) {
@@ -57,7 +97,7 @@ require(['ApiLoader'], function(Ctl){
 
                 btnStartVideo.addEventListener("click", function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
-                    currentCall.startVideo(
+                    currentCall.videoStart(
                        function() {
                            showInfoMessage("Video is started!");
                        },
@@ -69,7 +109,7 @@ require(['ApiLoader'], function(Ctl){
 
                 btnStopVideo.addEventListener("click", function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
-                    currentCall.stopVideo(
+                    currentCall.videoStop(
                        function() {
                            showInfoMessage("Video is stopped!");
                        },
@@ -79,11 +119,29 @@ require(['ApiLoader'], function(Ctl){
                    );
                 });
 
-                // btnHoldCall.addEventListener("click", function (e) {
-                // });
-                //
-                // btnUnHoldCall.addEventListener("click", function (e) {
-                // });
+                btnHoldCall.addEventListener("click", function (e) {
+                    var currentCall = speakEasy.CallManager.getCurrentCall();
+                    currentCall.hold(
+                        function() {
+                            showInfoMessage("Call is held!");
+                        },
+                        function() {
+                            showErrorMessage("Call couldn't be held!");
+                        }
+                    );
+                });
+
+                btnUnHoldCall.addEventListener("click", function (e) {
+                    var currentCall = speakEasy.CallManager.getCurrentCall();
+                    currentCall.unhold(
+                        function() {
+                            showInfoMessage("Call is resumed!");
+                        },
+                        function() {
+                            showErrorMessage("Call couldn't be resumed!");
+                        }
+                    );
+                });
 
             }
 
