@@ -78,6 +78,10 @@ define([
                     setAccessToken(request.response.access_token);
                     setRefreshToken(request.response.refresh_token);
                     return Subscription.sync();
+                } else {
+                    var fail = new Promise();
+                    fail.done(err.response, null);
+                    return fail;
                 }
             }.bind(this);
 
@@ -178,6 +182,7 @@ define([
 
         this.login = login;
         this.reAuthenticate = reAuthenticate;
+        this.isAuthenticated = isAuthenticated;
 
     }
 

@@ -59,10 +59,15 @@ define([
             self.logger.time(method + " " + url);
             (function(xhr) {
                 xhr.onreadystatechange = function() {
-                    if (this.readyState === 4 && this.status === 200) {
+                    if (this.readyState === 4) {
                         self.logger.timeEnd(method + " " + url);
                         clearTimeout(timeout);
-                        p.done(null, this);
+                        if (this.status === 200) {
+                            p.done(null, this);
+                        }
+                        if (this.status === 400) {
+                            p.done(this, null);
+                        }
                     }
                 };
                 xhr.onerror = function(response) {

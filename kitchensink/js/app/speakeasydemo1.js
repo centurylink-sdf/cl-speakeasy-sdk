@@ -1,21 +1,18 @@
-require(['ApiLoader'], function(Ctl){
+define(['jquery', 'materialize', 'ApiLoader'], function($, materialize, Ctl) {
 
-    var username = 'test01',
-        password = 'password1234';
+    // $(".button-collapse").sideNav();
+    // $('.modal-trigger').leanModal();
 
-    console.log('Running CtlApi v' + Ctl.getVersion());
-
-    // login into CTL service
-    Ctl.Auth.login(username, password, function(error, response) {
-        if (!error) {
-            console.info('Successfully authenticated. Now you can load any CenturyLink API.');
-            loadSpeakEasy();
-        } else {
-            console.error('Authentication failed: ', error);
-        }
-    });
+    var btnLogin = $('.btn-login');
+    var btnLogout = $('.btn-logout');
+    if (Ctl.Auth.isAuthenticated()) {
+        loadSpeakEasy();
+    } else {
+        window.location.href = 'index.html';
+    }
 
     function loadSpeakEasy() {
+        debugger;
         // use the sdk for your needs, this call should load SpeakEasy API Client
         Ctl.load('SpeakEasy', '0.1.4', function(err, speakEasy) {
 
@@ -79,40 +76,34 @@ require(['ApiLoader'], function(Ctl){
                    );
                 });
 
-                // btnHoldCall.addEventListener("click", function (e) {
-                // });
-                //
-                // btnUnHoldCall.addEventListener("click", function (e) {
-                // });
-
             }
 
         });
     }
 
+    // Utility function to show error messages
+    function showErrorMessage(msg) {
+        showMessage(msg, "alert alert-danger");
+    }
+    // Utility function to show info messages
+    function showInfoMessage(msg) {
+        showMessage(msg, "alert alert-info");
+    }
+    // Utility function to show info success messages
+    function showSuccessMessage(msg) {
+        showMessage(msg, "alert alert-success");
+    }
+    // Utility function to show warning messages
+    function showWarningMessage(msg) {
+        showMessage(msg, "alert alert-warning");
+    }
+
+    function showMessage(msg, classNames) {
+        var logContainer = document.getElementById('logContainer');
+        var elChild = document.createElement("div");
+        elChild.className = classNames;
+        elChild.innerHTML = msg;
+        logContainer.insertBefore(elChild, logContainer.firstChild);
+    }
+
 });
-
-// Utility function to show error messages
-function showErrorMessage(msg) {
-    showMessage(msg, "alert alert-danger");
-}
-// Utility function to show info messages
-function showInfoMessage(msg) {
-    showMessage(msg, "alert alert-info");
-}
-// Utility function to show info success messages
-function showSuccessMessage(msg) {
-    showMessage(msg, "alert alert-success");
-}
-// Utility function to show warning messages
-function showWarningMessage(msg) {
-    showMessage(msg, "alert alert-warning");
-}
-
-function showMessage(msg, classNames) {
-    var logContainer = document.getElementById('logContainer');
-    var elChild = document.createElement("div");
-    elChild.className = classNames;
-    elChild.innerHTML = msg;
-    logContainer.insertBefore(elChild, logContainer.firstChild);
-}

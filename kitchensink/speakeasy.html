@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- This is a very basic example -->
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Usage example for the ctlapi</title>
+
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+    <link type="text/css" rel="stylesheet" href="css/main.css" />
+
+    <script data-main="js/speakeasydemo" src="../../dist/ctlapi-0.1.4.js"></script>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-wrapper">
+            <a href="#!" class="brand-logo"><img src="img/ctl-logo-color.svg" alt="CTLCom" /></a>
+            <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a class="waves-effect waves-light btn modal-trigger btn-login hidden" href="#loginModal">Login</a></li>
+                <li><a class="waves-effect waves-light btn btn-logout hidden" href="#">Logout</a></li>
+            </ul>
+            <ul class="side-nav" id="mobile-demo">
+                <li><a href="speakeasy.html">SpeakEasy</a></li>
+                <li><a class="waves-effect waves-light btn modal-trigger btn-login hidden" href="#loginModal">Login</a></li>
+                <li><a class="waves-effect waves-light btn btn-logout hidden" href="#">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <h3>Make a new call</h3>
+        <p>
+            <label for="confDestination">Destination</label>
+            <input id="confDestination" type="text" value="" placeholder="number to call" />
+            <button id="btnMakeCall" class="btn btn-success">Call</button>
+        </p>
+        <fieldset>
+            <legend>Call controls</legend>
+            <div class="btn-group">
+                <button id="btnEndCall" class="btn btn-danger">End Call</button>
+                <button id="btnStartVideo" class="btn btn-primary">Start Video</button>
+                <button id="btnStopVideo" class="btn btn-primary">Stop Video</button>
+                <button id="btnHoldCall" class="btn btn-primary">Hold</button>
+                <button id="btnUnHoldCall" class="btn btn-primary">Unhold</button>
+            </div>
+        </fieldset>
+        <div class="left margin10">
+            Local video:
+            <br />
+            <div id="localVideo" class="local-video"></div>
+
+        </div>
+        <div class="left margin10">
+            Remote video:
+            <br />
+            <div id="remoteVideo" class="remote-video"></div>
+        </div>
+        <br />
+        <br />
+        <div class="left margin10 clear">
+            <h2>Status</h2>
+
+            <div id="logContainer" class="logContainer"></div>
+        </div>
+
+        <!-- Modals -->
+        <div id="loginModal" class="modal">
+            <div class="modal-content">
+                <h4>Enter Your Login Info</h4>
+                <div class="row">
+                  <form class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          <input id="login" type="text">
+                          <label for="login">Login</label>
+                        </div>
+                      </div>
+                    <div class="row">
+                      <div class="input-field col s12">
+                        <input id="password" type="password" class="validate">
+                        <label for="password">Password</label>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Login</a>
+                <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Cancel</a>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
