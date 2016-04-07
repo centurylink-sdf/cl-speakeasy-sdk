@@ -1,7 +1,7 @@
 require.config({
     baseUrl: "./",
     "paths": {
-        "fcs":              "../lib/fcs-jsl-3.1.3",
+        "fcs":              "../lib/fcs-jsl-4.0.0",
         "Ctl":              "empty:",
         "Ctl.speakeasy":    "./"
     },
