@@ -86,6 +86,10 @@ gulp.task('build-optimize-speakeasy', function (cb) {
         .pipe(gulp.dest('./dist'));
 });
 
+gulp.task('build-speakeasy', function (cb) {
+    runSequence('clean', 'build-require-speakeasy', 'build-optimize-speakeasy', cb);
+});
+
 gulp.task('build', function (cb) {
     runSequence('clean', 'build-require-apiloader', 'build-optimize-apiloader', 'build-require-speakeasy', 'build-optimize-speakeasy', cb);
 });
@@ -177,11 +181,11 @@ gulp.task('git-tag-commit', function(cb) {
 gulp.task('example-upgrade-tag', function(){
     var pkg = require('./package.json');
     var v = pkg.version;
-    var file = 'example/*.html';
+    var file = 'kitchensink/www/*.html';
 
     return gulp.src([file])
         .pipe(replace(/ctlapi-([\d.]+)\.js/g, 'ctlapi-' + v + '.js'))
-        .pipe(gulp.dest('example'));
+        .pipe(gulp.dest('kitchensink/www'));
 });
 
 gulp.task('upgrade-version', function(){

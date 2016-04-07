@@ -15,8 +15,8 @@ define([
     /**
      * @class Ctl.apiloader.ApiLoader
      *
-     * @author Andrew Kovalenko <andrew@cybind.net>
-     * @docauthor Andrew Kovalenko <andrew@cybind.net>
+     * @author Andrew Kovalenko <andrew@jaybirdgroup.com>
+     * @docauthor Andrew Kovalenko <andrew@jaybirdgroup.com>
      *
      * Ctl.apiloader.ApiLoader is the heart of the CenturyLink JavaScript API loading capability. It is most commonly used
      * via the {@link Ctl.apiloader.ApiLoader#load} shorthand. Ctl.apiloader.ApiLoader is used for asynchronous loading approach
@@ -55,7 +55,7 @@ define([
             require(
                 [name],
                 function(api) {
-                    // loadedApis.push(api);
+                    loadedApis.push(api);
                     Utils.doCallback(callback, [null, api]);
                 },
                 function(err) {

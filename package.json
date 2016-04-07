@@ -5,7 +5,7 @@
   "version": "0.1.4",
   "author": {
     "name": "Andrew Kovalenko",
-    "email": "andrew@cybind.net"
+    "email": "andrew@jaybirdgroup.com"
   },
   "description": "A JavaScript SDK",
   "repository": {
@@ -15,7 +15,9 @@
   "keywords": [
     "sdk",
     "api",
-    "javascript"
+    "javascript",
+    "apiloader",
+    "speakeasy"
   ],
   "dependencies": {
     "colors": "0.6.2",
