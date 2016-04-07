@@ -1,4 +1,4 @@
-define(['jquery', 'materialize', 'ApiLoader'], function($, materialize, Ctl) {
+define(['jquery', 'ApiLoader'], function($, Ctl) {
 
     var btnLogin = $('.btn-login');
     var btnLogout = $('.btn-logout');
