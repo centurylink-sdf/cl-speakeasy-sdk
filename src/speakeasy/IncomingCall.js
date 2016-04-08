@@ -4,14 +4,16 @@ define([
     'Ctl/Logger',
     'Ctl/Promise',
     'Ctl/Ajax',
-    'Ctl/Utils'
+    'Ctl/Utils',
+    'Ctl.speakeasy/CallInfo'
 ], function (
     BaseCall,
     Config,
     Logger,
     Promise,
     Ajax,
-    Utils
+    Utils,
+    CallInfo
 ) {
 
     var self = null;
@@ -61,6 +63,7 @@ define([
         self.internalCall.reject(
             function () {
                 self.logger.info("Rejected incomming call...");
+                CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.getCallId());
                 Utils.doCallback(successCallback);
             },
             function () {
