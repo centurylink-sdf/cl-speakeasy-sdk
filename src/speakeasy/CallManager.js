@@ -6,7 +6,8 @@ define([
     'Ctl/Utils',
     'fcs',
     'Ctl.speakeasy/IncomingCall',
-    'Ctl.speakeasy/OutgoingCall'
+    'Ctl.speakeasy/OutgoingCall',
+    'Ctl.speakeasy/CallInfo'
 ], function (
     Config,
     Logger,
@@ -15,7 +16,8 @@ define([
     Utils,
     fcs,
     IncomingCall,
-    OutgoingCall
+    OutgoingCall,
+    CallInfo
 ) {
 
     /**
@@ -32,14 +34,13 @@ define([
 
         var self = this;
         self.logger = new Logger('CallManager');
-        self.calls = [];
-        self.currentCall = null;
 
-        /**
-         *
-         */
         function setup(config) {
             Utils.extend(Config.callManager, config);
+
+            CallInfo.subscribeEvents(CallInfo.events.ON_DELETE_CALL, function(callId) {
+                CallInfo.deleteCall(callId);
+            });
         }
 
         /**
@@ -47,7 +48,7 @@ define([
          *
          */
         function getCalls() {
-            return self.calls;
+            return CallInfo.getCalls();
         }
 
         /**
@@ -55,14 +56,7 @@ define([
          *
          */
         function getCurrentCall() {
-            return self.currentCall;
-        }
-
-        /**
-         * Load CneturyLink API
-         *
-         */
-        function subscribeEvents(callback) {
+            return CallInfo.getCurrentCall();
         }
 
         /**
@@ -72,7 +66,7 @@ define([
          * @return  {Call} Contains call object with required info
          */
         function get(callID) {
-            return self.calls[callID];
+            return CallInfo.get(callID);
         }
 
         /**
@@ -96,12 +90,10 @@ define([
                 numToCall,
 
                 function(call) {
-                    var callId = call.getId();
 
                     var outgoingCall = new OutgoingCall(call);
 
-                    self.calls[callId] = outgoingCall;
-                    self.currentCall = outgoingCall;
+                    CallInfo.addCall(outgoingCall, true);
 
                     Utils.doCallback(callback, [ null, outgoingCall ]);
 
@@ -123,9 +115,7 @@ define([
             self.logger.info("There is an incomming call...");
 
             var incomingCall = new IncomingCall(call);
-
-            //TODO: not sure shoud we set incoming call as active (we can already have outgoing call as active)
-            self.currentCall = incomingCall;
+            CallInfo.addCall(incomingCall, false);
 
             Utils.doCallback(self.onCallReceived, [ null, incomingCall ]);
         }
@@ -133,7 +123,6 @@ define([
         this.setup = setup;
         this.getCalls = getCalls;
         this.getCurrentCall = getCurrentCall;
-        this.subscribeEvents = subscribeEvents;
         this.get = get;
         this.createCall = createCall;
         this.processReceivedCall = processReceivedCall;
@@ -147,5 +136,4 @@ define([
     }
 
     return new CallManager();
-
 });

@@ -4,14 +4,16 @@ define([
     'Ctl/Promise',
     'Ctl/Ajax',
     'Ctl/Utils',
-    'fcs'
+    'fcs',
+    'Ctl.speakeasy/CallInfo'
 ], function (
     Config,
     Logger,
     Promise,
     Ajax,
     Utils,
-    fcs
+    fcs,
+    CallInfo
 ) {
 
     var self = null;
@@ -79,6 +81,8 @@ define([
             function () {
                 removeLocalStream();
                 removeRemoteStream();
+
+                CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.getCallId());
 
                 Utils.doCallback(successCallback);
             },
@@ -267,6 +271,14 @@ define([
         removeRemoteStream();
     }
 
+    function toggleLocalStream() {
+
+    }
+
+    function toggleRemoteStream() {
+
+    }
+
     function processStateChange(state) {
         self.callState = state;
 
@@ -286,8 +298,10 @@ define([
             case fcs.call.States.JOINED:
                 break;
             case fcs.call.States.ON_HOLD:
+                Utils.doCallback(self.onStateChanged, [null, self.events.CALL_HELD]);
                 break;
             case fcs.call.States.ON_REMOTE_HOLD:
+                Utils.doCallback(self.onStateChanged, [null, self.events.CALL_HELD]);
                 break;
             case fcs.call.States.OUTGOING:
                 break;
