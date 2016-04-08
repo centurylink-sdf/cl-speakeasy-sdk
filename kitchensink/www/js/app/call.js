@@ -2,6 +2,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
 
     var btnLogin = $('.btn-login');
     var btnLogout = $('.btn-logout');
+
     if (Ctl.Auth.isAuthenticated()) {
         loadSpeakEasy();
     } else {
@@ -102,6 +103,10 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                 });
 
                 btnStopVideo.addEventListener("click", function (e) {
+
+                    var $toastContent = $('<span>I am toast content</span>');
+                    Materialize.toast($toastContent, 5000);
+
                     var currentCall = speakEasy.CallManager.getCurrentCall();
                     currentCall.stopVideo(
                        function() {

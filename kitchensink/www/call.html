@@ -19,14 +19,11 @@
         <div class="nav-wrapper">
             <a href="#!" class="brand-logo"><img src="img/ctl-logo-color.svg" alt="CTLCom" /></a>
             <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li><a class="waves-effect waves-light btn modal-trigger btn-login hidden" href="#loginModal">Login</a></li>
-                <li><a class="waves-effect waves-light btn btn-logout hidden" href="#">Logout</a></li>
+            <ul class="right hide-on-med-and-down">
+                <li><a class="waves-effect waves-light btn btn-logout" href="#">Logout</a></li>
             </ul>
             <ul class="side-nav" id="mobile-demo">
-                <li><a href="call.html">SpeakEasy</a></li>
-                <li><a class="waves-effect waves-light btn modal-trigger btn-login hidden" href="#loginModal">Login</a></li>
-                <li><a class="waves-effect waves-light btn btn-logout hidden" href="#">Logout</a></li>
+                <li><a class="waves-effect waves-light btn btn-logout" href="#">Logout</a></li>
             </ul>
         </div>
     </nav>
@@ -48,11 +45,11 @@
         <fieldset>
             <legend>Call controls</legend>
             <div class="btn-group">
-                <button id="btnEndCall" class="btn btn-danger">End Call</button>
-                <button id="btnStartVideo" class="btn btn-primary">Start Video</button>
-                <button id="btnStopVideo" class="btn btn-primary">Stop Video</button>
-                <button id="btnHoldCall" class="btn btn-primary">Hold</button>
-                <button id="btnUnHoldCall" class="btn btn-primary">Unhold</button>
+                <button id="btnEndCall" class="btn">End Call</button>
+                <button id="btnStartVideo" class="btn">Start Video</button>
+                <button id="btnStopVideo" class="btn">Stop Video</button>
+                <button id="btnHoldCall" class="btn">Hold</button>
+                <button id="btnUnHoldCall" class="btn">Unhold</button>
             </div>
         </fieldset>
         <div class="left margin10">
@@ -69,12 +66,18 @@
         <br />
         <br />
         <div class="left margin10 clear">
-            <h2>Status</h2>
+            <h4>Status</h4>
 
             <div id="logContainer" class="logContainer"></div>
         </div>
 
     </div>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".button-collapse").sideNav();
+        });
+    </script>
 
 </body>
 </html>
