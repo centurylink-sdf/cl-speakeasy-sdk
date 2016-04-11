@@ -179,14 +179,14 @@ define([
     function onStreamAddedHandler(streamURL) {
 
         self.logger.log("Outgoing call remote stream added: " + streamURL);
-        self.logger.log('canReceiveVideo: ' + self.internalCall.canReceiveVideo());
-        self.logger.log('canSendVideo: ' + self.internalCall.canSendVideo());
+        self.logger.log('canReceiveVideo: ' + self.fcsCall.canReceiveVideo());
+        self.logger.log('canSendVideo: ' + self.fcsCall.canSendVideo());
 
         if (streamURL) {
             self.remoteStreamURL = streamURL;
             setRemoteStream(streamURL);
         } else {
-            var remoteUserDisabledVideo = !self.internalCall.canReceiveVideo() && self.internalCall.canSendVideo();
+            var remoteUserDisabledVideo = !self.fcsCall.canReceiveVideo() && self.fcsCall.canSendVideo();
             if (remoteUserDisabledVideo) {
                 self.logger.log('Remote user has disabled video feature');
             }
@@ -196,8 +196,8 @@ define([
     function onLocalStreamAddedHandler(streamURL) {
 
         self.logger.log("local stream added: " + streamURL);
-        self.logger.log('canReceiveVideo: ' + self.internalCall.canReceiveVideo());
-        self.logger.log('canSendVideo: ' + self.internalCall.canSendVideo());
+        self.logger.log('canReceiveVideo: ' + self.fcsCall.canReceiveVideo());
+        self.logger.log('canSendVideo: ' + self.fcsCall.canSendVideo());
 
         if (streamURL) {
             self.localStreamURL = streamURL;
