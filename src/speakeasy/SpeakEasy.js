@@ -33,13 +33,14 @@ define([
         function init() {
             self.logger.info('Initializing calling features');
 
-            initFcsLogger();
+            //initFcsLogger();
 
             fcs.setUserAuth(getPublicUserId(), '');
 
             // Set ajaxHook for url, headers and data intersection
             Config.fcsapi.ajaxHook = customAjaxSetup;
-
+            //Config.fcsapi.localVideoContainer = document.getElementById('localVideo');
+            //Config.fcsapi.remoteVideoContainer = document.getElementById('remoteVideo');
             fcs.setup(Config.fcsapi);
 
             Notification.start(

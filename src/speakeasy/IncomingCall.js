@@ -42,9 +42,10 @@ define([
      */
     function answer(successCallback, failureCallback) {
 
-        self.internalCall.answer(
+        self.fcsCall.answer(
             function () {
                 self.logger.info("You are on call.");
+                CallInfo.setCurrentCall(self);
                 Utils.doCallback(successCallback);
             },
             function () {
@@ -60,7 +61,7 @@ define([
      */
     function reject(successCallback, failureCallback) {
 
-        self.internalCall.reject(
+        self.fcsCall.reject(
             function () {
                 self.logger.info("Rejected incomming call...");
                 CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.getCallId());

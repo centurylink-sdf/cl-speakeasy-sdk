@@ -38,6 +38,8 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
 
                 speakEasy.CallManager.onCallReceived = function (call) {
 
+                    attachCallListeners(call);
+
                     // Call dialog box
                     var r = confirm("Incoming call! Would you like to answer?");
                     if (r === true) {
@@ -60,24 +62,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                 btnMakeCall.addEventListener("click", function (e) {
                     var numToCall = confDestination.value;
                     speakEasy.CallManager.createCall(numToCall, false, function(call) {
-
-                        call.onStateChanged = function(state) {
-                            switch (state) {
-
-                                case call.events.CALL_STARTED:
-                                    showInfoMessage("Call is started!");
-                                    break;
-                                case call.events.CALL_ENDED:
-                                    showInfoMessage("Call was ended on other side!");
-                                    break;
-                                case call.events.CALL_HELD:
-                                    showInfoMessage("Call was held on other side!");
-                                    break;
-                                case call.events.CALL_REJECTED:
-                                    showInfoMessage("Call was rejected!");
-                                    break;
-                            }
-                        }
+                        attachCallListeners(call);
                     });
                 });
 
@@ -92,7 +77,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
 
                 btnStartVideo.addEventListener("click", function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
-                    currentCall.startVideo(
+                    currentCall.videoStart(
                        function() {
                            showInfoMessage("Video is started!");
                        },
@@ -108,7 +93,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     Materialize.toast($toastContent, 5000);
 
                     var currentCall = speakEasy.CallManager.getCurrentCall();
-                    currentCall.stopVideo(
+                    currentCall.videoStop(
                        function() {
                            showInfoMessage("Video is stopped!");
                        },
@@ -143,6 +128,28 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                 });
             }
         });
+    }
+
+    function attachCallListeners(call) {
+        call.onStateChanged = function(state) {
+            switch (state) {
+                case call.events.CALL_RINGING:
+                    showInfoMessage("Ringing!");
+                    break;
+                case call.events.CALL_STARTED:
+                    showInfoMessage("Call is started!");
+                    break;
+                case call.events.CALL_ENDED:
+                    showInfoMessage("Call was ended on other side!");
+                    break;
+                case call.events.CALL_HELD:
+                    showInfoMessage("Call was held on other side!");
+                    break;
+                case call.events.CALL_REJECTED:
+                    showInfoMessage("Call was rejected!");
+                    break;
+            }
+        }
     }
 
     // Utility function to show error messages

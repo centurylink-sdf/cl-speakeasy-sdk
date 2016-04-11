@@ -95,7 +95,7 @@ define([
 
                     CallInfo.addCall(outgoingCall, true);
 
-                    Utils.doCallback(callback, [ null, outgoingCall ]);
+                    Utils.doCallback(callback, [ outgoingCall ]);
 
                 },
                 function(errorMessage) {
@@ -117,7 +117,7 @@ define([
             var incomingCall = new IncomingCall(call);
             CallInfo.addCall(incomingCall, false);
 
-            Utils.doCallback(self.onCallReceived, [ null, incomingCall ]);
+            Utils.doCallback(self.onCallReceived, [ incomingCall ]);
         }
 
         this.setup = setup;

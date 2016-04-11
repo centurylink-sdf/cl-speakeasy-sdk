@@ -59,7 +59,7 @@ define([], function () {
     };
     Logger.prototype.prefix = function(method, args) {
         var prepend = "[" + method.toUpperCase() + "][" + this.name + "]:	";
-        if ([ "log", "error", "warn", "info" ].indexOf(method) !== -1) {
+        if ([ "log", "error", "warn", "info", "debug" ].indexOf(method) !== -1) {
             if ("string" === typeof args[0]) {
                 args[0] = prepend + args[0];
             } else {

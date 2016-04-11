@@ -54,6 +54,14 @@ define([
             return self.currentCall;
         }
 
+        /**
+         * Set active call
+         * @param call
+         */
+        function setCurrentCall(call) {
+            self.currentCall = call;
+        }
+
         function addCall(call, isCurrent) {
 
             var callId = call.getCallId();
@@ -105,6 +113,7 @@ define([
 
         this.getCalls = getCalls;
         this.getCurrentCall = getCurrentCall;
+        this.setCurrentCall = setCurrentCall;
         this.get = get;
         this.addCall = addCall;
         this.deleteCall = deleteCall;

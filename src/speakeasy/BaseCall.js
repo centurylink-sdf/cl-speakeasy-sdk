@@ -46,6 +46,8 @@ define([
         self.localStreamURL = null;
         self.callState = null;
 
+        self.id = self.fcsCall.getId();
+
         attachListeners();
     }
 
@@ -54,8 +56,6 @@ define([
         //This function listens call state changes in JSL API level
         self.fcsCall.onStateChange = function(state, statusCode) {
             //Add statusCode that returned from the server property to the call
-            self.logger.log('status changed: ' + statusCode);
-
             processStateChange(state);
         };
 
@@ -79,8 +79,7 @@ define([
 
         self.fcsCall.end(
             function () {
-                removeLocalStream();
-                removeRemoteStream();
+                removeAllVideoStreams();
 
                 CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.getCallId());
 
@@ -168,7 +167,6 @@ define([
         self.fcsCall.videoStop(
             function () {
                 removeLocalStream();
-                removeRemoteStream();
 
                 Utils.doCallback(successCallback);
             },
@@ -203,8 +201,6 @@ define([
 
         if (streamURL) {
             self.localStreamURL = streamURL;
-
-
             setLocalStream(streamURL);
         }
     }
@@ -216,7 +212,7 @@ define([
         var videoContainer = document.getElementById(Config.callManager.remoteVideoContainer);
 
         var video = document.createElement('video');
-        video.id = 'video_' + self.getCallId();
+        video.id = 'video_' + self.id;
         video.css.width = '100%';
         video.css.height = '100%';
 
@@ -230,12 +226,10 @@ define([
 
     function removeRemoteStream() {
         var videoContainer = document.getElementById(Config.callManager.remoteVideoContainer);
-        var videoElements = videoContainer.getElementsById('video_' + self.getCallId());
+        var videoElement = document.getElementById('video_' + self.id);
 
-        if(videoElements.length > 0) {
-            for(var i = videoElements.length - 1; i >= 0; i--) {
-                videoContainer.removeChild(videoElements[i]);
-            }
+        if(videoElement != null) {
+            videoContainer.removeChild(videoElement);
         }
     }
 
@@ -284,46 +278,62 @@ define([
 
         switch(state) {
             case fcs.call.States.RINGING:
+                self.logger.debug('status changed: RINGING');
+                Utils.doCallback(self.onStateChanged, [self.events.CALL_RINGING]);
                 break;
             case fcs.call.States.IN_CALL:
-
-                tils.doCallback(self.onStateChanged, [null, self.events.CALL_STARTED]);
+                self.logger.debug('status changed: IN_CALL');
+                Utils.doCallback(self.onStateChanged, [self.events.CALL_STARTED]);
                 break;
             case fcs.call.States.CALL_IN_PROGRESS:
+                self.logger.debug('status changed: CALL_IN_PROGRESS');
                 break;
             case fcs.call.States.INCOMING:
+                self.logger.debug('status changed: INCOMING');
                 break;
             case fcs.call.States.ANSWERING:
+                self.logger.debug('status changed: ANSWERING');
                 break;
             case fcs.call.States.JOINED:
+                self.logger.debug('status changed: JOINED');
                 break;
             case fcs.call.States.ON_HOLD:
-                Utils.doCallback(self.onStateChanged, [null, self.events.CALL_HELD]);
+                self.logger.debug('status changed: ON_HOLD');
+                Utils.doCallback(self.onStateChanged, [self.events.CALL_HELD]);
                 break;
             case fcs.call.States.ON_REMOTE_HOLD:
-                Utils.doCallback(self.onStateChanged, [null, self.events.CALL_HELD]);
+                self.logger.debug('status changed: ON_REMOTE_HOLD');
+                Utils.doCallback(self.onStateChanged, [self.events.CALL_HELD]);
                 break;
             case fcs.call.States.OUTGOING:
+                self.logger.debug('status changed: OUTGOING');
                 break;
             case fcs.call.States.RENEGOTIATION:
+                self.logger.debug('status changed: RENEGOTIATION');
                 break;
             case fcs.call.States.ENDED:
+                self.logger.debug('status changed: ENDED');
 
-                removeAllVideoStreams();
-                Utils.doCallback(self.onStateChanged, [null, self.events.CALL_ENDED]);
+                //removeAllVideoStreams();
+                Utils.doCallback(self.onStateChanged, [self.events.CALL_ENDED]);
 
                 break;
             case fcs.call.States.REJECTED:
+                self.logger.debug('status changed: REJECTED');
 
-                Utils.doCallback(self.onStateChanged, [null, self.events.CALL_REJECTED]);
+                Utils.doCallback(self.onStateChanged, [self.events.CALL_REJECTED]);
                 break;
             case fcs.call.States.OUTGOING:
+                self.logger.debug('status changed: OUTGOING');
                 break;
             case fcs.call.States.EARLY_MEDIA:
+                self.logger.debug('status changed: EARLY_MEDIA');
                 break;
             case fcs.call.States.TRANSFERRED:
+                self.logger.debug('status changed: TRANSFERRED');
                 break;
             case fcs.call.States.TRANSFER_FAILURE:
+                self.logger.debug('status changed: TRANSFER_FAILURE');
                 break;
         }
     }
@@ -350,10 +360,11 @@ define([
      * @enum {number}
      */
     BaseCall.prototype.events = {
-        CALL_STARTED: 0,
-        CALL_ENDED: 1,
-        CALL_HELD: 2,
-        CALL_REJECTED: 3
+        CALL_RINGING: 0,
+        CALL_STARTED: 1,
+        CALL_ENDED: 2,
+        CALL_HELD: 3,
+        CALL_REJECTED: 4
     };
 
     return BaseCall;
