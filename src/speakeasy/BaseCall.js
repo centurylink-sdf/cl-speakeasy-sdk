@@ -182,7 +182,7 @@ define([
         self.logger.log('canReceiveVideo: ' + self.fcsCall.canReceiveVideo());
         self.logger.log('canSendVideo: ' + self.fcsCall.canSendVideo());
 
-        if (streamURL) {
+        if (streamURL && self.fcsCall.canReceiveVideo()) {
             self.remoteStreamURL = streamURL;
             setRemoteStream(streamURL);
         } else {
@@ -190,6 +190,7 @@ define([
             if (remoteUserDisabledVideo) {
                 self.logger.log('Remote user has disabled video feature');
             }
+            removeRemoteStream();
         }
     }
 
@@ -213,8 +214,8 @@ define([
 
         var video = document.createElement('video');
         video.id = 'video_' + self.id;
-        video.css.width = '100%';
-        video.css.height = '100%';
+        video.style.width = '100%';
+        video.style.height = '100%';
 
         videoContainer.appendChild(video);
 
@@ -239,8 +240,8 @@ define([
 
         var videoContainer = document.getElementById(Config.callManager.localVideoContainer);
         var video = document.createElement('video');
-        video.css.width = '100%';
-        video.css.height = '100%';
+        video.style.width = '100%';
+        video.style.height = '100%';
 
         videoContainer.appendChild(video);
 
@@ -314,7 +315,7 @@ define([
             case fcs.call.States.ENDED:
                 self.logger.debug('status changed: ENDED');
 
-                //removeAllVideoStreams();
+                removeAllVideoStreams();
                 Utils.doCallback(self.onStateChanged, [self.events.CALL_ENDED]);
 
                 break;
