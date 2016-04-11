@@ -33,7 +33,7 @@ define([
         function init() {
             self.logger.info('Initializing calling features');
 
-            //initFcsLogger();
+            initFcsLogger();
 
             fcs.setUserAuth(getPublicUserId(), '');
 
