@@ -1,4 +1,8 @@
-define([], function () {
+define([
+    'Ctl/Utils'
+], function (
+    Utils
+) {
 
     /**
      * Promise implementation
@@ -49,26 +53,40 @@ define([], function () {
             };
         }
         for (var i = 0; i < total; i++) {
-            promises[i]().then(notifier(i));
+            if(Utils.isFunction(promises[i])) {
+                promises[i]().then(notifier(i));
+            }
+            else {
+                promises[i].then(notifier(i));
+            }
         }
         return p;
     };
+
     Promise.chain = function(promises, error, result) {
         var p = new Promise();
         if (promises === null || promises.length === 0) {
             p.done(error, result);
         } else {
-            promises[0](error, result).then(function(res, err) {
+
+            function processPromise(err, res) {
                 promises.splice(0, 1);
                 //self.logger.info(promises.length)
                 if (promises) {
-                    Promise.chain(promises, res, err).then(function(r, e) {
-                        p.done(r, e);
+                    Promise.chain(promises, err, res).then(function(e, r) {
+                        p.done(e, r);
                     });
                 } else {
-                    p.done(res, err);
+                    p.done(err, res);
                 }
-            });
+            }
+
+            if(Utils.isFunction(promises[0])) {
+                promises[0](error, result).then(processPromise);
+            }
+            else {
+                promises[0].then(processPromise);
+            }
         }
         return p;
     };
