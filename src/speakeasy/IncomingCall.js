@@ -42,16 +42,27 @@ define([
      */
     function answer(successCallback, failureCallback) {
 
-        self.fcsCall.answer(
-            function () {
-                self.logger.info("You are on call.");
-                CallInfo.setCurrentCall(self);
-                Utils.doCallback(successCallback);
-            },
-            function () {
-                self.logger.error("Call answer is failed!");
+        var p = CallInfo.triggerEvent(CallInfo.events.BEFORE_ANSWER_CALL, self.id);
+
+        p.then(function(error) {
+
+            if(error) {
                 Utils.doCallback(failureCallback);
-            });
+            }
+            else {
+                self.fcsCall.answer(
+                    function () {
+                        self.logger.info("You are on call.");
+
+                        CallInfo.setCurrentCall(self);
+                        Utils.doCallback(successCallback);
+                    },
+                    function () {
+                        self.logger.error("Call answer is failed!");
+                        Utils.doCallback(failureCallback);
+                    });
+            }
+        });
     }
 
     /**
@@ -64,7 +75,7 @@ define([
         self.fcsCall.reject(
             function () {
                 self.logger.info("Rejected incomming call...");
-                CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.getCallId());
+                CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.id);
                 Utils.doCallback(successCallback);
             },
             function () {
@@ -78,6 +89,14 @@ define([
      */
     function getCallerInfo() {
 
+        if(self.fcsCall) {
+            return {
+                name: self.fcsCall.callerName,
+                number: self.fcsCall.callerNumber
+            }
+        }
+
+        return null;
     }
 
     IncomingCall.prototype = Object.create(BaseCall.prototype);

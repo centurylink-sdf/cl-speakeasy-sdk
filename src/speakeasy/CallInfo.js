@@ -32,10 +32,13 @@ define([
         self.calls = [];
         self.currentCall = null;
 
+
         self.subscribedEvents = {};
 
         self.events = {
-            ON_DELETE_CALL: "ON_DELETE_CALL"
+            ON_DELETE_CALL: "ON_DELETE_CALL",
+            BEFORE_ANSWER_CALL: "BEFORE_ANSWER_CALL",
+            BEFORE_UNHOLD: "BEFORE_UNHOLD"
         };
 
         /**
@@ -83,16 +86,32 @@ define([
             return self.calls[callID];
         }
 
+        /**
+         *
+         * @param callId
+         */
         function deleteCall(callId) {
             var callToDelete = self.get(callId);
             if(callToDelete) {
                 delete self.calls[callId];
-                if(self.currentCall.getCallId() == callId) {
+                if(self.currentCall.id == callId) {
                     self.currentCall = null;
+
+                    //make previous call as current
+                    for (var id in self.calls) {
+                        self.currentCall = self.calls[id];
+                        break;
+                    }
                 }
             }
         }
 
+        /**
+         *
+         * @param event
+         * @param callback
+         * @returns {Ctl.speakeasy.CallInfo}
+         */
         function subscribeEvents(event, callback) {
             if (!self.subscribedEvents[event]) {
                 self.subscribedEvents[event] = [];
@@ -101,14 +120,21 @@ define([
             return self;
         }
 
+        /**
+         *
+         * @param event
+         * @returns {*}
+         */
         function triggerEvent(event) {
             if (!self.subscribedEvents[event]) return false;
-            var args = Array.prototype.slice.call(arguments, 1);
+            var args = Array.prototype.slice.call(arguments, 1),
+                promises = [];
+
             for (var i = 0, l = self.subscribedEvents[event].length; i < l; i++) {
                 var subscription = self.subscribedEvents[event][i];
-                subscription.callback.apply(subscription.context, args);
+                promises.push(subscription.callback.apply(subscription.context, args));
             }
-            return self;
+            return Promise.chain(promises);
         }
 
         this.getCalls = getCalls;

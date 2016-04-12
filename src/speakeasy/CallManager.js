@@ -39,8 +39,54 @@ define([
             Utils.extend(Config.callManager, config);
 
             CallInfo.subscribeEvents(CallInfo.events.ON_DELETE_CALL, function(callId) {
+                var p = new Promise();
                 CallInfo.deleteCall(callId);
+                p.done(false);
+                return p;
             });
+
+            CallInfo.subscribeEvents(CallInfo.events.BEFORE_ANSWER_CALL, function() {
+                return holdCurrentCall();
+            });
+
+            CallInfo.subscribeEvents(CallInfo.events.BEFORE_UNHOLD, function(callId) {
+
+                var p = new Promise();
+                var currentCall = CallInfo.getCurrentCall();
+                if(currentCall != null && currentCall.id != callId) {
+                    p = holdCurrentCall();
+                }
+                else {
+                    p.done(false);
+                }
+                return p;
+            });
+        }
+
+        function holdCurrentCall() {
+
+            var promise = new Promise(),
+                currentCall = CallInfo.getCurrentCall();
+
+            if(currentCall != null) {
+                // place current call on hold
+                if(currentCall.isActive()) {
+                    currentCall.hold(function() {
+                        promise.done(false);
+                    },
+                    function() {
+                        promise.done(true);
+                    });
+                }
+                else {
+                    promise.done(false);
+                }
+            }
+            else {
+                promise.done(false);
+            }
+
+            return promise;
         }
 
         /**
@@ -78,37 +124,50 @@ define([
          *
          * @return  {OutgoingCall} Contains call object with required info
          */
-        function createCall(numToCall, isVideoEnabled, callback) {
+        function createCall(numToCall, isVideoEnabled, successCallback, failureCallback) {
 
             var domain = Config.settings.defaultOutgoingCallDomain;
             var numToCall = !/@/.test(numToCall) ?  numToCall + "@" + domain : numToCall;
 
             var currentUser = fcs.getUser();
-            fcs.call.startCall(
-                currentUser,
-                null,
-                numToCall,
 
-                function(call) {
+            holdCurrentCall().then(function(error) {
 
-                    var outgoingCall = new OutgoingCall(call);
+                if(error) {
+                    Utils.doCallback(failureCallback);
+                }
+                else {
+                    fcs.call.startCall(
+                        currentUser,
+                        null,
+                        numToCall,
 
-                    CallInfo.addCall(outgoingCall, true);
+                        function(call) {
 
-                    Utils.doCallback(callback, [ outgoingCall ]);
+                            holdCurrentCall();
 
-                },
-                function(errorMessage) {
-                    if (errorMessage === 2) {
-                        self.logger.log("CREATE_PEER_FAILED", "error");
-                    } else {
-                        self.logger.log("CALL_FAILED", errorMessage);
-                    }
-                },
-                isVideoEnabled,
-                isVideoEnabled,
-                Config.callManager.videoQuality
-            );
+                            var outgoingCall = new OutgoingCall(call);
+
+                            CallInfo.addCall(outgoingCall, true);
+
+                            Utils.doCallback(successCallback, [ outgoingCall ]);
+
+                        },
+                        function(errorMessage) {
+                            if (errorMessage === 2) {
+                                self.logger.log("CREATE_PEER_FAILED", "error");
+                            } else {
+                                self.logger.log("CALL_FAILED", errorMessage);
+                            }
+                            Utils.doCallback(failureCallback);
+                        },
+                        isVideoEnabled,
+                        isVideoEnabled,
+                        Config.callManager.videoQuality
+                    );
+                }
+
+            });
         }
 
         function processReceivedCall(call) {

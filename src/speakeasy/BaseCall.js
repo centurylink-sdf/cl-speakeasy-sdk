@@ -81,7 +81,7 @@ define([
             function () {
                 removeAllVideoStreams();
 
-                CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.getCallId());
+                CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.id);
 
                 Utils.doCallback(successCallback);
             },
@@ -128,6 +128,9 @@ define([
      * @param failureCallback
      */
     function unhold(successCallback, failureCallback) {
+
+        CallInfo.triggerEvent(CallInfo.events.BEFORE_UNHOLD, self.id);
+
         self.fcsCall.unhold(
             function () {
                 Utils.doCallback(successCallback);
@@ -266,14 +269,6 @@ define([
         removeRemoteStream();
     }
 
-    function toggleLocalStream() {
-
-    }
-
-    function toggleRemoteStream() {
-
-    }
-
     function processStateChange(state) {
         self.callState = state;
 
@@ -300,7 +295,7 @@ define([
                 break;
             case fcs.call.States.ON_HOLD:
                 self.logger.debug('status changed: ON_HOLD');
-                Utils.doCallback(self.onStateChanged, [self.events.CALL_HELD]);
+
                 break;
             case fcs.call.States.ON_REMOTE_HOLD:
                 self.logger.debug('status changed: ON_REMOTE_HOLD');
@@ -316,6 +311,7 @@ define([
                 self.logger.debug('status changed: ENDED');
 
                 removeAllVideoStreams();
+                CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.id);
                 Utils.doCallback(self.onStateChanged, [self.events.CALL_ENDED]);
 
                 break;
@@ -339,6 +335,10 @@ define([
         }
     }
 
+    function isActive() {
+        return self.callState == fcs.call.States.IN_CALL || self.callState == fcs.call.States.RENEGOTIATION;
+    }
+
     BaseCall.prototype.hangUp = hangUp;
     BaseCall.prototype.mute = mute;
     BaseCall.prototype.unmute = unmute;
@@ -347,6 +347,7 @@ define([
     BaseCall.prototype.videoStart = videoStart;
     BaseCall.prototype.videoStop = videoStop;
     BaseCall.prototype.getCallId = getCallId;
+    BaseCall.prototype.isActive = isActive;
 
     /**
      * @event
@@ -366,6 +367,13 @@ define([
         CALL_ENDED: 2,
         CALL_HELD: 3,
         CALL_REJECTED: 4
+    };
+
+    BaseCall.prototype.failureReasons = {
+        HOLD_FAILURE: "The call hold is failed",
+        UNHOLD_FAILURE: "The call unhold is failed",
+        START_CALL_FAILURE: "The call start is failed",
+        ANSWER_CALL_FAILURE: "The call answer is failed"
     };
 
     return BaseCall;

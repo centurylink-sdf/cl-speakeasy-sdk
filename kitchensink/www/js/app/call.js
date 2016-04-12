@@ -40,8 +40,10 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
 
                     attachCallListeners(call);
 
+                    var callerInfo = call.getCallerInfo();
+
                     // Call dialog box
-                    var r = confirm("Incoming call! Would you like to answer?");
+                    var r = confirm("Incoming call from "+ callerInfo.name +"(" + callerInfo.number + ")! Would you like to answer?");
                     if (r === true) {
                         // Answering on the incoming call
                         call.answer(function() {

@@ -38,6 +38,13 @@ define([
      */
     function getCalleeInfo() {
 
+        if(self.fcsCall) {
+            return {
+                number: self.fcsCall.calleeNumber
+            }
+        }
+
+        return null;
     }
 
     OutgoingCall.prototype = Object.create(BaseCall.prototype);
