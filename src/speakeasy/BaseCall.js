@@ -114,6 +114,7 @@ define([
 
         self.fcsCall.hold(
             function () {
+                removeAllVideoStreams();
                 Utils.doCallback(successCallback);
             },
             function () {
@@ -133,6 +134,7 @@ define([
 
         self.fcsCall.unhold(
             function () {
+                showAllVideoStreams();
                 Utils.doCallback(successCallback);
             },
             function () {
@@ -209,23 +211,42 @@ define([
         }
     }
 
+    function showLocalVideo() {
+        if(self.localStreamURL && self.fcsCall.canSendVideo()) {
+            setLocalStream(self.localStreamURL);
+        }
+    }
+
+    function showRemoteVideo() {
+        if(self.remoteStreamURL && self.fcsCall.canReceiveVideo()) {
+            setRemoteStream(self.remoteStreamURL);
+        }
+    }
+
+    function showAllVideoStreams() {
+        showLocalVideo();
+        showRemoteVideo();
+    }
+
     function setRemoteStream(streamUrl) {
 
-        removeRemoteStream();
+        if(!isRemoteVideoExist(streamUrl)) {
+            removeRemoteStream();
 
-        var videoContainer = document.getElementById(Config.callManager.remoteVideoContainer);
+            var videoContainer = document.getElementById(Config.callManager.remoteVideoContainer);
 
-        var video = document.createElement('video');
-        video.id = 'video_' + self.id;
-        video.style.width = '100%';
-        video.style.height = '100%';
+            var video = document.createElement('video');
+            video.id = 'video_' + self.id;
+            video.style.width = '100%';
+            video.style.height = '100%';
 
-        videoContainer.appendChild(video);
+            videoContainer.appendChild(video);
 
-        video.pause();
-        video.src = streamUrl;
-        video.load();
-        video.play();
+            video.pause();
+            video.src = streamUrl;
+            video.load();
+            video.play();
+        }
     }
 
     function removeRemoteStream() {
@@ -239,19 +260,21 @@ define([
 
     function setLocalStream(streamUrl) {
 
-        removeLocalStream();
+        if(!isLocalVideoExist(streamUrl)) {
+            removeLocalStream();
 
-        var videoContainer = document.getElementById(Config.callManager.localVideoContainer);
-        var video = document.createElement('video');
-        video.style.width = '100%';
-        video.style.height = '100%';
+            var videoContainer = document.getElementById(Config.callManager.localVideoContainer);
+            var video = document.createElement('video');
+            video.style.width = '100%';
+            video.style.height = '100%';
 
-        videoContainer.appendChild(video);
+            videoContainer.appendChild(video);
 
-        video.src = streamUrl;
-        video.pause();
-        video.load();
-        video.play();
+            video.src = streamUrl;
+            video.pause();
+            video.load();
+            video.play();
+        }
     }
 
     function removeLocalStream() {
@@ -269,6 +292,30 @@ define([
         removeRemoteStream();
     }
 
+    function isLocalVideoExist(streamUrl) {
+
+        var isExist = false;
+        var videoContainer = document.getElementById(Config.callManager.localVideoContainer);
+
+        if(videoContainer) {
+            var videoElements = videoContainer.getElementsByTagName('video');
+            isExist = videoElements.length > 0 && videoElements[0].src == streamUrl
+        }
+        return isExist;
+    }
+
+    function isRemoteVideoExist(streamUrl) {
+
+        var isExist = false;
+        var videoElement = document.getElementById('video_' + self.id);
+
+        if(videoElement != null) {
+            isExist = videoElement.src == streamUrl
+        }
+
+        return isExist;
+    }
+
     function processStateChange(state) {
         self.callState = state;
 
@@ -279,6 +326,7 @@ define([
                 break;
             case fcs.call.States.IN_CALL:
                 self.logger.debug('status changed: IN_CALL');
+                showAllVideoStreams();
                 Utils.doCallback(self.onStateChanged, [self.events.CALL_STARTED]);
                 break;
             case fcs.call.States.CALL_IN_PROGRESS:
@@ -299,6 +347,7 @@ define([
                 break;
             case fcs.call.States.ON_REMOTE_HOLD:
                 self.logger.debug('status changed: ON_REMOTE_HOLD');
+                removeAllVideoStreams();
                 Utils.doCallback(self.onStateChanged, [self.events.CALL_HELD]);
                 break;
             case fcs.call.States.OUTGOING:
@@ -317,7 +366,7 @@ define([
                 break;
             case fcs.call.States.REJECTED:
                 self.logger.debug('status changed: REJECTED');
-
+                removeAllVideoStreams();
                 Utils.doCallback(self.onStateChanged, [self.events.CALL_REJECTED]);
                 break;
             case fcs.call.States.OUTGOING:
