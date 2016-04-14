@@ -21,13 +21,14 @@ define([
     /**
      * @class Ctl.speakeasy.IncomingCall
      * @extends Ctl.speakeasy.BaseCall
-     * Manage calls
+     * The incoming call implementation
      *
      * @requires Config
      * @requires Logger
      * @requires Promise
      * @requires Ajax
      * @requires Utils
+     * @requires CallInfo
      */
     function IncomingCall() {
         BaseCall.apply(this, arguments);
@@ -36,9 +37,9 @@ define([
     }
 
     /**
-     *
-     * @param successCallback
-     * @param failureCallback
+     * Answers the call
+     * @param {Function} successCallback The callback function to be called after success
+     * @param {Function} failureCallback The callback function to be called after failure
      */
     function answer(successCallback, failureCallback) {
 
@@ -66,9 +67,9 @@ define([
     }
 
     /**
-     *
-     * @param successCallback
-     * @param failureCallback
+     * Rejects the call
+     * @param {Function} successCallback The callback function to be called after success
+     * @param {Function} failureCallback The callback function to be called after failure
      */
     function reject(successCallback, failureCallback) {
 
@@ -85,7 +86,10 @@ define([
     }
 
     /**
-     *
+     * Gets caller information
+     * @returns {Object} The caller information
+     * @returns {String} return.name The name of the caller
+     * @returns {String} return.number The number of the caller
      */
     function getCallerInfo() {
 
