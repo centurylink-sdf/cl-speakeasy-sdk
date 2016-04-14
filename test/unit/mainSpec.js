@@ -1,7 +1,7 @@
 define(['Utils'], function(Utils){
     describe("A spec to test Utils module" , function() {
 
-      it("test isFunction method", function() {
+      it("isFunction should return true if argument is function", function() {
         var foo =  function(){};
         var bar = 13;
 
@@ -9,7 +9,7 @@ define(['Utils'], function(Utils){
         expect(Utils.isFunction(bar)).not.toBe(true);
       });
 
-      it('test isValidUrl method', function(){
+      it('isValidUrl should return true if url is valid', function(){
           var foo = 'http://google.com';
           var bar = '';
 
@@ -17,7 +17,7 @@ define(['Utils'], function(Utils){
           expect(Utils.isValidUrl(bar)).not.toBe(true);
       });
 
-      it('test encodeParams method', function(){
+      it('encodeParams should return encoded string', function(){
           var foo = {
             foo: 'value1',
             bar: 'value2'
@@ -29,7 +29,7 @@ define(['Utils'], function(Utils){
           expect(Utils.encodeParams(bar)).toEqual('');
       });
 
-      it('test set and get methods together', function(){
+      it('should set item to localStorage and get it from there', function(){
           var key = 'spec';
           var value = ' test';
 
