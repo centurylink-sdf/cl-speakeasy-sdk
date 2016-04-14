@@ -1,30 +1,42 @@
-define(['CtlApiLoader'], function (CtlApiLoader) {
+define(['Utils'], function(Utils){
+    describe("A spec to test Utils module" , function() {
 
-    describe("CtlApiLoader", function () {
-        it("sanity check", function () {
-            expect(true).toBe(true);
-        });
+      it("test isFunction method", function() {
+        var foo =  function(){};
+        var bar = 13;
 
-        it("should expose the sdk", function () {
-            expect( CtlApiLoader ).toBeDefined();
-        });
+        expect(Utils.isFunction(foo)).toBe(true);
+        expect(Utils.isFunction(bar)).not.toBe(true);
+      });
 
-        it("should have a method called authenticate", function () {
-            expect( CtlApiLoader.authenticate ).toBeDefined();
-        });
+      it('test isValidUrl method', function(){
+          var foo = 'http://google.com';
+          var bar = '';
 
-        it("should call the requestSample method when getting a page", function () {
-            spyOn(WikiSampleSDK, '_requestSample');
-            WikiSampleSDK.GetPage('Cheese');
-            expect(WikiSampleSDK._requestSample.calls.length).toEqual(1);
-        });
+          expect(Utils.isValidUrl(foo)).toBe(true);
+          expect(Utils.isValidUrl(bar)).not.toBe(true);
+      });
+
+      it('test encodeParams method', function(){
+          var foo = {
+            foo: 'value1',
+            bar: 'value2'
+          };
+
+          var bar = {};
+
+          expect(Utils.encodeParams(foo)).toEqual('foo=value1&bar=value2');
+          expect(Utils.encodeParams(bar)).toEqual('');
+      });
+
+      it('test set and get mwthod together', function(){
+          var key = 'spec';
+          var value = ' test';
+
+          Utils.set(key, value);
+
+          expect(Utils.get(key)).toEqual(value);
+      });
+
     });
-
-    describe("WikiSampleSDK.WikiTextHelper", function () {
-        it("should convert a given text to upper case", function () {
-            var upperCase = WikiSampleSDK.WikiTextHelper._upperCase('some text I got');
-            expect(upperCase).toBe('SOME TEXT I GOT');
-        });
-    });
-
 });
