@@ -19,7 +19,7 @@ define([
     /**
      * @class Ctl.speakeasy.OutgoingCall
      * @extends Ctl.speakeasy.BaseCall
-     * Manage calls
+     * The outgoing call implementation
      *
      * @requires Config
      * @requires Logger
@@ -34,7 +34,9 @@ define([
     }
 
     /**
-     *
+     * Gets callee information
+     * @returns {Object} The callee information
+     * @returns {String} return.number The number of the callee
      */
     function getCalleeInfo() {
 

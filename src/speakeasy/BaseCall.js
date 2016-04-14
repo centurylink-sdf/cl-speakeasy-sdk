@@ -28,6 +28,7 @@ define([
      * @requires Promise
      * @requires Ajax
      * @requires Utils
+     * @requires CallInfo
      */
     function BaseCall(fcsCall) {
 
@@ -51,12 +52,16 @@ define([
         attachListeners();
     }
 
+    /**
+     * Attaches handlers for listening call events
+     * @private
+     */
     function attachListeners() {
 
         //This function listens call state changes in JSL API level
         self.fcsCall.onStateChange = function(state, statusCode) {
             //Add statusCode that returned from the server property to the call
-            processStateChange(state);
+            processStateChange(state, statusCode);
         };
 
         self.fcsCall.onStreamAdded = function(streamURL) {
@@ -68,12 +73,18 @@ define([
         };
     }
 
+    /**
+     * Gets call id
+     * @returns {String} Unique identifier for the call
+     */
     function getCallId() {
         return self.fcsCall.getId();
     }
 
     /**
      * End the call.
+     * @param {Function} successCallback The callback function to be called after success
+     * @param {Function} failureCallback The callback function to be called after failure
      */
     function hangUp(successCallback, failureCallback) {
 
@@ -107,8 +118,8 @@ define([
     /**
      * Holds the call.
      *
-     * @param successCallback
-     * @param failureCallback
+     * @param {Function} successCallback The callback function to be called after success
+     * @param {Function} failureCallback The callback function to be called after failure
      */
     function hold(successCallback, failureCallback) {
 
@@ -125,8 +136,8 @@ define([
     /**
      * Resume the call.
      *
-     * @param successCallback
-     * @param failureCallback
+     * @param {Function} successCallback The callback function to be called after success
+     * @param {Function} failureCallback The callback function to be called after failure
      */
     function unhold(successCallback, failureCallback) {
 
@@ -144,8 +155,8 @@ define([
 
     /**
      * Start the video for this call after the call is established.
-     * @param successCallback
-     * @param failureCallback
+     * @param {Function} successCallback The callback function to be called after success
+     * @param {Function} failureCallback The callback function to be called after failure
      */
     function videoStart(successCallback, failureCallback) {
 
@@ -164,8 +175,8 @@ define([
     /**
      * Stop the video for this call after the call is established.
      *
-     * @param successCallback
-     * @param failureCallback
+     * @param {Function} successCallback The callback function to be called after success
+     * @param {Function} failureCallback The callback function to be called after failure
      */
     function videoStop(successCallback, failureCallback) {
 
@@ -178,9 +189,22 @@ define([
             function () {
                 Utils.doCallback(failureCallback);
             });
-
     }
 
+    /**
+     * Send Dual-tone multi-frequency signaling
+     * @param {String} tone Tone to be send as dtmf
+     */
+    function sendDTMF(tone) {
+        self.fcsCall.sendDTMF(tone);
+    }
+
+    /**
+     * Handler for listening remote video stream ready event.
+     * @private
+     *
+     * @param {String} streamURL Remote video stream url
+     */
     function onStreamAddedHandler(streamURL) {
 
         self.logger.log("Outgoing call remote stream added: " + streamURL);
@@ -199,6 +223,12 @@ define([
         }
     }
 
+    /**
+     * The handler for listening local video stream ready event
+     * @private
+     *
+     * @param {String} streamURL Local video stream url
+     */
     function onLocalStreamAddedHandler(streamURL) {
 
         self.logger.log("local stream added: " + streamURL);
@@ -211,23 +241,41 @@ define([
         }
     }
 
+    /**
+     * Creates local video element in DOM
+     * @private
+     */
     function showLocalVideo() {
         if(self.localStreamURL && self.fcsCall.canSendVideo()) {
             setLocalStream(self.localStreamURL);
         }
     }
 
+    /**
+     * Creates remote video element in DOM
+     * @private
+     */
     function showRemoteVideo() {
         if(self.remoteStreamURL && self.fcsCall.canReceiveVideo()) {
             setRemoteStream(self.remoteStreamURL);
         }
     }
 
+    /**
+     * Creates all video elements in DOM
+     * @private
+     */
     function showAllVideoStreams() {
         showLocalVideo();
         showRemoteVideo();
     }
 
+    /**
+     * Creates remote video element in DOM
+     * @private
+     *
+     * @param {String} streamUrl The remote video stream url
+     */
     function setRemoteStream(streamUrl) {
 
         if(!isRemoteVideoExist(streamUrl)) {
@@ -249,6 +297,10 @@ define([
         }
     }
 
+    /**
+     * Removes remote stream element from DOM
+     * @private
+     */
     function removeRemoteStream() {
         var videoContainer = document.getElementById(Config.callManager.remoteVideoContainer);
         var videoElement = document.getElementById('video_' + self.id);
@@ -258,6 +310,12 @@ define([
         }
     }
 
+    /**
+     * Creates local video element in DOM
+     * @private
+     *
+     * @param {String} streamUrl The local stream url
+     */
     function setLocalStream(streamUrl) {
 
         if(!isLocalVideoExist(streamUrl)) {
@@ -277,6 +335,10 @@ define([
         }
     }
 
+    /**
+     * Removes local video element from DOM
+     * @private
+     */
     function removeLocalStream() {
 
         var videoContainer = document.getElementById(Config.callManager.localVideoContainer);
@@ -287,11 +349,22 @@ define([
         }
     }
 
+    /**
+     * Removes all video elements from DOM
+     * @private
+     */
     function removeAllVideoStreams() {
         removeLocalStream();
         removeRemoteStream();
     }
 
+    /**
+     * Checks if local video element exist in DOM
+     * @private
+     *
+     * @param {String} streamUrl The local stream url
+     * @returns {Boolean}
+     */
     function isLocalVideoExist(streamUrl) {
 
         var isExist = false;
@@ -304,6 +377,13 @@ define([
         return isExist;
     }
 
+    /**
+     * Checks if remote video element exist in DOM
+     * @private
+     *
+     * @param {String} streamUrl The remote stream url
+     * @returns {Boolean}
+     */
     function isRemoteVideoExist(streamUrl) {
 
         var isExist = false;
@@ -316,7 +396,14 @@ define([
         return isExist;
     }
 
-    function processStateChange(state) {
+    /**
+     * The handler for listening call state changes in JSL API level
+     * @private
+     *
+     * @param state
+     * @param statusCode
+     */
+    function processStateChange(state, statusCode) {
         self.callState = state;
 
         switch(state) {
@@ -384,6 +471,10 @@ define([
         }
     }
 
+    /**
+     * Checks if call is established
+     * @returns {boolean} If call established or not
+     */
     function isActive() {
         return self.callState == fcs.call.States.IN_CALL || self.callState == fcs.call.States.RENEGOTIATION;
     }
@@ -400,15 +491,14 @@ define([
 
     /**
      * @event
-     * Raised when call state is changed
-     *
+     * Sets the handler for listening the call state change.
      */
     BaseCall.prototype.onStateChanged = null;
 
+
     /**
-     * Enum call states.
-     * @readonly
-     * @enum {number}
+     * @enum
+     * The state events of the Call
      */
     BaseCall.prototype.events = {
         CALL_RINGING: 0,
