@@ -29,7 +29,7 @@ define(['Utils'], function(Utils){
           expect(Utils.encodeParams(bar)).toEqual('');
       });
 
-      it('test set and get mwthod together', function(){
+      it('test set and get methods together', function(){
           var key = 'spec';
           var value = ' test';
 
