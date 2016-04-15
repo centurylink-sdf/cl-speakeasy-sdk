@@ -29,7 +29,8 @@ define([
         var config = {
             storageKeywords: {
                 accessToken: 'access_token',
-                refreshToken: 'refresh_token'
+                refreshToken: 'refresh_token',
+                loginUsername: 'last_login_username'
             }
         };
 
@@ -77,7 +78,8 @@ define([
                     BaseRequest.prototype.refreshToken = request.response.refresh_token;
                     setAccessToken(request.response.access_token);
                     setRefreshToken(request.response.refresh_token);
-                    return Subscription.sync();
+                    setLoginUsername(username);
+                    return Subscription.sync(username);
                 } else {
                     var fail = new Promise();
                     fail.done(err.response, null);
@@ -180,9 +182,31 @@ define([
             return Utils.get(config.storageKeywords.refreshToken);
         }
 
+        /**
+         * Store the login username for later use - uses localstorage if available
+         *
+         * @private
+         * @param   {String} username
+         */
+        function setLoginUsername(username) {
+            Utils.set(config.storageKeywords.loginUsername, username);
+        }
+
+        /**
+         * Get the login username
+         *
+         * @private
+         * @return  {String} username
+         */
+        function getLoginUsername() {
+            return Utils.get(config.storageKeywords.loginUsername);
+        }
+
         this.login = login;
         this.reAuthenticate = reAuthenticate;
         this.isAuthenticated = isAuthenticated;
+        this.setLoginUsername = setLoginUsername;
+        this.getLoginUsername = getLoginUsername;
 
     }
 

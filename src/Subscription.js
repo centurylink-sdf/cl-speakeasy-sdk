@@ -36,7 +36,22 @@ define([
             }
         };
 
-        function sync() {
+        var ids = [
+            { "publicID": "7202839128", "ID": "test01" },
+            { "publicID": "7202839129", "ID": "test02" },
+            { "publicID": "7202839243", "ID": "test03" },
+            { "publicID": "7202839244", "ID": "test04" },
+            { "publicID": "7202839245", "ID": "test05" },
+            { "publicID": "3183601228", "ID": "437171125" },
+            { "publicID": "3183601229", "ID": "437171136" },
+            { "publicID": "3183601754", "ID": "444577233" },
+            { "publicID": "3183601755", "ID": "444577277" },
+            { "publicID": "3183601756", "ID": "444577313" },
+            { "publicID": "3183601758", "ID": "444577391" },
+            { "publicID": "3183601759", "ID": "444577426" }
+        ];
+
+        function sync(username) {
             var p = new Promise();
 
             var serviceListRequest = function() {
@@ -51,9 +66,17 @@ define([
 
                 // FIXME:0 Currently saving subscribed services only for first item
                 // Will be needed to loop through all subscribed services and retrieve catalog info for each.
-                var keys = Object.keys(request.response.Services);
-                var publicId = keys[0];
-                var subscribedServices = request.response.Services[keys[0]];
+                // var keys = Object.keys(request.response.Services);
+                // var publicId = keys[0];
+
+                var publicId;
+                for(var i=0; i<ids.length; i++) {
+                    if (ids[i]["ID"] === username) {
+                        publicId = ids[i]["publicID"];
+                        break;
+                    }
+                }
+                var subscribedServices = request.response.Services[publicId];
                 setServices(subscribedServices);
 
                 return getSubscriptionServiceDetails(Config.services.speakEasyServiceName, publicId);
