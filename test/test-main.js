@@ -11,6 +11,8 @@ require.config({
     // Karma serves files from '/base'
     baseUrl: '/base/src/',
     paths: {
+        'Ctl.model.request':    '../src/model/request',
+        'Ctl.apiloader':        '../src/apiloader'
     },
     shim: {
     },
