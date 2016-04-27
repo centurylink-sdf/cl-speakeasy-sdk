@@ -15,12 +15,15 @@
 </head>
 <body>
 
+    <div id="progressLogout" class="progress hidden">
+         <div class="indeterminate"></div>
+    </div>
     <nav>
         <div class="nav-wrapper">
             <a href="#!" class="brand-logo"><img src="img/ctl-logo-color.svg" alt="CTLCom" /></a>
             <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
-            <ul class="right hide-on-med-and-down">
-                <li><a class="waves-effect waves-light btn btn-logout" href="#">Logout</a></li>
+            <ul class="right hide-on-small-only">
+                <li><a id="btnLogout" class="waves-effect waves-light btn btn-logout" href="#">Logout</a></li>
             </ul>
             <ul class="side-nav" id="mobile-demo">
                 <li><a class="waves-effect waves-light btn btn-logout" href="#">Logout</a></li>
@@ -42,32 +45,29 @@
                 </div>
             </div>
         </p>
-        <fieldset>
-            <legend>Call controls</legend>
-            <div class="btn-group">
-                <button id="btnEndCall" class="btn-floating btn-large waves-effect waves-light red"><i class="large material-icons">call_end</i></button>
-                <button id="btnStartVideo" class="btn-floating"><i class="large material-icons">videocam</i></button>
-                <button id="btnStopVideo" class="btn-floating"><i class="large material-icons">videocam_off</i></button>
-                <button id="btnHoldCall" class="btn-floating"><i class="large material-icons">pause</i></button>
-                <button id="btnUnHoldCall" class="btn-floating"><i class="large material-icons">play_arrow</i></button>
-                <button id="btnMute" class="btn-floating"><i class="large material-icons">mic</i></button>
-                <button id="btnUnMute" class="btn-floating"><i class="large material-icons">mic_off</i></button>
-            </div>
-        </fieldset>
-        <div class="left margin10">
+        <div id="localVideoContainer" class="hidden">
             Local video:
             <br />
             <div id="localVideo" class="local-video"></div>
 
         </div>
-        <div class="left margin10">
+        <div class="remote-video-container">
             Remote video:
             <br />
             <div id="remoteVideo" class="remote-video"></div>
+            <div id="btnGroupCall" class="btn-group hidden">
+                <button id="btnEndCall" class="btn-floating waves-effect waves-light red"><i class="large material-icons">call_end</i></button>
+                <button id="btnStopVideo" class="btn-floating hidden"><i class="large material-icons">videocam_off</i></button>
+                <button id="btnStartVideo" class="btn-floating"><i class="large material-icons">videocam</i></button>
+                <button id="btnUnHoldCall" class="btn-floating hidden"><i class="large material-icons">play_arrow</i></button>
+                <button id="btnHoldCall" class="btn-floating"><i class="large material-icons">pause</i></button>
+                <button id="btnMute" class="btn-floating hidden"><i class="large material-icons">mic</i></button>
+                <button id="btnUnMute" class="btn-floating"><i class="large material-icons">mic_off</i></button>
+            </div>
         </div>
         <br />
         <br />
-        <div class="left margin10 clear">
+        <div>
             <h4>Status</h4>
 
             <div id="logContainer" class="logContainer"></div>
@@ -78,6 +78,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $(".button-collapse").sideNav();
+            $('.modal-trigger').leanModal();
         });
     </script>
 

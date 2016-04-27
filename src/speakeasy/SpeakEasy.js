@@ -163,22 +163,17 @@ define([
             return publicUserId;
         }
 
-        function logout() {
+        function logout(successCallback, failureCallback) {
 
-            // It removes user's subscription from SPiDR Server
-            fcs.clearResources(
-                function () {
-                    fcs.notification.stop(
-                        function(){
-                            self.logger.log('Notification system is stopped successfully!!');
-                        },
-                        function(){
-                            self.logger.log('Something Wrong Here!!!');
-                        }
-                    );
+            fcs.notification.stop(
+                function(){
+                    self.logger.log('Notification system is stopped successfully!!');
+                    Utils.doCallback(successCallback);
                 },
-                true,
-                true
+                function(){
+                    self.logger.log('Something Wrong Here!!!');
+                    Utils.doCallback(failureCallback);
+                }
             );
         }
 

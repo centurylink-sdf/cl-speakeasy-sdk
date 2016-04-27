@@ -72,10 +72,15 @@ define([
             return loadedApis;
         }
 
+        function logout() {
+            Utils.removeAll();
+        }
+
         this.Auth = Auth;
         this.getVersion = getVersion;
         this.load = load;
         this.getLoadedApis = getLoadedApis;
+        this.logout = logout;
     }
 
     return new ApiLoader();
