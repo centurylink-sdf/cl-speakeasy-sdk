@@ -138,9 +138,9 @@ define([], function () {
 
         function removeAll() {
             for (var i = localStorage.length; i--;){
-                if (localStorage.key(i).indexOf('ctlapi_') > -1) {
+                // if (localStorage.key(i).indexOf('ctlapi_') > -1) {
                     localStorage.removeItem(localStorage.key(i));
-                }
+                // }
             }
         }
 

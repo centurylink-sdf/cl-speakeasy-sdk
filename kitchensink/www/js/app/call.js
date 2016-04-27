@@ -28,6 +28,10 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                 var btnStopVideo = document.getElementById('btnStopVideo');
                 var btnHoldCall = document.getElementById('btnHoldCall');
                 var btnUnHoldCall = document.getElementById('btnUnHoldCall');
+                var btnMute = document.getElementById('btnMute');
+                var btnUnMute = document.getElementById('btnUnMute');
+
+                var btnLogout = document.getElementById('btnLogout');
 
                 speakEasy.CallManager.setup(
                     {
@@ -48,6 +52,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                         // Answering on the incoming call
                         call.answer(function() {
                             showInfoMessage("Call is answered!");
+                            $("#btnGroupCall").show();
                         }, function() {
                             showErrorMessage("Call couldn't be answered!");
                         });
@@ -63,6 +68,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
 
                 btnMakeCall.addEventListener("click", function (e) {
                     var numToCall = confDestination.value;
+                    $("#btnGroupCall").show();
                     speakEasy.CallManager.createCall(numToCall, false, function(call) {
                         attachCallListeners(call);
                     });
@@ -72,6 +78,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
                     currentCall.hangUp(function() {
                         showInfoMessage("Call is ended!");
+                        $("#btnGroupCall").hide();
                     }, function() {
                         showErrorMessage("Call couldn't be ended!");
                     });
@@ -82,6 +89,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     currentCall.videoStart(
                        function() {
                            showInfoMessage("Video is started!");
+                           $("#localVideoContainer").show();
                        },
                        function() {
                            showErrorMessage("Video couldn't be started!");
@@ -91,13 +99,14 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
 
                 btnStopVideo.addEventListener("click", function (e) {
 
-                    var $toastContent = $('<span>I am toast content</span>');
-                    Materialize.toast($toastContent, 5000);
+                    // var $toastContent = $('<span>I am toast content</span>');
+                    // Materialize.toast($toastContent, 5000);
 
                     var currentCall = speakEasy.CallManager.getCurrentCall();
                     currentCall.videoStop(
                        function() {
                            showInfoMessage("Video is stopped!");
+                           $("#localVideoContainer").hide();
                        },
                        function() {
                            showErrorMessage("Video couldn't be stopped!");
@@ -128,6 +137,34 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                         }
                     );
                 });
+
+                btnMute.addEventListener("click", function (e) {
+                    var currentCall = speakEasy.CallManager.getCurrentCall();
+                    currentCall.mute();
+                    showInfoMessage("Call is muted!");
+                });
+
+                btnUnMute.addEventListener("click", function (e) {
+                    var currentCall = speakEasy.CallManager.getCurrentCall();
+                    currentCall.unmute();
+                    showInfoMessage("Call is unmuted!");
+                });
+
+                btnLogout.addEventListener("click", function (e) {
+                    $('#progressLogout').show();
+                    speakEasy.logout(function() {
+                        showInfoMessage("SpeakEasy logout succeed!");
+                        Ctl.logout();
+                        $('#progressLogout').hide();
+                        window.location.href = 'index.html';
+                    },
+                    function() {
+                        showErrorMessage("SpeakEasy logout has failed!");
+                        Ctl.logout();
+                        $('#progressLogout').hide();
+                        window.location.href = 'index.html';
+                    });
+                });
             }
         });
     }
@@ -143,6 +180,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     break;
                 case call.events.CALL_ENDED:
                     showInfoMessage("Call was ended on other side!");
+                    $("#btnGroupCall").hide();
                     break;
                 case call.events.CALL_HELD:
                     showInfoMessage("Call was held on other side!");

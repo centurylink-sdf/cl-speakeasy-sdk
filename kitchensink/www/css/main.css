@@ -66,3 +66,11 @@ nav .brand-logo {
 .brand-logo img {
     width: 200px;
 }
+
+.progress {
+    margin: 0;
+}
+
+#progressLogout {
+    position: absolute;
+}
