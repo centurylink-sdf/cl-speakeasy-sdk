@@ -22,6 +22,8 @@ define([
      */
     function Subscription() {
 
+        var mock = true;
+
         var logger = new Logger('Subscription');
 
         var config = {
@@ -52,6 +54,9 @@ define([
         ];
 
         function sync(username) {
+
+            if (mock) return mockSync(username);
+
             var p = new Promise();
 
             var serviceListRequest = function() {
@@ -66,8 +71,6 @@ define([
 
                 // FIXME:0 Currently saving subscribed services only for first item
                 // Will be needed to loop through all subscribed services and retrieve catalog info for each.
-                // var keys = Object.keys(request.response.Services);
-                // var publicId = keys[0];
 
                 var publicId;
                 for(var i=0; i<ids.length; i++) {
@@ -90,6 +93,37 @@ define([
             }.bind(this);
 
             Promise.chain([ serviceListRequest, serviceCatalogRequest ]).then(oncomplete);
+            return p;
+        }
+
+        function mockSync(username) {
+            var p = new Promise();
+
+            var publicId;
+            for(var i=0; i<ids.length; i++) {
+                if (ids[i]["ID"] === username) {
+                    publicId = ids[i]["publicID"];
+                    break;
+                }
+            }
+
+            var subscribedServices = ["SpeakEasy", "Courier"];
+            setServices(subscribedServices);
+
+            var response = {
+                "ServiceCatalog": {
+                    "publicID":"" + publicId,
+                    "serviceName":"SpeakEasy",
+                    "domain":"ctlvoip.lab.centurylink",
+                    "ID": username + "-1",
+                    "WebSocketEndpoints":"www.intg104.centurylink.com:8590$www.intg104.centurylink.com:8590"
+                }
+            };
+
+            setServiceCatalog(response.ServiceCatalog);
+
+            p.done(null, response.serviceCatalog);
+
             return p;
         }
 

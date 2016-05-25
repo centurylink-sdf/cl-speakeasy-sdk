@@ -21,6 +21,10 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                 console.log('SpeakEasy has been loaded');
                 console.log('Running SpeakEasy v' + speakEasy.version());
 
+                var userName = Ctl.Auth.getLoginUsername();
+
+                $('#userName').html(userName);
+
                 var confDestination = document.getElementById('confDestination');
                 var btnMakeCall = document.getElementById('btnMakeCall');
                 var btnEndCall = document.getElementById('btnEndCall');
@@ -90,6 +94,8 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                        function() {
                            showInfoMessage("Video is started!");
                            $("#localVideoContainer").show();
+                           $(btnStartVideo).hide();
+                           $(btnStopVideo).show();
                        },
                        function() {
                            showErrorMessage("Video couldn't be started!");
@@ -107,6 +113,8 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                        function() {
                            showInfoMessage("Video is stopped!");
                            $("#localVideoContainer").hide();
+                           $(btnStopVideo).hide();
+                           $(btnStartVideo).show();
                        },
                        function() {
                            showErrorMessage("Video couldn't be stopped!");
@@ -119,6 +127,8 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     currentCall.hold(
                         function() {
                             showInfoMessage("Call is held!");
+                            $(btnHoldCall).hide();
+                            $(btnUnHoldCall).show();
                         },
                         function() {
                             showErrorMessage("Call couldn't be held!");
@@ -131,6 +141,8 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     currentCall.unhold(
                         function() {
                             showInfoMessage("Call is resumed!");
+                            $(btnUnHoldCall).hide();
+                            $(btnHoldCall).show();
                         },
                         function() {
                             showErrorMessage("Call couldn't be resumed!");
@@ -142,12 +154,16 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
                     currentCall.mute();
                     showInfoMessage("Call is muted!");
+                    $(btnMute).hide();
+                    $(btnUnMute).show();
                 });
 
                 btnUnMute.addEventListener("click", function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
                     currentCall.unmute();
                     showInfoMessage("Call is unmuted!");
+                    $(btnUnMute).hide();
+                    $(btnMute).show();
                 });
 
                 btnLogout.addEventListener("click", function (e) {

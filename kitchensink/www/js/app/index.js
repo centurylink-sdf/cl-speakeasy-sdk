@@ -53,13 +53,15 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
         var password = $('#password').val();
 
         Ctl.Auth.login(username, password, function(error, response) {
-            if (!error) {
+            if (!error && response) {
                 console.info('Successfully authenticated. Now you can load any CenturyLink API.');
                 window.location.href = 'call.html';
             } else {
                 console.error('Authentication failed: ', error);
                 unBlockUI();
-                showLoginError(error.responseMessage);
+                if (error) {
+                    showLoginError(error.responseMessage);
+                }
             }
         });
 

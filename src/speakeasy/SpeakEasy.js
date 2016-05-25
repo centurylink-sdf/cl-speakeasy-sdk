@@ -43,6 +43,29 @@ define([
             //Config.fcsapi.remoteVideoContainer = document.getElementById('remoteVideo');
             fcs.setup(Config.fcsapi);
 
+            // TODO: Implement support check for WebRTC
+            // fcs.onPluginRequired = function(error) {
+            //     switch (error) {
+            //         case fcs.call.MediaErrors.WRONG_VERSION: // Alert
+            //             showErrorMessage("Media Plugin Version Not Supported. See fcs.call.MediaErrors.WRONG_VERSION");
+            //             pluginDownloadDialog("Media Plugin Version Not Supported");
+            //             break;
+            //
+            //         case fcs.call.MediaErrors.NEW_VERSION_WARNING: //Warning
+            //             showWarningMessage("New Media Version Available Wanrning! See fcs.call.MediaErrors.NEW_VERSION_WARNING");
+            //             break;
+            //
+            //         case fcs.call.MediaErrors.NOT_INITIALIZED: // Alert
+            //             showErrorMessage("Media couldn't be initialized. See fcs.call.MediaErrors.NOT_INITIALIZED");
+            //             break;
+            //
+            //         case fcs.call.MediaErrors.NOT_FOUND: // Alert
+            //             showErrorMessage("Plugin couldn't be found! See fcs.call.MediaErrors.NOT_FOUND");
+            //             pluginDownloadDialog("Plugin couldn't be found!");
+            //             break;
+            //     }
+            // }
+
             Notification.start(
                 function() {
                     self.logger.log("You are logged in successfully!");
@@ -188,6 +211,8 @@ define([
 
         this.version = version;
         this.logout = logout;
+        this.getPublicUserId = getPublicUserId;
+
         this.CallManager = CallManager;
 
     }
