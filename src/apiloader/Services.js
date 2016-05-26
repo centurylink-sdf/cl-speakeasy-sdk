@@ -5,7 +5,7 @@
  */
 require.config({
     "paths": {
-        "SpeakEasy": "https://localhost:8000/dist/speakeasy"
+        "SpeakEasy": "http://localhost:8000/dist/speakeasy"
         // "SpeakEasy": "https://speakeasy.veuxdu.centurylink.com/SpeakEasyDemo/dist/speakeasy"
     }
 });

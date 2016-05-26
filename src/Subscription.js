@@ -122,7 +122,7 @@ define([
 
             setServiceCatalog(response.ServiceCatalog);
 
-            p.done(null, response.serviceCatalog);
+            p.done(null, response.ServiceCatalog);
 
             return p;
         }
