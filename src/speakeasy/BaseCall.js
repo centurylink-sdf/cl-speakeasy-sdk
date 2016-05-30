@@ -126,6 +126,7 @@ define([
         self.fcsCall.hold(
             function () {
                 removeAllVideoStreams();
+                self.fcsCall.onStateChange(fcs.call.States.ON_HOLD);
                 Utils.doCallback(successCallback);
             },
             function () {
@@ -146,6 +147,7 @@ define([
         self.fcsCall.unhold(
             function () {
                 showAllVideoStreams();
+                self.fcsCall.onStateChange(fcs.call.States.IN_CALL);
                 Utils.doCallback(successCallback);
             },
             function () {
@@ -430,12 +432,12 @@ define([
                 break;
             case fcs.call.States.ON_HOLD:
                 self.logger.debug('status changed: ON_HOLD');
-
+                Utils.doCallback(self.onStateChanged, [self.events.CALL_HELD]);
                 break;
             case fcs.call.States.ON_REMOTE_HOLD:
                 self.logger.debug('status changed: ON_REMOTE_HOLD');
                 removeAllVideoStreams();
-                Utils.doCallback(self.onStateChanged, [self.events.CALL_HELD]);
+                Utils.doCallback(self.onStateChanged, [self.events.CALL_REMOTE_HELD]);
                 break;
             case fcs.call.States.OUTGOING:
                 self.logger.debug('status changed: OUTGOING');
@@ -505,7 +507,8 @@ define([
         CALL_STARTED: 1,
         CALL_ENDED: 2,
         CALL_HELD: 3,
-        CALL_REJECTED: 4
+        CALL_REMOTE_HELD: 4,
+        CALL_REJECTED: 5
     };
 
     BaseCall.prototype.failureReasons = {

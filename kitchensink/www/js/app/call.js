@@ -3,6 +3,8 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
     var btnLogin = $('.btn-login');
     var btnLogout = $('.btn-logout');
 
+    var _speakEasy = null;
+
     if (Ctl.Auth.isAuthenticated()) {
         loadSpeakEasy();
     } else {
@@ -18,6 +20,9 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                 console.log('Error loading SpeakEasy');
                 console.log(err);
             } else {
+
+                _speakEasy = speakEasy;
+
                 console.log('SpeakEasy has been loaded');
                 console.log('Running SpeakEasy v' + speakEasy.version());
 
@@ -50,6 +55,8 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
 
                     var callerInfo = call.getCallerInfo();
 
+                    addCall(call.getCallId(), { name: callerInfo.name, number: callerInfo.number, status: 'Incoming' });
+
                     // Call dialog box
                     var r = confirm("Incoming call from "+ callerInfo.name +"(" + callerInfo.number + ")! Would you like to answer?");
                     if (r === true) {
@@ -63,7 +70,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     } else {
                         // Rejecting the incomming call
                         call.reject(function() {
-                            showInfoMessage("Call is rejected!");
+
                         }, function() {
                             showErrorMessage("Call couldn't be rejected!");
                         });
@@ -75,14 +82,20 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     $("#btnGroupCall").show();
                     speakEasy.CallManager.createCall(numToCall, false, function(call) {
                         attachCallListeners(call);
+                        addCall(call.getCallId(), { name: '', number: numToCall, status: 'Ringing' });
                     });
                 });
 
                 btnEndCall.addEventListener("click", function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
                     currentCall.hangUp(function() {
-                        showInfoMessage("Call is ended!");
+
                         $("#btnGroupCall").hide();
+
+                        updateCallStatus(currentCall.getCallId(), 'Ended');
+                        setTimeout(function() {
+                            removeCall(currentCall.getCallId());
+                        }, 1000);
                     }, function() {
                         showErrorMessage("Call couldn't be ended!");
                     });
@@ -126,7 +139,6 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
                     currentCall.hold(
                         function() {
-                            showInfoMessage("Call is held!");
                             $(btnHoldCall).hide();
                             $(btnUnHoldCall).show();
                         },
@@ -140,7 +152,6 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
                     currentCall.unhold(
                         function() {
-                            showInfoMessage("Call is resumed!");
                             $(btnUnHoldCall).hide();
                             $(btnHoldCall).show();
                         },
@@ -185,24 +196,82 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
         });
     }
 
+    function addCall(callId, callInfo) {
+
+        var callsTable = $('#currentCalls');
+        var $callRow = $('<tr></tr>').attr('data-id', callId);
+
+        $callRow.append(['<td>', callInfo.name, '</td>'].join(''));
+        $callRow.append(['<td>', callInfo.number, '</td>'].join(''));
+        $callRow.append(['<td class="js-status">', callInfo.status, '</td>'].join(''));
+
+        callsTable.find('tbody').append($callRow);
+        $("#noCallsRow").hide();
+
+        $callRow.click(function() {
+            var callId = $(this).attr('data-id');
+            _speakEasy.CallManager.switchTo(callId, function() {
+                showInfoMessage("The call has switched successfully");
+            },
+            function() {
+                showErrorMessage("The call switch are failed");
+            })
+        });
+    }
+
+    function updateCallStatus(callId, status) {
+
+        var $callRow = $('#currentCalls').find('tr[data-id="'+callId+'"]');
+        $callRow.find('.js-status').text(status);
+    }
+
+    function removeCall(callId) {
+        var $callRow = $('#currentCalls').find('tr[data-id="'+callId+'"]');
+        $callRow.remove();
+
+        var calls = _speakEasy.CallManager.getCalls();
+        if(calls.length == 0) {
+            $("#noCallsRow").show();
+        }
+    }
+
     function attachCallListeners(call) {
         call.onStateChanged = function(state) {
+            var callId = call.getCallId();
             switch (state) {
                 case call.events.CALL_RINGING:
                     showInfoMessage("Ringing!");
+                    updateCallStatus(callId, 'Ringing');
                     break;
                 case call.events.CALL_STARTED:
                     showInfoMessage("Call is started!");
+                    updateCallStatus(callId, 'In Call');
                     break;
                 case call.events.CALL_ENDED:
                     showInfoMessage("Call was ended on other side!");
+
+                    updateCallStatus(callId, 'Ended');
+                    setTimeout(function() {
+                        removeCall(callId);
+                    }, 1000);
+
                     $("#btnGroupCall").hide();
                     break;
                 case call.events.CALL_HELD:
+                    showInfoMessage("Call is held!");
+                    updateCallStatus(callId, 'Hold');
+                    break;
+                case call.events.CALL_REMOTE_HELD:
                     showInfoMessage("Call was held on other side!");
+                    updateCallStatus(callId, 'Remote hold');
                     break;
                 case call.events.CALL_REJECTED:
                     showInfoMessage("Call was rejected!");
+                    updateCallStatus(callId, 'Rejected');
+                    setTimeout(function() {
+                        removeCall(callId);
+                    }, 1000);
+
                     break;
             }
         }
