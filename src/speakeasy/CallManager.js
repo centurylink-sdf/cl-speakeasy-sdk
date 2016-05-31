@@ -98,6 +98,14 @@ define([
         }
 
         /**
+         * Get total call count
+         * @return {int} Calls count
+         */
+        function getCallsCount() {
+            return CallInfo.getCallsCount();
+        }
+
+        /**
          * Get active call
          *
          */
@@ -183,6 +191,7 @@ define([
                 }
                 else {
                     var call = CallInfo.get(callId);
+                    CallInfo.setCurrentCall(call);
                     if(!call.isActive()) {
                         call.unhold(function() {
                             Utils.doCallback(successCallback);
@@ -206,6 +215,7 @@ define([
 
         this.setup = setup;
         this.getCalls = getCalls;
+        this.getCallsCount = getCallsCount;
         this.getCurrentCall = getCurrentCall;
         this.get = get;
         this.createCall = createCall;

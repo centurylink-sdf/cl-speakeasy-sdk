@@ -1,9 +1,9 @@
+var _speakEasy = null;
+
 define(['jquery', 'ApiLoader'], function($, Ctl) {
 
     var btnLogin = $('.btn-login');
     var btnLogout = $('.btn-logout');
-
-    var _speakEasy = null;
 
     if (Ctl.Auth.isAuthenticated()) {
         loadSpeakEasy();
@@ -63,7 +63,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                         // Answering on the incoming call
                         call.answer(function() {
                             showInfoMessage("Call is answered!");
-                            $("#btnGroupCall").show();
+                            updateCallButtonsGroup();
                         }, function() {
                             showErrorMessage("Call couldn't be answered!");
                         });
@@ -79,10 +79,13 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
 
                 btnMakeCall.addEventListener("click", function (e) {
                     var numToCall = confDestination.value;
-                    $("#btnGroupCall").show();
+
                     speakEasy.CallManager.createCall(numToCall, false, function(call) {
+                        updateCallButtonsGroup();
                         attachCallListeners(call);
                         addCall(call.getCallId(), { name: '', number: numToCall, status: 'Ringing' });
+                    }, function() {
+                        showErrorMessage("Make new call failed!");
                     });
                 });
 
@@ -90,7 +93,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
                     currentCall.hangUp(function() {
 
-                        $("#btnGroupCall").hide();
+                        updateCallButtonsGroup();
 
                         updateCallStatus(currentCall.getCallId(), 'Ended');
                         setTimeout(function() {
@@ -117,10 +120,6 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                 });
 
                 btnStopVideo.addEventListener("click", function (e) {
-
-                    // var $toastContent = $('<span>I am toast content</span>');
-                    // Materialize.toast($toastContent, 5000);
-
                     var currentCall = speakEasy.CallManager.getCurrentCall();
                     currentCall.videoStop(
                        function() {
@@ -211,6 +210,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
         $callRow.click(function() {
             var callId = $(this).attr('data-id');
             _speakEasy.CallManager.switchTo(callId, function() {
+                updateCallButtonsGroup();
                 showInfoMessage("The call has switched successfully");
             },
             function() {
@@ -229,9 +229,51 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
         var $callRow = $('#currentCalls').find('tr[data-id="'+callId+'"]');
         $callRow.remove();
 
-        var calls = _speakEasy.CallManager.getCalls();
-        if(calls.length == 0) {
+        if(_speakEasy.CallManager.getCallsCount() == 0) {
             $("#noCallsRow").show();
+        }
+    }
+
+    function updateCallButtonsGroup() {
+
+        var callsCount = _speakEasy.CallManager.getCallsCount();
+
+        if(callsCount > 0) {
+            var call = _speakEasy.CallManager.getCurrentCall();
+
+            if(call.isMuted) {
+                $(btnMute).hide();
+                $(btnUnMute).show();
+            }
+            else {
+                $(btnUnMute).hide();
+                $(btnMute).show();
+            }
+
+            if(call.isVideoStarted) {
+                $(btnStartVideo).hide();
+                $(btnStopVideo).show();
+                $("#localVideoContainer").show();
+            }
+            else {
+                $("#localVideoContainer").hide();
+                $(btnStopVideo).hide();
+                $(btnStartVideo).show();
+            }
+
+            if(call.isOnHold()) {
+                $(btnHoldCall).hide();
+                $(btnUnHoldCall).show();
+            }
+            else {
+                $(btnUnHoldCall).hide();
+                $(btnHoldCall).show();
+            }
+
+            $("#btnGroupCall").show();
+        }
+        else {
+            $("#btnGroupCall").hide();
         }
     }
 
@@ -255,7 +297,8 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                         removeCall(callId);
                     }, 1000);
 
-                    $("#btnGroupCall").hide();
+                    updateCallButtonsGroup();
+
                     break;
                 case call.events.CALL_HELD:
                     showInfoMessage("Call is held!");
@@ -264,10 +307,12 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                 case call.events.CALL_REMOTE_HELD:
                     showInfoMessage("Call was held on other side!");
                     updateCallStatus(callId, 'Remote hold');
+                    updateCallButtonsGroup();
                     break;
                 case call.events.CALL_REJECTED:
                     showInfoMessage("Call was rejected!");
                     updateCallStatus(callId, 'Rejected');
+                    updateCallButtonsGroup();
                     setTimeout(function() {
                         removeCall(callId);
                     }, 1000);
