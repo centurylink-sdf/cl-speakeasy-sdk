@@ -488,6 +488,7 @@ define([
     BaseCall.prototype.videoStop = videoStop;
     BaseCall.prototype.getCallId = getCallId;
     BaseCall.prototype.isActive = isActive;
+    BaseCall.prototype.sendDTMF = sendDTMF;
 
     /**
      * @event

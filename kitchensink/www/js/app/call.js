@@ -73,6 +73,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                 btnMakeCall.addEventListener("click", function (e) {
                     var numToCall = confDestination.value;
                     $("#btnGroupCall").show();
+                    confDestination.value = '';
                     speakEasy.CallManager.createCall(numToCall, false, function(call) {
                         attachCallListeners(call);
                     });
@@ -181,6 +182,22 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
                         window.location.href = 'index.html';
                     });
                 });
+
+                confDestination.addEventListener("keydown", function (e) {
+                    var keyCode = e.keyCode;
+                    var currentCall = speakEasy.CallManager.getCurrentCall();
+                    if (currentCall) {
+                        console.log('keyCode = ' + keyCode);
+                        var keyStr = String.fromCharCode(keyCode);
+
+                        var regexKey = /[0-9]|[#]|[*]/;
+                        if (regexKey.test(keyStr)) {
+                            currentCall.sendDTMF(keyStr);
+                        }
+                        
+                    }
+                },
+                false);
             }
         });
     }
