@@ -50,6 +50,15 @@ define([
         }
 
         /**
+         * Get total call count
+         * @return {int} Calls count
+         */
+        function getCallsCount() {
+            var calls = self.getCalls();
+            return Object.keys(calls).length;
+        }
+
+        /**
          * Get active call
          *
          */
@@ -138,6 +147,7 @@ define([
         }
 
         this.getCalls = getCalls;
+        this.getCallsCount = getCallsCount;
         this.getCurrentCall = getCurrentCall;
         this.setCurrentCall = setCurrentCall;
         this.get = get;

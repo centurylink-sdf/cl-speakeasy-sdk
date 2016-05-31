@@ -98,6 +98,14 @@ define([
         }
 
         /**
+         * Get total call count
+         * @return {int} Calls count
+         */
+        function getCallsCount() {
+            return CallInfo.getCallsCount();
+        }
+
+        /**
          * Get active call
          *
          */
@@ -170,6 +178,32 @@ define([
             });
         }
 
+        /**
+         * Make active another call
+         * @param {String} callId The call id to switch to
+         * @param {function} successCallback The callback function to be called after success
+         * @param {function} failureCallback The callback function to be called after failure
+         */
+        function switchTo(callId, successCallback, failureCallback) {
+            holdCurrentCall().then(function(error) {
+                if(error) {
+                    Utils.doCallback(failureCallback);
+                }
+                else {
+                    var call = CallInfo.get(callId);
+                    CallInfo.setCurrentCall(call);
+                    if(!call.isActive()) {
+                        call.unhold(function() {
+                            Utils.doCallback(successCallback);
+                        },
+                        function() {
+                            Utils.doCallback(failureCallback);
+                        })
+                    }
+                }
+            });
+        }
+
         function processReceivedCall(call) {
             self.logger.info("There is an incomming call...");
 
@@ -181,9 +215,11 @@ define([
 
         this.setup = setup;
         this.getCalls = getCalls;
+        this.getCallsCount = getCallsCount;
         this.getCurrentCall = getCurrentCall;
         this.get = get;
         this.createCall = createCall;
+        this.switchTo = switchTo;
         this.processReceivedCall = processReceivedCall;
 
         /**

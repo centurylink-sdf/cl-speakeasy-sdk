@@ -34,49 +34,71 @@
 
     <div class="container">
 
-        <h4>Make a new call</h4>
-        <p>
-            <div class="row">
-                <div class="input-field col s6">
-                    <input id="confDestination" type="text" />
-                    <label for="confDestination">Destination</label>
+        <div class="row">
+            <div class="col s6">
+
+                <h4>Make a new call</h4>
+                <p>
+                <div class="row">
+                    <div class="input-field col s6">
+                        <input id="confDestination" type="text" />
+                        <label for="confDestination">Destination</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <button id="btnMakeCall" class="btn-floating btn-large waves-effect waves-light"><i class="large material-icons">phone</i></button>
+                    </div>
                 </div>
-                <div class="input-field col s6">
-                    <button id="btnMakeCall" class="btn-floating btn-large waves-effect waves-light"><i class="large material-icons">phone</i></button>
+                </p>
+                <div id="localVideoContainer" class="hidden">
+                    Local video:
+                    <br />
+                    <div id="localVideo" class="local-video"></div>
+
                 </div>
-                <!-- <div class="input-field col s5">
-                    <button id="btnDialpad" class="btn-floating btn-large waves-effect waves-light"><i class="large material-icons">dialpad</i></button>
-                </div> -->
+                <div class="remote-video-container">
+                    Remote video:
+                    <br />
+                    <div id="remoteVideo" class="remote-video"></div>
+                    <div id="btnGroupCall" class="btn-group hidden">
+                        <button id="btnEndCall" class="btn-floating waves-effect waves-light red"><i class="large material-icons">call_end</i></button>
+                        <button id="btnStopVideo" class="btn-floating hidden"><i class="large material-icons">videocam_off</i></button>
+                        <button id="btnStartVideo" class="btn-floating"><i class="large material-icons">videocam</i></button>
+                        <button id="btnUnHoldCall" class="btn-floating hidden"><i class="large material-icons">play_arrow</i></button>
+                        <button id="btnHoldCall" class="btn-floating"><i class="large material-icons">pause</i></button>
+                        <button id="btnUnMute" class="btn-floating hidden"><i class="large material-icons">mic_off</i></button>
+                        <button id="btnMute" class="btn-floating"><i class="large material-icons">mic</i></button>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div>
+                    <h4>Status</h4>
+
+                    <div id="logContainer" class="logContainer"></div>
+                </div>
             </div>
-        </p>
-        <div id="localVideoContainer" class="hidden">
-            Local video:
-            <br />
-            <div id="localVideo" class="local-video"></div>
+            <div class="col s6">
 
-        </div>
-        <div class="remote-video-container">
-            Remote video:
-            <br />
-            <div id="remoteVideo" class="remote-video"></div>
-            <div id="btnGroupCall" class="btn-group hidden">
-                <button id="btnEndCall" class="btn-floating waves-effect waves-light red"><i class="large material-icons">call_end</i></button>
-                <button id="btnStopVideo" class="btn-floating hidden"><i class="large material-icons">videocam_off</i></button>
-                <button id="btnStartVideo" class="btn-floating"><i class="large material-icons">videocam</i></button>
-                <button id="btnUnHoldCall" class="btn-floating hidden"><i class="large material-icons">play_arrow</i></button>
-                <button id="btnHoldCall" class="btn-floating"><i class="large material-icons">pause</i></button>
-                <button id="btnUnMute" class="btn-floating hidden"><i class="large material-icons">mic_off</i></button>
-                <button id="btnMute" class="btn-floating"><i class="large material-icons">mic</i></button>
+                <h4>Current calls</h4>
+
+                <table id="currentCalls" class="highlight bordered">
+                    <thead>
+                    <tr>
+                        <th data-field="name">Name</th>
+                        <th data-field="number">Number</th>
+                        <th data-field="status">Status</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr id="noCallsRow">
+                        <td colspan="3">No calls</td>
+                    </tr>
+                    </tbody>
+                </table>
+
             </div>
         </div>
-        <br />
-        <br />
-        <div>
-            <h4>Status</h4>
-
-            <div id="logContainer" class="logContainer"></div>
-        </div>
-
     </div>
 
     <script type="text/javascript">

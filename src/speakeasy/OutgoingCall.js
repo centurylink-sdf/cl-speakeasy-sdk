@@ -13,9 +13,6 @@ define([
     Ajax,
     Utils
 ) {
-
-    var self = null;
-
     /**
      * @class Ctl.speakeasy.OutgoingCall
      * @extends Ctl.speakeasy.BaseCall
@@ -30,29 +27,27 @@ define([
     function OutgoingCall() {
         BaseCall.apply(this, arguments);
 
-        self = this;
-    }
+        var self = this;
 
-    /**
-     * Gets callee information
-     * @returns {Object} The callee information
-     * @returns {String} return.number The number of the callee
-     */
-    function getCalleeInfo() {
+        /**
+         * Gets callee information
+         * @returns {Object} The callee information
+         * @returns {String} return.number The number of the callee
+         */
+        self.getCalleeInfo = function() {
 
-        if(self.fcsCall) {
-            return {
-                number: self.fcsCall.calleeNumber
+            if(self.fcsCall) {
+                return {
+                    number: self.fcsCall.calleeNumber
+                }
             }
-        }
 
-        return null;
+            return null;
+        }
     }
 
     OutgoingCall.prototype = Object.create(BaseCall.prototype);
     OutgoingCall.prototype.constructor = OutgoingCall;
-
-    OutgoingCall.prototype.getCalleeInfo = getCalleeInfo;
 
     return OutgoingCall;
 });

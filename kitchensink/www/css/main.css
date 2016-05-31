@@ -74,3 +74,15 @@ nav .brand-logo {
 #progressLogout {
     position: absolute;
 }
+
+#currentCalls tbody tr {
+    cursor: pointer;
+}
+
+#currentCalls tbody tr#noCallsRow {
+    cursor: default;
+}
+
+#currentCalls tbody tr#noCallsRow td {
+    text-align: center;
+}
