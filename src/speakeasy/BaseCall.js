@@ -504,10 +504,6 @@ define([
          */
         self.onStateChanged = null;
 
-        /**
-         * @enum
-         * The state events of the Call
-         */
         self.events = {
             CALL_RINGING: 0,
             CALL_STARTED: 1,

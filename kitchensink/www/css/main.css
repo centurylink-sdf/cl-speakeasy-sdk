@@ -71,6 +71,10 @@ nav .brand-logo {
     margin: 0;
 }
 
+table.highlight>tbody>tr.active {
+    background-color: #BFDFFF;
+}
+
 #progressLogout {
     position: absolute;
 }

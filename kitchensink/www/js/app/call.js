@@ -217,7 +217,7 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
     function addCall(callId, callInfo) {
 
         var callsTable = $('#currentCalls');
-        var $callRow = $('<tr></tr>').attr('data-id', callId);
+        var $callRow = $('<tr></tr>').attr('data-id', callId).addClass('active');
 
         $callRow.append(['<td>', callInfo.name, '</td>'].join(''));
         $callRow.append(['<td>', callInfo.number, '</td>'].join(''));
@@ -231,6 +231,8 @@ define(['jquery', 'ApiLoader'], function($, Ctl) {
             _speakEasy.CallManager.switchTo(callId, function() {
                 updateCallButtonsGroup();
                 showInfoMessage("The call has switched successfully");
+                $('#currentCalls').find('tr').removeClass('active');
+                $(this).addClass('active');
             },
             function() {
                 showErrorMessage("The call switch are failed");

@@ -96,7 +96,8 @@ define([
         }
 
         /**
-         *
+         * Delete call from existing calls and make next call as current
+         * @private
          * @param callId
          */
         function deleteCall(callId) {
@@ -116,7 +117,7 @@ define([
         }
 
         /**
-         *
+         * @private
          * @param event
          * @param callback
          * @returns {Ctl.speakeasy.CallInfo}
@@ -130,7 +131,7 @@ define([
         }
 
         /**
-         *
+         * @private
          * @param event
          * @returns {*}
          */
