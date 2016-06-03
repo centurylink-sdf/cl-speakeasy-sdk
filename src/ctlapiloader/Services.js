@@ -1,7 +1,7 @@
 /**
- * @class Ctl.apiloader.Services
+ * @class Ctl.ctlapiloader.Services
  *
- * List of API JavaScript libraries available to load by Ctl.apiloader.ApiLoader.
+ * List of API JavaScript libraries available to load by Ctl.ctlapiloader.CtlApiLoader.
  */
 require.config({
     "paths": {

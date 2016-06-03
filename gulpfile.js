@@ -54,11 +54,11 @@ gulp.task('default', tasklist.withFilters(function(task) {
  * ***********************************************************************************************
  */
 
-gulp.task('build-require-apiloader', function (cb) {
-    executeCommand(rJsCommand + ' -o src/apiloader/build.json', cb);
+gulp.task('build-require-ctlapiloader', function (cb) {
+    executeCommand(rJsCommand + ' -o src/ctlapiloader/build.json', cb);
 });
 
-gulp.task('build-optimize-apiloader', function (cb) {
+gulp.task('build-optimize-ctlapiloader', function (cb) {
     var pkg = require('./package.json');
 
     return gulp.src('./dist/' + pkg.name + '.js')
@@ -70,8 +70,8 @@ gulp.task('build-optimize-apiloader', function (cb) {
         .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('build-apiloader', function (cb) {
-    runSequence('clean', 'build-require-apiloader', 'build-optimize-apiloader', cb);
+gulp.task('build-ctlapiloader', function (cb) {
+    runSequence('clean', 'build-require-ctlapiloader', 'build-optimize-ctlapiloader', cb);
 });
 
 gulp.task('build-require-speakeasy', function (cb) {
@@ -91,7 +91,7 @@ gulp.task('build-speakeasy', function (cb) {
 });
 
 gulp.task('build', function (cb) {
-    runSequence('clean', 'build-require-apiloader', 'build-optimize-apiloader', 'build-require-speakeasy', 'build-optimize-speakeasy', cb);
+    runSequence('clean', 'build-require-ctlapiloader', 'build-optimize-ctlapiloader', 'build-require-speakeasy', 'build-optimize-speakeasy', cb);
 });
 
 gulp.task('stream', function (cb) {

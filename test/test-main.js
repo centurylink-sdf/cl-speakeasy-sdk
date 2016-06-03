@@ -12,7 +12,7 @@ require.config({
     baseUrl: '/base/src/',
     paths: {
         'Ctl.model.request':    '../src/model/request',
-        'Ctl.apiloader':        '../src/apiloader',
+        'Ctl.ctlapiloader':        '../src/ctlapiloader',
         "Ctl":                  '../src',
     },
     shim: {

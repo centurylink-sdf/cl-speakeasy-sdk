@@ -1,7 +1,6 @@
-var _speakEasy = null;
+define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
-define(['jquery', 'ApiLoader'], function($, Ctl) {
-
+    var _speakEasy = null;
     var btnLogin = $('.btn-login');
     var btnLogout = $('.btn-logout');
 

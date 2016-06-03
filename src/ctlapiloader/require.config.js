@@ -3,9 +3,9 @@ require.config({
     'paths': {
         'Ctl':                  '../',
         'Ctl.model.request':    '../model/request',
-        'Ctl.apiloader':        './'
+        'Ctl.ctlapiloader':        './'
     },
-    name: 'ApiLoader',
+    name: 'CtlApiLoader',
     out: '../../dist/ctlapi.js',
     optimize: 'none',
     include: ['../lib/require', 'Services']

@@ -1,6 +1,3 @@
-/**
- * Created by Peter on 4/8/2016.
- */
 define([
     'Ctl.speakeasy/Config',
     'Ctl/Logger',

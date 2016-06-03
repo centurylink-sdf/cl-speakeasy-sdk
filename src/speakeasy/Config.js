@@ -1,7 +1,7 @@
 /**
  * @class Ctl.speakeasy.Config
  *
- * List of configuration options for Ctl.speakeasy.ApiLoader.
+ * List of configuration options for Ctl.speakeasy.CtlApiLoader.
  */
 define({
     settings: {

@@ -16,7 +16,7 @@
     "sdk",
     "api",
     "javascript",
-    "apiloader",
+    "ctlapiloader",
     "speakeasy"
   ],
   "dependencies": {

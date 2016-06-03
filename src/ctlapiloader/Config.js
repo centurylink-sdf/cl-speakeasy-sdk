@@ -1,7 +1,7 @@
 /**
- * @class Ctl.apiloader.Config
+ * @class Ctl.ctlapiloader.Config
  *
- * List of configuration options for Ctl.apiloader.ApiLoader.
+ * List of configuration options for Ctl.ctlapiloader.CtlApiLoader.
  */
 define({
     settings: {

@@ -12,7 +12,7 @@
                 ]
             },
             {
-                "name": "API Loader",
+                "name": "Ctl API Loader",
                 "classes": [
                     "Ctl"
                 ]

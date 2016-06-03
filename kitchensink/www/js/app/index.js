@@ -1,4 +1,4 @@
-define(['jquery', 'ApiLoader'], function($, Ctl) {
+define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
     var btnLogin = $('.btn-login');
     var btnLogout = $('.btn-logout');

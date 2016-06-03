@@ -1,6 +1,6 @@
 define([
-    'Ctl.apiloader/Version',
-    'Ctl.apiloader/Config',
+    'Ctl.ctlapiloader/Version',
+    'Ctl.ctlapiloader/Config',
     'Ctl/Logger',
     'Ctl/Utils',
     'Ctl/Auth'
@@ -13,26 +13,26 @@ define([
 ) {
 
     /**
-     * @class Ctl.apiloader.ApiLoader
+     * @class Ctl.ctlapiloader.CtlApiLoader
      *
      * @author Andrew Kovalenko <andrew@jaybirdgroup.com>
      * @docauthor Andrew Kovalenko <andrew@jaybirdgroup.com>
      *
-     * Ctl.apiloader.ApiLoader is the heart of the CenturyLink JavaScript API loading capability. It is most commonly used
-     * via the {@link Ctl.apiloader.ApiLoader#load} shorthand. Ctl.apiloader.ApiLoader is used for asynchronous loading approach
+     * Ctl.ctlapiloader.CtlApiLoader is the heart of the CenturyLink JavaScript API loading capability. It is most commonly used
+     * via the {@link Ctl.ctlapiloader.CtlApiLoader#load} shorthand. Ctl.ctlapiloader.CtlApiLoader is used for asynchronous loading approach
      * and leverage it advantages for the best development flow.
      *
-     * @requires Ctl.apiloader.Version
-     * @requires Ctl.apiloader.Config
+     * @requires Ctl.ctlapiloader.Version
+     * @requires Ctl.ctlapiloader.Config
      * @requires Ctl.Logger
      * @requires Ctl.Utils
      * @requires Ctl.Auth
      *
      * @singleton
      */
-    function ApiLoader() {
+    function CtlApiLoader() {
 
-        var logger = new Logger('ApiLoader');
+        var logger = new Logger('CtlApiLoader');
         var loadedApis = [];
 
         /**
@@ -83,6 +83,6 @@ define([
         this.logout = logout;
     }
 
-    return new ApiLoader();
+    return new CtlApiLoader();
 
 });
