@@ -435,7 +435,7 @@ define([
          * @param {Function} successCallback The callback function to be called after success
          * @param {Function} failureCallback The callback function to be called after failure
          */
-        self.videoStart = function(successCallback, failureCallback) {
+        self.startVideoSend = function(successCallback, failureCallback) {
 
             self.fcsCall.videoStart(
                 function () {
@@ -456,7 +456,7 @@ define([
          * @param {Function} successCallback The callback function to be called after success
          * @param {Function} failureCallback The callback function to be called after failure
          */
-        self.videoStop = function(successCallback, failureCallback) {
+        self.stopVideoSend = function(successCallback, failureCallback) {
 
             self.fcsCall.videoStop(
                 function () {
@@ -471,10 +471,10 @@ define([
 
         /**
          * Send Dual-tone multi-frequency signaling
-         * @param {String} tone Tone to be send as dtmf
+         * @param {String} digit Digit to be send as dtmf
          */
-        self.sendDTMF = function(tone) {
-            self.fcsCall.sendDTMF(tone);
+        self.sendDigits = function(digit) {
+            self.fcsCall.sendDTMF(digit);
         };
 
         /**

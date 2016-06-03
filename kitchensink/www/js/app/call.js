@@ -108,7 +108,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                 btnStartVideo.addEventListener("click", function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
-                    currentCall.videoStart(
+                    currentCall.startVideoSend(
                        function() {
                            showInfoMessage("Video is started!");
                            $("#localVideoContainer").show();
@@ -123,7 +123,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                 btnStopVideo.addEventListener("click", function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
-                    currentCall.videoStop(
+                    currentCall.stopVideoSend(
                        function() {
                            showInfoMessage("Video is stopped!");
                            $("#localVideoContainer").hide();
@@ -203,7 +203,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                         var regexKey = /[0-9]|[#]|[*]/;
                         if (regexKey.test(keyStr)) {
-                            currentCall.sendDTMF(keyStr);
+                            currentCall.sendDigits(keyStr);
                         }
 
                     }
