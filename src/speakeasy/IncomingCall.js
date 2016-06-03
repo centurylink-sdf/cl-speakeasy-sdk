@@ -3,6 +3,7 @@ define([
     'Ctl.speakeasy/Config',
     'Ctl/Logger',
     'Ctl/Promise',
+    'Ctl/EventEmitter',
     'Ctl/Ajax',
     'Ctl/Utils',
     'Ctl.speakeasy/CallInfo'
@@ -11,6 +12,7 @@ define([
     Config,
     Logger,
     Promise,
+    EventEmitter,
     Ajax,
     Utils,
     CallInfo
@@ -39,7 +41,7 @@ define([
          */
         self.answer = function(successCallback, failureCallback) {
 
-            var p = CallInfo.triggerEvent(CallInfo.events.BEFORE_ANSWER_CALL, self.id);
+            var p = EventEmitter.trigger(EventEmitter.events.BEFORE_ANSWER_CALL, true, self.id);
 
             p.then(function(error) {
 
@@ -72,7 +74,7 @@ define([
             self.fcsCall.reject(
                 function () {
                     self.logger.info("Rejected incomming call...");
-                    CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.id);
+                    EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, true, self.id);
                     self.fcsCall.onStateChange(fcs.call.States.REJECTED);
                     Utils.doCallback(successCallback);
                 },

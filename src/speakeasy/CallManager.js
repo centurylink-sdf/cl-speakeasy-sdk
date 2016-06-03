@@ -4,6 +4,7 @@ define([
     'Ctl/Promise',
     'Ctl/Ajax',
     'Ctl/Utils',
+    'Ctl/EventEmitter',
     'fcs',
     'Ctl.speakeasy/IncomingCall',
     'Ctl.speakeasy/OutgoingCall',
@@ -14,6 +15,7 @@ define([
     Promise,
     Ajax,
     Utils,
+    EventEmitter,
     fcs,
     IncomingCall,
     OutgoingCall,
@@ -38,18 +40,18 @@ define([
         function setup(config) {
             Utils.extend(Config.callManager, config);
 
-            CallInfo.subscribeEvents(CallInfo.events.ON_DELETE_CALL, function(callId) {
+            EventEmitter.on(EventEmitter.events.ON_DELETE_CALL, function(callId) {
                 var p = new Promise();
                 CallInfo.deleteCall(callId);
                 p.done(false);
                 return p;
             });
 
-            CallInfo.subscribeEvents(CallInfo.events.BEFORE_ANSWER_CALL, function() {
+            EventEmitter.on(EventEmitter.events.BEFORE_ANSWER_CALL, function() {
                 return holdCurrentCall();
             });
 
-            CallInfo.subscribeEvents(CallInfo.events.BEFORE_UNHOLD, function(callId) {
+            EventEmitter.on(EventEmitter.events.BEFORE_UNHOLD, function(callId) {
 
                 var p = new Promise();
                 var currentCall = CallInfo.getCurrentCall();

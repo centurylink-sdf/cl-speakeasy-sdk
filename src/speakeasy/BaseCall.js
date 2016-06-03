@@ -4,6 +4,7 @@ define([
     'Ctl/Promise',
     'Ctl/Ajax',
     'Ctl/Utils',
+    'Ctl/EventEmitter',
     'fcs',
     'Ctl.speakeasy/CallInfo'
 ], function (
@@ -12,6 +13,7 @@ define([
     Promise,
     Ajax,
     Utils,
+    EventEmitter,
     fcs,
     CallInfo
 ) {
@@ -284,12 +286,12 @@ define([
             switch(state) {
                 case fcs.call.States.RINGING:
                     self.logger.debug('status changed: RINGING');
-                    Utils.doCallback(self.onStateChanged, [self.events.CALL_RINGING]);
+                    EventEmitter.trigger(EventEmitter.events.CALL_RINGING, false, self);
                     break;
                 case fcs.call.States.IN_CALL:
                     self.logger.debug('status changed: IN_CALL');
                     showAllVideoStreams();
-                    Utils.doCallback(self.onStateChanged, [self.events.CALL_STARTED]);
+                    EventEmitter.trigger(EventEmitter.events.CALL_STARTED, false, self);
                     break;
                 case fcs.call.States.CALL_IN_PROGRESS:
                     self.logger.debug('status changed: CALL_IN_PROGRESS');
@@ -305,12 +307,12 @@ define([
                     break;
                 case fcs.call.States.ON_HOLD:
                     self.logger.debug('status changed: ON_HOLD');
-                    Utils.doCallback(self.onStateChanged, [self.events.CALL_HELD]);
+                    EventEmitter.trigger(EventEmitter.events.CALL_HELD, false, self);
                     break;
                 case fcs.call.States.ON_REMOTE_HOLD:
                     self.logger.debug('status changed: ON_REMOTE_HOLD');
                     removeAllVideoStreams();
-                    Utils.doCallback(self.onStateChanged, [self.events.CALL_REMOTE_HELD]);
+                    EventEmitter.trigger(EventEmitter.events.CALL_REMOTE_HELD, false, self);
                     break;
                 case fcs.call.States.OUTGOING:
                     self.logger.debug('status changed: OUTGOING');
@@ -322,14 +324,14 @@ define([
                     self.logger.debug('status changed: ENDED');
 
                     removeAllVideoStreams();
-                    CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.id);
-                    Utils.doCallback(self.onStateChanged, [self.events.CALL_ENDED]);
+                    EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, true, self.id);
+                    EventEmitter.trigger(EventEmitter.events.CALL_ENDED, false, self);
 
                     break;
                 case fcs.call.States.REJECTED:
                     self.logger.debug('status changed: REJECTED');
                     removeAllVideoStreams();
-                    Utils.doCallback(self.onStateChanged, [self.events.CALL_REJECTED]);
+                    EventEmitter.trigger(EventEmitter.events.CALL_REJECTED, false, self);
                     break;
                 case fcs.call.States.OUTGOING:
                     self.logger.debug('status changed: OUTGOING');
@@ -365,7 +367,7 @@ define([
                 function () {
                     removeAllVideoStreams();
 
-                    CallInfo.triggerEvent(CallInfo.events.ON_DELETE_CALL, self.id);
+                    EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, true, self.id);
 
                     Utils.doCallback(successCallback);
                 },
@@ -417,7 +419,7 @@ define([
          */
         self.unhold = function(successCallback, failureCallback) {
 
-            CallInfo.triggerEvent(CallInfo.events.BEFORE_UNHOLD, self.id);
+            EventEmitter.trigger(EventEmitter.events.BEFORE_UNHOLD, true, self.id);
 
             self.fcsCall.unhold(
                 function () {
@@ -490,7 +492,7 @@ define([
          * @returns {boolean} If call has been held or not
          */
         self.isOnHold = function() {
-            var holdState = self.fcsCall.getHoldState()
+            var holdState = self.fcsCall.getHoldState();
 
             if(holdState && (holdState == fcs.call.HoldStates.BOTH_HOLD || holdState == fcs.call.HoldStates.LOCAL_HOLD || holdState == fcs.call.HoldStates.REMOTE_HOLD)) {
                 return true;
@@ -499,18 +501,12 @@ define([
         };
 
         /**
-         * @event
-         * Sets the handler for listening the call state change.
+         * Subscribe to call events
+         * @param {string} event The event to subscribe to
+         * @param {function} callback The function will be called when event will rise
          */
-        self.onStateChanged = null;
-
-        self.events = {
-            CALL_RINGING: 0,
-            CALL_STARTED: 1,
-            CALL_ENDED: 2,
-            CALL_HELD: 3,
-            CALL_REMOTE_HELD: 4,
-            CALL_REJECTED: 5
+        self.on = function(event, callback) {
+            EventEmitter.on(event, callback);
         };
 
         self.failureReasons = {

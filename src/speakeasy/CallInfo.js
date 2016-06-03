@@ -1,15 +1,9 @@
 define([
     'Ctl.speakeasy/Config',
-    'Ctl/Logger',
-    'Ctl/Promise',
-    'Ctl/Ajax',
-    'Ctl/Utils'
+    'Ctl/Logger'
 ], function (
     Config,
-    Logger,
-    Promise,
-    Ajax,
-    Utils
+    Logger
 ) {
 
     /**
@@ -28,15 +22,6 @@ define([
         self.logger = new Logger('CallInfo');
         self.calls = [];
         self.currentCall = null;
-
-
-        self.subscribedEvents = {};
-
-        self.events = {
-            ON_DELETE_CALL: "ON_DELETE_CALL",
-            BEFORE_ANSWER_CALL: "BEFORE_ANSWER_CALL",
-            BEFORE_UNHOLD: "BEFORE_UNHOLD"
-        };
 
         /**
          * Get all calls
@@ -113,37 +98,6 @@ define([
             }
         }
 
-        /**
-         * @private
-         * @param event
-         * @param callback
-         * @returns {Ctl.speakeasy.CallInfo}
-         */
-        function subscribeEvents(event, callback) {
-            if (!self.subscribedEvents[event]) {
-                self.subscribedEvents[event] = [];
-            }
-            self.subscribedEvents[event].push({ context: self, callback: callback });
-            return self;
-        }
-
-        /**
-         * @private
-         * @param event
-         * @returns {*}
-         */
-        function triggerEvent(event) {
-            if (!self.subscribedEvents[event]) return false;
-            var args = Array.prototype.slice.call(arguments, 1),
-                promises = [];
-
-            for (var i = 0, l = self.subscribedEvents[event].length; i < l; i++) {
-                var subscription = self.subscribedEvents[event][i];
-                promises.push(subscription.callback.apply(subscription.context, args));
-            }
-            return Promise.chain(promises);
-        }
-
         this.getCalls = getCalls;
         this.getCallsCount = getCallsCount;
         this.getCurrentCall = getCurrentCall;
@@ -151,9 +105,6 @@ define([
         this.get = get;
         this.addCall = addCall;
         this.deleteCall = deleteCall;
-        this.subscribeEvents = subscribeEvents;
-        this.triggerEvent = triggerEvent;
-
     }
 
     return new CallInfo();
