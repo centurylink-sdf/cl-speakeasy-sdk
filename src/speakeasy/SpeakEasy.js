@@ -33,7 +33,7 @@ define([
         function init() {
             self.logger.info('Initializing calling features');
 
-            initFcsLogger();
+            // initFcsLogger();
 
             fcs.setUserAuth(getPublicUserId(), '');
 
@@ -180,12 +180,21 @@ define([
             return settings;
         }
 
+        /**
+         * Retrieve user's public ID
+         * @return {String} user's client ID
+         */
         function getPublicUserId() {
             var speakEasy = Utils.getObject('services_SpeakEasy');
             var publicUserId = speakEasy.publicID + '@' + speakEasy.domain;
             return publicUserId;
         }
 
+        /**
+         * Logout from the SpeakEasy service
+         * @param  {Function} successCallback function called in successfull case
+         * @param  {Function} failureCallback function called in failure case
+         */
         function logout(successCallback, failureCallback) {
 
             fcs.notification.stop(

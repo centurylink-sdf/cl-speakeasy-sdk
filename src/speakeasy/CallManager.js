@@ -37,6 +37,11 @@ define([
         var self = this;
         self.logger = new Logger('CallManager');
 
+        /**
+         * Setup SpeakEasy main configuration
+         * @param  {[type]} config [description]
+         * @return {[type]}        [description]
+         */
         function setup(config) {
             Utils.extend(Config.callManager, config);
 

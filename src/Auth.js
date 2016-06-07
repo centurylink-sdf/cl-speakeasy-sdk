@@ -19,7 +19,7 @@ define([
 ) {
 
     /**
-     * [Auth description]
+     * Main class responsible for authentication
      * @class Ctl.Auth
      */
     function Auth() {
@@ -94,6 +94,10 @@ define([
             Promise.chain([ getAccessToken, syncSubscriptionServices ]).then(oncomplete);
         }
 
+        /**
+         * Authenticate if access token has expired
+         * @param  {Function} callback [description]
+         */
         function reAuthenticate(callback) {
             var rtRequest = new RefreshTokenRequest(getRefreshToken());
 
@@ -124,16 +128,27 @@ define([
 
         }
 
+        /**
+         * Check if client is already authenticated
+         * @return {Boolean} true if authenticated
+         */
         function isAuthenticated() {
             return getAccessToken() != null;
         }
 
+        /**
+         * Login without additional service requests if client already authenticated
+         * @param  {Function} callback function to call once authenticated
+         */
         function loginFromCache(callback) {
             BaseRequest.prototype.accessToken = getAccessToken();
             BaseRequest.prototype.refreshToken = getRefreshToken();
             Utils.doCallback(callback, [null]);
         }
 
+        /**
+         * Remove all related data from localStorage
+         */
         function logout() {
             // TODO:10 Figure out better place for logout for the all loaded services
             // for (var i=0; i<loadedApis.length; i++) {
@@ -185,7 +200,6 @@ define([
         /**
          * Store the login username for later use - uses localstorage if available
          *
-         * @private
          * @param   {String} username
          */
         function setLoginUsername(username) {

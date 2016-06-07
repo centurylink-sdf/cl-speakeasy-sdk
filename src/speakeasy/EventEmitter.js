@@ -27,6 +27,12 @@ define([
             CALL_REJECTED: 'CALL_REJECTED'
         };
 
+        /**
+         * Subscripbe for an event
+         * @param  {Object}   event    event to subscribe
+         * @param  {Function} callback callback for handled event
+         * @return {Object}            EventEmitter
+         */
         function on(event, callback) {
             if (!self.subscribedEvents[event]) {
                 self.subscribedEvents[event] = [];
@@ -35,6 +41,12 @@ define([
             return self;
         }
 
+        /**
+         * Trigger event
+         * @param  {Object} event        event to trigger
+         * @param  {Boolean} usePromises use promises or not
+         * @return {Object}              EventEmitter
+         */
         function trigger(event, usePromises) {
             if (!self.subscribedEvents[event]) return false;
             var args = Array.prototype.slice.call(arguments, 2),

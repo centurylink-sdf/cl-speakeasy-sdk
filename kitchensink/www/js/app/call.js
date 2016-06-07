@@ -4,6 +4,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
     var btnLogin = $('.btn-login');
     var btnLogout = $('.btn-logout');
 
+    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.Auth-method-isAuthenticated
     if (Ctl.Auth.isAuthenticated()) {
         loadSpeakEasy();
     } else {
@@ -12,7 +13,8 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
     function loadSpeakEasy() {
 
-        // use the sdk for your needs, this call should load SpeakEasy API Client
+        // Use the sdk for your needs, this call should load SpeakEasy API Client
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.ctlapiloader.CtlApiLoader-method-load
         Ctl.load('SpeakEasy', '0.1.4', function(err, speakEasy) {
 
             if (err) {
@@ -25,6 +27,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
                 console.log('SpeakEasy has been loaded');
                 console.log('Running SpeakEasy v' + speakEasy.version());
 
+                // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.Auth-method-getLoginUsername
                 var userName = Ctl.Auth.getLoginUsername();
 
                 $('#userName').html(userName);
@@ -41,6 +44,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                 var btnLogout = document.getElementById('btnLogout');
 
+                // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallManager-method-setup
                 speakEasy.CallManager.setup(
                     {
                         localVideoContainer: 'localVideo',
@@ -48,18 +52,22 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
                     }
                 );
 
+                // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallManager-event-onCallReceived
                 speakEasy.CallManager.onCallReceived = function (call) {
 
                     attachCallListeners(call);
 
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.IncomingCall-method-getCallerInfo
                     var callerInfo = call.getCallerInfo();
 
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-getCallId
                     addCall(call.getCallId(), { name: callerInfo.name, number: callerInfo.number, status: 'Incoming' });
 
                     // Call dialog box
                     var r = confirm('Incoming call from '+ callerInfo.name +'(' + callerInfo.number + ')! Would you like to answer?');
                     if (r === true) {
                         // Answering on the incoming call
+                        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.IncomingCall-method-answer
                         call.answer(function() {
                             showInfoMessage('Call is answered!');
                             updateCallButtonsGroup();
@@ -68,6 +76,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
                         });
                     } else {
                         // Rejecting the incomming call
+                        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.IncomingCall-method-reject
                         call.reject(function() {
 
                         }, function() {
@@ -82,6 +91,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
                     $('#btnGroupCall').show();
                     confDestination.value = '';
 
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallManager-method-createCall
                     speakEasy.CallManager.createCall(numToCall, false, function(call) {
                         updateCallButtonsGroup();
                         attachCallListeners(call);
@@ -92,7 +102,11 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
                 });
 
                 btnEndCall.addEventListener('click', function (e) {
+
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallInfo-method-getCurrentCall
                     var currentCall = speakEasy.CallManager.getCurrentCall();
+
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-hangUp
                     currentCall.hangUp(function() {
 
                         updateCallButtonsGroup();
@@ -108,6 +122,8 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                 btnStartVideo.addEventListener('click', function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
+
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-startVideoSend
                     currentCall.startVideoSend(
                        function() {
                            showInfoMessage('Video is started!');
@@ -123,6 +139,8 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                 btnStopVideo.addEventListener('click', function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
+
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-stopVideoSend
                     currentCall.stopVideoSend(
                        function() {
                            showInfoMessage('Video is stopped!');
@@ -138,6 +156,8 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                 btnHoldCall.addEventListener('click', function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
+
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-hold
                     currentCall.hold(
                         function() {
                             $(btnHoldCall).hide();
@@ -151,6 +171,8 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                 btnUnHoldCall.addEventListener('click', function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
+
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-unhold
                     currentCall.unhold(
                         function() {
                             $(btnUnHoldCall).hide();
@@ -164,6 +186,8 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                 btnMute.addEventListener('click', function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
+
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-mute
                     currentCall.mute();
                     showInfoMessage('Call is muted!');
                     $(btnMute).hide();
@@ -172,6 +196,8 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                 btnUnMute.addEventListener('click', function (e) {
                     var currentCall = speakEasy.CallManager.getCurrentCall();
+
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-unmute
                     currentCall.unmute();
                     showInfoMessage('Call is unmuted!');
                     $(btnUnMute).hide();
@@ -180,8 +206,11 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                 btnLogout.addEventListener('click', function (e) {
                     $('#progressLogout').show();
+
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.SpeakEasy-method-logout
                     speakEasy.logout(function() {
                         showInfoMessage('SpeakEasy logout succeed!');
+                        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.Auth-method-logout
                         Ctl.logout();
                         $('#progressLogout').hide();
                         window.location.href = 'index.html';
@@ -203,6 +232,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
                         var regexKey = /[0-9]|[#]|[*]/;
                         if (regexKey.test(keyStr)) {
+                            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-sendDigits
                             currentCall.sendDigits(keyStr);
                         }
 
@@ -227,6 +257,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
         $callRow.click(function() {
             var callId = $(this).attr('data-id');
+            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallManager-method-switchTo
             _speakEasy.CallManager.switchTo(callId, function() {
                 updateCallButtonsGroup();
                 showInfoMessage('The call has switched successfully');
@@ -249,6 +280,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
         var $callRow = $('#currentCalls').find('tr[data-id="'+callId+'"]');
         $callRow.remove();
 
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallManager-method-getCallsCount
         if(_speakEasy.CallManager.getCallsCount() === 0) {
             $('#noCallsRow').show();
         }
@@ -301,6 +333,7 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
         var callId = call.getCallId();
 
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-on
         call.on('CALL_RINGING', function() {
             showInfoMessage('Ringing!');
             updateCallStatus(callId, 'Ringing');

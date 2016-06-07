@@ -55,7 +55,6 @@ define([
             require(
                 [name],
                 function(api) {
-                    loadedApis.push(api);
                     Utils.doCallback(callback, [null, api]);
                 },
                 function(err) {
@@ -65,13 +64,9 @@ define([
         }
 
         /**
-         * Retrieves list of loaded APIs
-         * @return {Array} list of APIs
+         * Logout from services and clear browser's data storage (cookies, localStorage etc.)
+         * @return {[type]} [description]
          */
-        function getLoadedApis() {
-            return loadedApis;
-        }
-
         function logout() {
             Utils.removeAll();
         }
@@ -79,7 +74,6 @@ define([
         this.Auth = Auth;
         this.getVersion = getVersion;
         this.load = load;
-        this.getLoadedApis = getLoadedApis;
         this.logout = logout;
     }
 
