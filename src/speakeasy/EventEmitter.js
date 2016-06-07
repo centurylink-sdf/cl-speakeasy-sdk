@@ -45,6 +45,9 @@ define([
                 if(usePromises) {
                     promises.push(subscription.callback.apply(subscription.context, args));
                 }
+                else {
+                    subscription.callback.apply(subscription.context, args);
+                }
             }
 
             if(usePromises) {
