@@ -4,8 +4,8 @@ define([
     'Ctl/Promise',
     'Ctl/Ajax',
     'Ctl/Utils',
-    'Ctl/EventEmitter',
     'fcs',
+    'Ctl.speakeasy/EventEmitter',
     'Ctl.speakeasy/IncomingCall',
     'Ctl.speakeasy/OutgoingCall',
     'Ctl.speakeasy/CallInfo'
@@ -15,8 +15,8 @@ define([
     Promise,
     Ajax,
     Utils,
-    EventEmitter,
     fcs,
+    EventEmitter,
     IncomingCall,
     OutgoingCall,
     CallInfo

@@ -3,18 +3,18 @@ define([
     'Ctl.speakeasy/Config',
     'Ctl/Logger',
     'Ctl/Promise',
-    'Ctl/EventEmitter',
     'Ctl/Ajax',
     'Ctl/Utils',
+    'Ctl.speakeasy/EventEmitter',
     'Ctl.speakeasy/CallInfo'
 ], function (
     BaseCall,
     Config,
     Logger,
     Promise,
-    EventEmitter,
     Ajax,
     Utils,
+    EventEmitter,
     CallInfo
 ) {
     /**

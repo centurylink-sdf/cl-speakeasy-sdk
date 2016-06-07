@@ -4,8 +4,8 @@ define([
     'Ctl/Promise',
     'Ctl/Ajax',
     'Ctl/Utils',
-    'Ctl/EventEmitter',
     'fcs',
+    'Ctl.speakeasy/EventEmitter',
     'Ctl.speakeasy/CallInfo'
 ], function (
     Config,
@@ -13,8 +13,8 @@ define([
     Promise,
     Ajax,
     Utils,
-    EventEmitter,
     fcs,
+    EventEmitter,
     CallInfo
 ) {
 
