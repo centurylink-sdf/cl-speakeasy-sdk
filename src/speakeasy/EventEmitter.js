@@ -28,37 +28,41 @@ define([
         };
 
         /**
-         * Subscripbe for an event
+         * Subscribe for an event
          * @param  {Object}   event    event to subscribe
+         * @param  {Object}   context  for what object event belong
          * @param  {Function} callback callback for handled event
          * @return {Object}            EventEmitter
          */
-        function on(event, callback) {
+        function on(event, context, callback) {
             if (!self.subscribedEvents[event]) {
                 self.subscribedEvents[event] = [];
             }
-            self.subscribedEvents[event].push({ context: self, callback: callback });
+            self.subscribedEvents[event].push({ context: context, callback: callback });
             return self;
         }
 
         /**
          * Trigger event
          * @param  {Object} event        event to trigger
+         * @param  {Object} context      for what object trigger event
          * @param  {Boolean} usePromises use promises or not
          * @return {Object}              EventEmitter
          */
-        function trigger(event, usePromises) {
+        function trigger(event, context, usePromises) {
             if (!self.subscribedEvents[event]) return false;
             var args = Array.prototype.slice.call(arguments, 2),
                 promises = [];
 
             for (var i = 0, l = self.subscribedEvents[event].length; i < l; i++) {
                 var subscription = self.subscribedEvents[event][i];
-                if(usePromises) {
-                    promises.push(subscription.callback.apply(subscription.context, args));
-                }
-                else {
-                    subscription.callback.apply(subscription.context, args);
+                if(subscription.context === null || subscription.context === context) {
+                    if(usePromises) {
+                        promises.push(subscription.callback.apply(subscription.context, args));
+                    }
+                    else {
+                        subscription.callback.apply(subscription.context, args);
+                    }
                 }
             }
 

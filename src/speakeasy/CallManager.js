@@ -45,18 +45,18 @@ define([
         function setup(config) {
             Utils.extend(Config.callManager, config);
 
-            EventEmitter.on(EventEmitter.events.ON_DELETE_CALL, function(callId) {
+            EventEmitter.on(EventEmitter.events.ON_DELETE_CALL, self, function(callId) {
                 var p = new Promise();
                 CallInfo.deleteCall(callId);
                 p.done(false);
                 return p;
             });
 
-            EventEmitter.on(EventEmitter.events.BEFORE_ANSWER_CALL, function() {
+            EventEmitter.on(EventEmitter.events.BEFORE_ANSWER_CALL, self, function() {
                 return holdCurrentCall();
             });
 
-            EventEmitter.on(EventEmitter.events.BEFORE_UNHOLD, function(callId) {
+            EventEmitter.on(EventEmitter.events.BEFORE_UNHOLD, self, function(callId) {
 
                 var p = new Promise();
                 var currentCall = CallInfo.getCurrentCall();

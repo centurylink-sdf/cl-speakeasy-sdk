@@ -286,12 +286,12 @@ define([
             switch(state) {
                 case fcs.call.States.RINGING:
                     self.logger.debug('status changed: RINGING');
-                    EventEmitter.trigger(EventEmitter.events.CALL_RINGING, false, self);
+                    EventEmitter.trigger(EventEmitter.events.CALL_RINGING, self, false, self);
                     break;
                 case fcs.call.States.IN_CALL:
                     self.logger.debug('status changed: IN_CALL');
                     showAllVideoStreams();
-                    EventEmitter.trigger(EventEmitter.events.CALL_STARTED, false, self);
+                    EventEmitter.trigger(EventEmitter.events.CALL_STARTED, self, false, self);
                     break;
                 case fcs.call.States.CALL_IN_PROGRESS:
                     self.logger.debug('status changed: CALL_IN_PROGRESS');
@@ -307,12 +307,12 @@ define([
                     break;
                 case fcs.call.States.ON_HOLD:
                     self.logger.debug('status changed: ON_HOLD');
-                    EventEmitter.trigger(EventEmitter.events.CALL_HELD, false, self);
+                    EventEmitter.trigger(EventEmitter.events.CALL_HELD, self, false, self);
                     break;
                 case fcs.call.States.ON_REMOTE_HOLD:
                     self.logger.debug('status changed: ON_REMOTE_HOLD');
                     removeAllVideoStreams();
-                    EventEmitter.trigger(EventEmitter.events.CALL_REMOTE_HELD, false, self);
+                    EventEmitter.trigger(EventEmitter.events.CALL_REMOTE_HELD, self, false, self);
                     break;
                 case fcs.call.States.OUTGOING:
                     self.logger.debug('status changed: OUTGOING');
@@ -324,14 +324,14 @@ define([
                     self.logger.debug('status changed: ENDED');
 
                     removeAllVideoStreams();
-                    EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, true, self.id);
-                    EventEmitter.trigger(EventEmitter.events.CALL_ENDED, false, self);
+                    EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, null, true, self.id);
+                    EventEmitter.trigger(EventEmitter.events.CALL_ENDED, self, false, self);
 
                     break;
                 case fcs.call.States.REJECTED:
                     self.logger.debug('status changed: REJECTED');
                     removeAllVideoStreams();
-                    EventEmitter.trigger(EventEmitter.events.CALL_REJECTED, false, self);
+                    EventEmitter.trigger(EventEmitter.events.CALL_REJECTED, self, false,  self);
                     break;
                 case fcs.call.States.OUTGOING:
                     self.logger.debug('status changed: OUTGOING');
@@ -367,7 +367,7 @@ define([
                 function () {
                     removeAllVideoStreams();
 
-                    EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, true, self.id);
+                    EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, null, true, self.id);
 
                     Utils.doCallback(successCallback);
                 },
@@ -419,7 +419,7 @@ define([
          */
         self.unhold = function(successCallback, failureCallback) {
 
-            EventEmitter.trigger(EventEmitter.events.BEFORE_UNHOLD, true, self.id);
+            EventEmitter.trigger(EventEmitter.events.BEFORE_UNHOLD, null, true, self.id);
 
             self.fcsCall.unhold(
                 function () {
@@ -506,7 +506,11 @@ define([
          * @param {function} callback The function will be called when event will rise
          */
         self.on = function(event, callback) {
-            EventEmitter.on(event, callback);
+            EventEmitter.on(event, self, callback);
+        };
+
+        self.trigger = function(event) {
+            EventEmitter.trigger(event, self, false, self);
         };
 
         self.failureReasons = {

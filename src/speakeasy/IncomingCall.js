@@ -41,7 +41,7 @@ define([
          */
         self.answer = function(successCallback, failureCallback) {
 
-            var p = EventEmitter.trigger(EventEmitter.events.BEFORE_ANSWER_CALL, true, self.id);
+            var p = EventEmitter.trigger(EventEmitter.events.BEFORE_ANSWER_CALL, null, true, self.id);
 
             p.then(function(error) {
 
@@ -74,7 +74,7 @@ define([
             self.fcsCall.reject(
                 function () {
                     self.logger.info("Rejected incomming call...");
-                    EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, true, self.id);
+                    EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, null, true, self.id);
                     self.fcsCall.onStateChange(fcs.call.States.REJECTED);
                     Utils.doCallback(successCallback);
                 },
