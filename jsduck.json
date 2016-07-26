@@ -1,5 +1,7 @@
 {
     "--title": "CenturyLink API Docs",
+    "--": "src",
+    "--exclude": "src/lib",
     "--warnings": "-all",
     "--categories": "jsduck-categories.json"
 }
