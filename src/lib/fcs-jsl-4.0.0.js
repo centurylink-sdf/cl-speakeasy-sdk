@@ -5,7 +5,7 @@
  */
 
 (function( window, undefined ) {
-    
+
 // Base64 by Kevin van Zonneveld - Public Domain
 // Original Source: http://kevin.vanzonneveld.net/
 
@@ -760,6 +760,7 @@ var JQrestfulImpl = function(_globalBroadcaster) {
                 xhr.setRequestHeader(headerKey, finalHeaders[headerKey]);
             }
         }
+        xhr.setRequestHeader('X-CtlRTC-SPIDR-FQDN', fcs.fcsConfig.websocketIP);
 
         if (typeof data !== "string") {
             data = JSON.stringify(data);
@@ -1041,7 +1042,7 @@ var JqrestfullManagerImpl = function(_jQueryAdapter, _globalBroadcaster) {
     _globalBroadcaster.subscribe(CONSTANTS.EVENT.DEVICE_SUBSCRIPTION_STARTED, onSubscriptionStarted);
     _globalBroadcaster.subscribe(CONSTANTS.EVENT.DEVICE_SUBSCRIPTION_ENDED, onSubscriptionEnded);
 
-    
+
 };
 
 //@{fcs-jsl-prod}
@@ -1748,7 +1749,7 @@ var CoreImpl = function(_server, _globalBroadcaster, _window) {
          */
         this.isConnected = isConnected;
 
-        
+
 
     },
     fcs;
@@ -11879,7 +11880,7 @@ var WebRtcAdaptorFactory = function(_window, _navigator, _logManager, _WebRtcPlu
         return DEFAULT_RTC_ADAPTOR;
     };
 
-    
+
 };
 
 //@{fcs-jsl-prod}
@@ -12632,7 +12633,7 @@ var WebRtcManager = function(_webRtcAdaptorFactory, _logManager, _turnCredential
 
     _globalBroadcaster.subscribe(CONSTANTS.EVENT.FCS_SETUP_COMPLETED, self.onFcsSetupCompleted);
 
-    
+
 };
 
 //@{fcs-jsl-prod}
@@ -13070,7 +13071,7 @@ var WebsocketManagerImpl = function(_logManager, _window, _CONSTANTS, _fcsConfig
         }
     };
 
-    
+
 };
 
 //@{fcs-jsl-prod}
@@ -13152,7 +13153,7 @@ var ConnectivityManagerImpl = function(_service, _logManager, _window, _globalBr
     _globalBroadcaster.subscribe(_CONSTANTS.EVENT.WEBSOCKET_DISCONNECTED, onCheckConnectivityFailure, PRIORITY);
     _globalBroadcaster.subscribe(_CONSTANTS.EVENT.WEBSOCKET_CONNECTED, onCheckConnectivitySuccess, PRIORITY);
 
-    
+
 
 };
 
@@ -13396,7 +13397,7 @@ var NotificationManagerImpl = function(_logManager, _globalBroadcaster, _websock
         clearTimeout(webSocketRetryAuditTimer);
     };
 
-    
+
 };
 
 //@{fcs-jsl-prod}
@@ -14071,7 +14072,7 @@ var SubscriptionManagerImpl = function(_fcsConfig, _fcs, _service, _logManager, 
     _globalBroadcaster.subscribe(_CONSTANTS.EVENT.TOKEN_NOT_FOUND, handleTokenOrSessionLoss);
     _globalBroadcaster.subscribe(_CONSTANTS.EVENT.SESSION_EXPIRED, handleTokenOrSessionLoss);
 
-    
+
 
 };
 
@@ -18472,7 +18473,7 @@ var CallManagerImpl = function(_webRtcManager, _callFSM, _callControlService, _s
         }
     };
 
-    
+
 };
 
 //@{fcs-jsl-prod}
@@ -20802,7 +20803,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
     _globalBroadcaster.subscribe(CONSTANTS.EVENT.DEVICE_SUBSCRIPTION_STARTED, subscriptionStarted);
     _globalBroadcaster.subscribe(CONSTANTS.EVENT.DEVICE_SUBSCRIPTION_ENDED, subscriptionStopped);
 
-    
+
 };
 
 //@{fcs-jsl-prod}
@@ -27452,7 +27453,7 @@ var DataChannelManagerImpl = function(_webRtcManager, _dataChannelService, _logM
         };
     };
 
-    
+
 
 };
 

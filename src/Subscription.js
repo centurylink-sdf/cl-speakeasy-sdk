@@ -22,7 +22,7 @@ define([
      */
     function Subscription() {
 
-        var mock = true;
+        var mock = false;
 
         var logger = new Logger('Subscription');
 
@@ -73,13 +73,26 @@ define([
                 // Will be needed to loop through all subscribed services and retrieve catalog info for each.
 
                 var publicId;
-                for(var i=0; i<ids.length; i++) {
-                    if (ids[i]["ID"] === username) {
-                        publicId = ids[i]["publicID"];
-                        break;
-                    }
+                var products = request.response.Products;
+                if (!products || products.length === 0) {
+                    p.done("No products returned.", request.response);
                 }
-                var subscribedServices = request.response.Services[publicId];
+
+                var publicIds = Object.keys(products);
+                $.each(publicIds, function (index, value) {
+                    var serviceNames = products[value];
+                    if ($.inArray('SpeakEasy', serviceNames) !== -1 || $.inArray('SpeakEasy-Out', serviceNames) !== -1) {
+                        publicId = value;
+                        return true;
+                    }
+                    return false;
+                });
+
+                if (!publicId) {
+                    p.done("No SpeakEasy product returned.", request.response);
+                }
+
+                var subscribedServices = ["SpeakEasy","Courier"];
                 setServices(subscribedServices);
 
                 return getSubscriptionServiceDetails(Config.services.speakEasyServiceName, publicId);
@@ -87,7 +100,7 @@ define([
 
             var oncomplete = function(err, request) {
                 if (!err && request) {
-                    setServiceCatalog(request.response.ServiceCatalog);
+                    setServiceCatalog(request.response);
                 }
                 p.done(err, request.response);
             }.bind(this);
@@ -156,7 +169,7 @@ define([
         }
 
         function setServiceCatalog(serviceCatalog) {
-            Utils.setObject(config.storageKeywords.services + '_' + serviceCatalog.serviceName, serviceCatalog);
+            Utils.setObject(config.storageKeywords.services + '_' + serviceCatalog.productName, serviceCatalog);
         }
 
         function getServiceCatalog(serviceName) {

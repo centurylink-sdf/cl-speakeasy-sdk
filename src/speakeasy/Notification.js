@@ -46,15 +46,19 @@ define([
             //get spider servers from localStorage
 
             var speakEasyServiceCatalog = Subscription.getServiceCatalog('SpeakEasy');
-
-            if (speakEasyServiceCatalog && speakEasyServiceCatalog.WebSocketEndpoints) {
-                var endpoints = speakEasyServiceCatalog.WebSocketEndpoints.split('$');
-                for (var i = 0; i < endpoints.length; i++) {
-                    var temp = endpoints[i].split(':');
-                    self.webRTCServerList.push({
-                        url: temp[0],
-                        port: temp[1]
-                    });
+            if (speakEasyServiceCatalog && speakEasyServiceCatalog.rtc && speakEasyServiceCatalog.rtc.routing) {
+                var sites = JSON.parse(speakEasyServiceCatalog.rtc.routing);
+                for (var i = 0; i < sites.length; i++) {
+                    for (var key in sites[i]) {
+                        var endpoints = sites[i][key];
+                        for (var i = 0; i < endpoints.length; i++) {
+                            var temp = endpoints[i].split(':');
+                            self.webRTCServerList.push({
+                                url: temp[0],
+                                port: temp[1]
+                            });
+                        }
+                    }
                 }
             }
 
