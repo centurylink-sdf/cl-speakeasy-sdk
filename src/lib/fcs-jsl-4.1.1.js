@@ -514,7 +514,8 @@ var CONSTANTS = {
         "NOTIFICATION_CHANNEL_LOST": "NOTIFICATION_CHANNEL_LOST",
         "FCS_SETUP_COMPLETED": "FCS_SETUP_COMPLETED",
         "WEBSOCKET_CONNECTED": "WEBSOCKET_CONNECTED",
-        "WEBSOCKET_DISCONNECTED": "WEBSOCKET_DISCONNECTED"
+        "WEBSOCKET_DISCONNECTED": "WEBSOCKET_DISCONNECTED",
+        "FORCE_CONNECTIVITY_CHECK": "FORCE_CONNECTIVITY_CHECK"
     },
     "SUBSCRIPTION_EVENT": {
         "TOKEN_OR_SESSION_LOSS": "TOKEN_OR_SESSION_LOSS",
@@ -725,7 +726,7 @@ var JQrestfulImpl = function(_globalBroadcaster) {
 
         // ajax hook to modify url and headers
         if (fcsConfig.ajaxHook) {
-            modValues = utils.callFunctionIfExist(fcsConfig.ajaxHook, xhr, window, {
+            modValues = window[fcsConfig.ajaxHook].call(xhr, window, {
                 type: method,
                 url: url,
                 headers: headers,
@@ -760,6 +761,7 @@ var JQrestfulImpl = function(_globalBroadcaster) {
                 xhr.setRequestHeader(headerKey, finalHeaders[headerKey]);
             }
         }
+
         xhr.setRequestHeader('X-CtlRTC-SPIDR-FQDN', fcs.fcsConfig.websocketIP);
 
         if (typeof data !== "string") {
@@ -1095,7 +1097,7 @@ function getUserToken() {
 }
 
 function getVersion() {
-    return "4.0.0.176";
+    return "4.1.1";
 }
 
 function isConnected() {
@@ -1788,7 +1790,7 @@ fcs.fcsConfig = fcsConfig;
  * @namespace
  * @memberOf fcs
  *
- * @version 4.0.0.176
+ * @version 4.1.1
  * @since 3.0.0
  *
  */
@@ -2249,6 +2251,7 @@ var Utils = function(_logManager) {
         var args = Array.prototype.slice.call(arguments),
             func;
         func = args.shift();
+
         if (typeof(func) === 'function') {
             try {
                 return func.apply(null, args);
@@ -4817,7 +4820,7 @@ var SDPParserImpl = function(_logManager, _fcsConfig, _CONSTANTS) {
             descriptions = [],
             index, reg = /\r\n|\r|\n/m,
             substr_arr, i, new_substr = "",
-            elm, option, numOfAPT, APTIndex = 0,
+            elm, option, numOfAPT, APTIndex = 0, isAPTCodec,
             mLineRegex, sdpMline, splitArray, APTValue;
 
         descriptions = pSdp.split(/^(?=m=)/m);
@@ -4839,18 +4842,21 @@ var SDPParserImpl = function(_logManager, _fcsConfig, _CONSTANTS) {
                     elm = substr_arr[i];
                     if (elm && elm.indexOf('apt=') !== -1) {
                         APTIndex++;
+                        isAPTCodec = false;
                         splitArray = elm.split('apt=');
                         APTValue = splitArray[1];
 
                         for (index = 0; index < sdpMline.length; index++) {
                             // index[1] is actual port and we should not check it.
                             if ((index !== 1) && sdpMline[index] && (sdpMline[index].indexOf(APTValue) !== -1)) {
-                                // APT value is found in codec list. Return the original SDP.
-                                return pSdp;
+                                // APT value is found in codec list.
+                                isAPTCodec = true;
                             }
                         }
-                        if(APTIndex === numOfAPT){
+                        if(isAPTCodec === false){
                             elm = elm.replace('apt=' + APTValue, 'apt=' + sdpMline[3] + lf + nl);
+                        } else {
+                            elm = elm + lf + nl;
                         }
                     }else if (elm && elm !== "") {
                             elm = elm + lf + nl;
@@ -6579,7 +6585,10 @@ var WebRtcAdaptorImpl = function(_super, _decorator, _model, _logManager, _utils
 
                                 obj.sdp = _sdpParser.updateVersion(peerLocalSdp, obj.sdp);
                                 obj.sdp = _sdpParser.checkIceParamsLengths(obj.sdp, updateSdp.sdp);
-
+                                obj.sdp = _sdpParser.checkAndRestoreICEParams(obj.sdp, updateSdp.sdp);
+                                if (_sdpParser.isSdpHasVideoWithZeroPort(obj.sdp) && self.getDefaultVideoContainer()) {
+                                     self.useDefaultRenderer(false, false, false);
+                                }
                                 obj.sdp = _sdpParser.setTcpSetupAttributeTo(obj.sdp, call.localTcpSetupAttribute, self.isDtlsEnabled());
 
                                 peer.setLocalDescription(
@@ -9482,6 +9491,10 @@ var WebRtcPluginAdaptorImpl = function(_super, _decorator, _model, _logManager, 
 
                                             localSdp = _sdpParser.updateVersion(peerLocalSdp, localSdp);
                                             localSdp = _sdpParser.checkIceParamsLengths(localSdp, updateSdp.sdp);
+                                            localSdp = _sdpParser.checkAndRestoreICEParams(localSdp, updateSdp.sdp);
+                                            if (_sdpParser.isSdpHasVideoWithZeroPort(localSdp) && self.getDefaultVideoContainer()) {
+                                                self.useDefaultRenderer(false, false, false);
+                                            }
 
                                             localSdp = _sdpParser.setTcpSetupAttributeTo(localSdp, call.localTcpSetupAttribute, self.isDtlsEnabled());
 
@@ -10296,7 +10309,7 @@ var WebRtcPluginv31AdaptorImpl = function(_super, _decorator, _model, _logManage
             min_revision: 500,
             min_build: 0,
 
-            current_revision: 516,
+            current_revision: 520,
             current_build: 0
         },
         logger = _logManager.getLogger("WebRtcPluginv31AdaptorImpl");
@@ -12408,8 +12421,12 @@ var WebRtcManager = function(_webRtcAdaptorFactory, _logManager, _turnCredential
 
             var successCallbackWrapper = function(sdp) {
                 clearSuccessParametersFromCall(call);
-                if(!local_hold_status) {
+                if(!local_hold_status && !hold) {
                     rtcAdaptor.restoreMuteStateOfCall(call);
+                }
+                if (!call.call.isVideoNegotiationAvailable()) {
+                    rtcAdaptor.muteVideoTrack(call, true, true);
+                    rtcAdaptor.setOriginatorSendLocalVideo(call, sdp, false);
                 }
                 rtcAdaptor.setOriginatorReceiveRemoteVideo(call);
                 if (typeof(successCallback) === 'function') {
@@ -13097,6 +13114,7 @@ var ConnectivityManagerImpl = function(_service, _logManager, _window, _globalBr
         logger.info("check connectivity timer is stopped.");
         clearInterval(connectivityTimer);
         if (params && params.resetConnectivity) {
+            clearInterval(connectivityTimer);
             isConnected = true;
             _setConnected(isConnected);
         }
@@ -13138,7 +13156,9 @@ var ConnectivityManagerImpl = function(_service, _logManager, _window, _globalBr
     function initConnectivityCheck() {
         var interval = isPositiveNumber(_fcsConfig.connectivityInterval) ? _fcsConfig.connectivityInterval : _CONSTANTS.TIMEOUT.DEFAULT_CONNECTIVITY_CHECK_INTERVAL;
 
-        stopCheckConnectivityTimer();
+        stopCheckConnectivityTimer({
+            resetConnectivity: true
+        });
         if (interval !== "0") {
             connectivityTimer = setInterval(checkConnectivity, interval);
         }
@@ -13152,6 +13172,7 @@ var ConnectivityManagerImpl = function(_service, _logManager, _window, _globalBr
     _globalBroadcaster.subscribe(_CONSTANTS.EVENT.XHR_REQUEST_NOT_INITIALIZED, onCheckConnectivityFailure, PRIORITY);
     _globalBroadcaster.subscribe(_CONSTANTS.EVENT.WEBSOCKET_DISCONNECTED, onCheckConnectivityFailure, PRIORITY);
     _globalBroadcaster.subscribe(_CONSTANTS.EVENT.WEBSOCKET_CONNECTED, onCheckConnectivitySuccess, PRIORITY);
+    _globalBroadcaster.subscribe(_CONSTANTS.EVENT.FORCE_CONNECTIVITY_CHECK, checkConnectivity, PRIORITY);
 
 
 
@@ -13558,7 +13579,9 @@ var SubscriptionManagerImpl = function(_fcsConfig, _fcs, _service, _logManager, 
     function clearForOnSubscriptionFailure(err) {
         logger.debug("Clear for on subscription failure.");
         if (_fcs.isConnected()) {
-            clearSubscription();
+            clearSubscription({
+                resetConnectivity: true
+            });
             _utils.callFunctionIfExist(onSubscriptionFailure, err);
         }
     }
@@ -13725,6 +13748,7 @@ var SubscriptionManagerImpl = function(_fcsConfig, _fcs, _service, _logManager, 
             if (_fcs.isConnected()) {
                 logger.error("Extending subscription is failed - error: " + err);
                 logger.error("Fail reusing existing subscription, re-subscribing.");
+                _globalBroadcaster.publish(_CONSTANTS.EVENT.FORCE_CONNECTIVITY_CHECK);
                 // notify the user first
                 clearOnExtendError();
                 deviceSubscribe();
@@ -14051,13 +14075,17 @@ var SubscriptionManagerImpl = function(_fcsConfig, _fcs, _service, _logManager, 
     };
 
     function handleGoneNotification(data) {
-        clearSubscription();
+        clearSubscription({
+            resetConnectivity: true
+        });
         clearUserNamePasswordFromCache();
         _utils.callFunctionIfExist(_fcs.notification.onGoneReceived, data);
     }
 
     function handleTokenOrSessionLoss() {
-        clearSubscription();
+        clearSubscription({
+            resetConnectivity: true
+        });
         clearUserNamePasswordFromCache();
         _utils.callFunctionIfExist(onSubscriptionFailure, _CONSTANTS.SUBSCRIPTION_EVENT.TOKEN_OR_SESSION_LOSS);
     }
@@ -14106,7 +14134,7 @@ var subscriptionManager = new SubscriptionManager();
  * @namespace
  * @memberOf fcs
  *
- * @version 4.0.0.176
+ * @version 4.1.1
  * @since 3.0.0
  *
  * @see fcs.config#notificationType
@@ -16376,18 +16404,27 @@ var CallManagerImpl = function(_webRtcManager, _callFSM, _callControlService, _s
                 logger.error("consultative transfer failed. callId: " + internalCall.id);
                 _utils.callFunctionIfExist(onFailure, e);
             });
-        } else if (currentCallState === fsmState.LOCAL_HOLDING ||
-            targetCallState === fsmState.LOCAL_HOLDING) {
+        } else if (currentCallState === fsmState.LOCAL_HOLDING) {
             if (!internalCall.transferTrigger) {
-                internalCall.transferTrigger = function() {
+                internalCall.transferTrigger = function () {
                     self.consultativeTransfer(data, onSuccess, onFailure);
+                    delete this.transferTrigger;
                 };
             } else {
-                _utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+                _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
+            }
+        } else if (targetCallState === fsmState.LOCAL_HOLDING) {
+            if (!targetCall.transferTrigger) {
+                targetCall.transferTrigger = function () {
+                    self.consultativeTransfer(data, onSuccess, onFailure);
+                    delete this.transferTrigger;
+                };
+            } else {
+                _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             }
         } else {
-            logger.error("Cannot consultative transfer in INIT callstate :" + fcs.Errors.STATE);
-            _utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            logger.error("Cannot consultative transfer in INIT callstate :" + _fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
         }
     };
 
@@ -17150,11 +17187,8 @@ var CallManagerImpl = function(_webRtcManager, _callFSM, _callControlService, _s
         } else if (currentCallState === fsmState.LOCAL_HOLDING ) {
             if (!internalCall.transferTrigger) {
                 internalCall.transferTrigger = function() {
-                    self.directTransfer(data, function() {
-                        _utils.callFunctionIfExist(onSuccess);
-                    }, function(e) {
-                        _utils.callFunctionIfExist(onFailure, e);
-                    });
+                    self.directTransfer(data, onSuccess, onFailure);
+                    delete this.transferTrigger;
                 };
             }
         } else {
@@ -18552,7 +18586,10 @@ var RccFSMImpl = function(_logManager) {
         callConsultativeTransferred_fsm: "callConsultativeTransferred_fsm",
         callTransferred_fsm: "callTransferred_fsm",
         conferencing_fsm: "conferencing_fsm",
-        conferenced_fsm: "conferenced_fsm"
+        conferenced_fsm: "conferenced_fsm",
+        blindTransferFailed_fsm: "blindTransferFailed_fsm",
+        consultativeTransferFailed_fsm:"consultativeTransferFailed_fsm",
+        conferenceCallFailed_fsm:"conferenceCallFailed_fsm"
     };
 
     //CallFSM receives NotificationEvent
@@ -18579,7 +18616,10 @@ var RccFSMImpl = function(_logManager) {
         answerCall_GUI: "answerCall_GUI",
         consultativeTransfer_GUI: "consultativeTransfer_GUI",
         conferenceCall_GUI: "conferenceCall_GUI",
-        conferenced: "conferenced"
+        conferenced: "conferenced",
+        blindTransferFailed: "blindTransferFailed",
+        consultativeTransferFailed:"consultativeTransferFailed",
+        conferenceCallFailed:"conferenceCallFailed"
     };
     var self = this,
         logger = _logManager.getLogger("rccFSM");
@@ -18599,6 +18639,12 @@ var RccFSMImpl = function(_logManager) {
                         call.currentState = self.CallFSMState.CALL_IN_PROGRESS;
                         onSuccess(call, self.TransferEvent.callInProgress_fsm);
                         break;
+                    // This is server RCC wrong notification workaround code.
+                    // ringing implemantation for init call state
+                    case self.NotificationEvent.ringing:
+                        call.currentState = self.CallFSMState.RINGING;
+                        onSuccess(call, self.TransferEvent.ringing_fsm);
+                        break;
                     case self.NotificationEvent.callReceived:
                         call.currentState = self.CallFSMState.CALL_RECEIVED;
                         onSuccess(call, self.TransferEvent.callReceived_fsm);
@@ -18614,6 +18660,12 @@ var RccFSMImpl = function(_logManager) {
                         call.currentState = self.CallFSMState.CALL_IN_PROGRESS;
                         onSuccess(call, self.TransferEvent.callInProgress_fsm);
                         break;
+                    // This is server RCC wrong notification workaround code.
+                    // ringing implemantation for making call state
+                    case self.NotificationEvent.ringing:
+                        call.currentState = self.CallFSMState.RINGING;
+                        onSuccess(call, self.TransferEvent.ringing_fsm);
+                        break;
                     case self.NotificationEvent.callEnded:
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callEnded_fsm);
@@ -18621,6 +18673,10 @@ var RccFSMImpl = function(_logManager) {
                     case self.NotificationEvent.callFailed:
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callFailed_fsm);
+                        break;
+                    case self.NotificationEvent.endCall_GUI:
+                        call.currentState = self.CallFSMState.ENDING_CALL;
+                        onSuccess(call, self.TransferEvent.endCall_fsm);
                         break;
                     default:
                         onFailure(call, self.TransferEvent.unknownNotification_fsm);
@@ -18633,6 +18689,10 @@ var RccFSMImpl = function(_logManager) {
                         call.currentState = self.CallFSMState.RINGING;
                         onSuccess(call, self.TransferEvent.ringing_fsm);
                         break;
+                    case self.NotificationEvent.answered:
+                        call.currentState = self.CallFSMState.ANSWERED;
+                        onSuccess(call, self.TransferEvent.answered_fsm);
+                        break;
                     case self.NotificationEvent.callFailed:
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callFailed_fsm);
@@ -18640,6 +18700,10 @@ var RccFSMImpl = function(_logManager) {
                     case self.NotificationEvent.callEnded:
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callEnded_fsm);
+                        break;
+                    case self.NotificationEvent.endCall_GUI:
+                        call.currentState = self.CallFSMState.ENDING_CALL;
+                        onSuccess(call, self.TransferEvent.endCall_fsm);
                         break;
                     default:
                         onFailure(call, self.TransferEvent.unknownNotification_fsm);
@@ -18742,6 +18806,14 @@ var RccFSMImpl = function(_logManager) {
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callFailed_fsm);
                         break;
+                    case self.NotificationEvent.endCall_GUI:
+                        call.currentState = self.CallFSMState.ENDING_CALL;
+                        onSuccess(call, self.TransferEvent.endCall_fsm);
+                        break;
+                    case self.NotificationEvent.conferenceCallFailed:
+                        call.currentState = call.previousState;
+                        onSuccess(call, self.TransferEvent.conferenceCallFailed_fsm);
+                        break;
                     default:
                         onFailure(call, self.TransferEvent.unknownNotification_fsm);
                         break;
@@ -18749,6 +18821,10 @@ var RccFSMImpl = function(_logManager) {
                 break;
             case self.CallFSMState.DEFLECTING_CALL:
                 switch (event) {
+                    case self.NotificationEvent.endCall_GUI:
+                        call.currentState = self.CallFSMState.ENDING_CALL;
+                        onSuccess(call, self.TransferEvent.endCall_fsm);
+                        break;
                     case self.NotificationEvent.redirected:
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.redirected_fsm);
@@ -18791,6 +18867,7 @@ var RccFSMImpl = function(_logManager) {
                         onSuccess(call, self.TransferEvent.callHeldLocally_fsm);
                         break;
                     case self.NotificationEvent.blind_transfering_GUI:
+                        call.previousState = call.currentState;
                         call.currentState = self.CallFSMState.BLIND_TRANSFERING;
                         onSuccess(call, self.TransferEvent.blind_transfering_fsm);
                         break;
@@ -18840,6 +18917,10 @@ var RccFSMImpl = function(_logManager) {
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callBlindTransferred_fsm);
                         break;
+                    case self.NotificationEvent.endCall_GUI:
+                        call.currentState = self.CallFSMState.ENDING_CALL;
+                        onSuccess(call, self.TransferEvent.endCall_fsm);
+                        break;
                     case self.NotificationEvent.callEnded:
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callEnded_fsm);
@@ -18847,6 +18928,10 @@ var RccFSMImpl = function(_logManager) {
                     case self.NotificationEvent.callFailed:
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callFailed_fsm);
+                        break;
+                    case self.NotificationEvent.blindTransferFailed:
+                        call.currentState = call.previousState;
+                        onSuccess(call, self.TransferEvent.blindTransferFailed_fsm);
                         break;
                     default:
                         onFailure(call, self.TransferEvent.unknownNotification_fsm);
@@ -18860,6 +18945,7 @@ var RccFSMImpl = function(_logManager) {
                         onSuccess(call, self.TransferEvent.callRetrievedRemotely_fsm);
                         break;
                     case self.NotificationEvent.blind_transfering_GUI:
+                        call.previousState = call.currentState;
                         call.currentState = self.CallFSMState.BLIND_TRANSFERING;
                         onSuccess(call, self.TransferEvent.blind_transfering_fsm);
                         break;
@@ -18872,6 +18958,9 @@ var RccFSMImpl = function(_logManager) {
                         call.previousState = call.currentState;
                         call.currentState = self.CallFSMState.BOTH_HOLD;
                         onSuccess(call, self.TransferEvent.callHeldBoth_fsm);
+                        break;
+                    case self.NotificationEvent.callHeldRemotely:
+                        onSuccess(call, self.TransferEvent.callHeldRemotely_fsm);
                         break;
                     case self.NotificationEvent.endCall_GUI:
                         call.currentState = self.CallFSMState.ENDING_CALL;
@@ -18916,6 +19005,10 @@ var RccFSMImpl = function(_logManager) {
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callFailed_fsm);
                         break;
+                    case self.NotificationEvent.endCall_GUI:
+                        call.currentState = self.CallFSMState.ENDING_CALL;
+                        onSuccess(call, self.TransferEvent.endCall_fsm);
+                        break;
                     default:
                         onFailure(call, self.TransferEvent.unknownNotification_fsm);
                         break;
@@ -18948,7 +19041,11 @@ var RccFSMImpl = function(_logManager) {
                         call.currentState = self.CallFSMState.BOTH_HOLD;
                         onSuccess(call, self.TransferEvent.callHeldBoth_fsm);
                         break;
+                    case self.NotificationEvent.callHeldLocally:
+                        onSuccess(call, self.TransferEvent.callHeldLocally_fsm);
+                        break;
                     case self.NotificationEvent.blind_transfering_GUI:
+                        call.previousState = call.currentState;
                         call.currentState = self.CallFSMState.BLIND_TRANSFERING;
                         onSuccess(call, self.TransferEvent.blind_transfering_fsm);
                         break;
@@ -18967,6 +19064,10 @@ var RccFSMImpl = function(_logManager) {
                 break;
             case self.CallFSMState.MAKING_CONSULTATIVE_TRANSFER:
                 switch (event) {
+                    case self.NotificationEvent.endCall_GUI:
+                        call.currentState = self.CallFSMState.ENDING_CALL;
+                        onSuccess(call, self.TransferEvent.endCall_fsm);
+                        break;
                     case self.NotificationEvent.callTransferred:
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callConsultativeTransferred_fsm);
@@ -18978,6 +19079,10 @@ var RccFSMImpl = function(_logManager) {
                     case self.NotificationEvent.callFailed:
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callFailed_fsm);
+                        break;
+                    case self.NotificationEvent.consultativeTransferFailed:
+                        call.currentState = call.previousState;
+                        onSuccess(call, self.TransferEvent.consultativeTransferFailed_fsm);
                         break;
                     default:
                         onFailure(call, self.TransferEvent.unknownNotification_fsm);
@@ -19001,6 +19106,10 @@ var RccFSMImpl = function(_logManager) {
                     case self.NotificationEvent.callFailed:
                         call.currentState = self.CallFSMState.INIT;
                         onSuccess(call, self.TransferEvent.callFailed_fsm);
+                        break;
+                    case self.NotificationEvent.endCall_GUI:
+                        call.currentState = self.CallFSMState.ENDING_CALL;
+                        onSuccess(call, self.TransferEvent.endCall_fsm);
                         break;
                     default:
                         onFailure(call, self.TransferEvent.unknownNotification_fsm);
@@ -19041,6 +19150,7 @@ var RccFSMImpl = function(_logManager) {
                         onSuccess(call, self.TransferEvent.callFailed_fsm);
                         break;
                     case self.NotificationEvent.blind_transfering_GUI:
+                        call.previousState = call.currentState;
                         call.currentState = self.CallFSMState.BLIND_TRANSFERING;
                         onSuccess(call, self.TransferEvent.blind_transfering_fsm);
                         break;
@@ -19085,11 +19195,8 @@ var RccFSMImpl = function(_logManager) {
                         call.id);
                     handler(call, transferEvent);
                 });
-        } else if (event === self.NotificationEvent.callFailed) {
-            //Server not recaived callid in call_failed notify
-            //handler(call, self.TransferEvent.callFailed_fsm);
-            // TODO: Remove the following log. Added to build the project.
-            logger.info("self.NotificationEvent.callFailed");
+        } else {
+            logger.info("Not a call object. Ignore this event. " + event);
         }
     };
 };
@@ -19399,7 +19506,7 @@ var rccControlService = new RccControlService();
 //@{fcs-jsl-prod}
 
 
-var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalBroadcaster) {
+var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalBroadcaster, _utils, _fcs) {
 
     /* AUDIT_KICKOFF_TIMEOUT is the interval we use to kickoff call audit after the call is setup.
      * The timeout is there to ensure we do not hit call setup race conditions when we try to kickoff the call audit */
@@ -19421,7 +19528,9 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
             RENEGOTIATION: 9,
             TRANSFERRED: 10,
             ON_REMOTE_HOLD: 11,
-            CALL_IN_PROGRESS: 12
+            CALL_IN_PROGRESS: 12,
+            EARLY_MEDIA: 13,
+            TRANSFER_FAILURE: 14
         },
         CALL_HOLD_STATES = {
             LOCAL_HOLD: 0,
@@ -19432,7 +19541,13 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         isMonitorStarted = false,
         isSubscription = false,
         sessionParam = {},
-        onMonitorSessionLost;
+        onMonitorSessionLost,
+        monitorSessionLostNotification = {
+           monitorSessionRefreshed: 'monitorSessionRefreshed',
+           monitorSessionTerminated: 'monitorSessionTerminated'
+        },
+        onMonitorSessionRefreshed,
+        onMonitorSessionTerminated;
 
     this.IncomingCall = function(callid, opts, callee, caller) {
         var id = callid,
@@ -19443,7 +19558,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
             btnTimeout, auditTimer, calledParty = callee,
             callingParty = caller;
 
-        this.notificationQueue = new utils.Queue();
+        this.notificationQueue = new _utils.Queue();
         this.onLocalStreamAdded = null;
         this.onStreamAdded = null;
         this.mute = function() {
@@ -19733,7 +19848,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
             btnTimeout, auditTimer, calledParty = callee,
             callingParty = caller;
 
-        this.notificationQueue = new utils.Queue();
+        this.notificationQueue = new _utils.Queue();
 
         this.onLocalStreamAdded = null;
 
@@ -20068,7 +20183,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         }, function(e) {
             stopExtendMonitorDeviceTimer();
             removeMonitorSessionParam();
-            utils.callFunctionIfExist(onMonitorSessionLost, e);
+            _utils.callFunctionIfExist(onMonitorSessionLost, e);
             logger.info("extend monitor device subscription request failure.");
         });
     }
@@ -20081,6 +20196,14 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
 
     self.setOnMonitorSessionLost = function(data) {
         onMonitorSessionLost = data.callback;
+    };
+
+    self.setOnMonitorSessionRefreshed = function (data) {
+        onMonitorSessionRefreshed = data.callback;
+    };
+
+    self.setOnMonitorSessionTerminated = function (data) {
+        onMonitorSessionTerminated = data.callback;
     };
 
     self.CALL_STATES = CALL_STATES;
@@ -20150,7 +20273,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         logger.info("start call... to: " + data.to);
 
         if (!monitorStarted()) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
@@ -20161,9 +20284,9 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
 
             self.delegateToCallFSM(internalCall, fsmNotificationEvent.makeCall_GUI);
             calls[reponse.rccCallResponse.callId] = internalCall;
-            utils.callFunctionIfExist(onSuccess, internalCall.call);
+            _utils.callFunctionIfExist(onSuccess, internalCall.call);
         }, function(e) {
-            utils.callFunctionIfExist(onFailure, e);
+            _utils.callFunctionIfExist(onFailure, e);
         });
     };
 
@@ -20172,7 +20295,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         logger.info("Called start Monitor Device function with " + data.deviceID);
 
         if (!self.isSubscribed()) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
@@ -20190,10 +20313,10 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         _rccControlService.startMonitor(param, function(response) {
             setMonitorSessionParam(data.deviceID, response.rccSessionResponse.sessionId, response.rccSessionResponse.expires);
             startExtendMonitorDeviceTimer(response.rccSessionResponse.expires / 2 * 1000);
-            utils.callFunctionIfExist(onSuccess);
+            _utils.callFunctionIfExist(onSuccess);
             logger.info("Start monitor device request successfuly");
         }, function(e) {
-            utils.callFunctionIfExist(onFailure, e);
+            _utils.callFunctionIfExist(onFailure, e);
             logger.info("Start monitor device request failure : " + e);
         });
     };
@@ -20207,17 +20330,17 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         logger.info("Called stop monitor device function");
 
         if (!monitorStarted()) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
         _rccControlService.stopMonitor(param, function() {
             stopExtendMonitorDeviceTimer();
             removeMonitorSessionParam();
-            utils.callFunctionIfExist(onSuccess);
+            _utils.callFunctionIfExist(onSuccess);
             logger.info("Stop monitor device request successfuly");
         }, function(e) {
-            utils.callFunctionIfExist(onFailure, e);
+            _utils.callFunctionIfExist(onFailure, e);
             logger.info("Stop monitor device request failure : " + e);
         });
     };
@@ -20235,13 +20358,13 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         logger.info("Called call answer function.Call id : " + data.callid);
 
         if (!internalCall) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
         // Answer call is supported for only device level monitoring
         if (!isDeviceMonitor(getMonitorSessionParam().deviceID)) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
@@ -20265,7 +20388,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
                     logger.info("Call answer request failure. " + e);
                 });
         } else {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
         }
     };
 
@@ -20281,7 +20404,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         logger.info("Called call hold function.Call id : " + data.callid);
 
         if (!internalCall) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
@@ -20292,16 +20415,16 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
             _rccControlService.holdCall(param,
                 function() {
                     self.delegateToCallFSM(internalCall, fsmNotificationEvent.holdCall_GUI);
-                    utils.callFunctionIfExist(onSuccess);
+                    _utils.callFunctionIfExist(onSuccess);
                     logger.info("Call hold request successfuly.");
                 },
                 function(e) {
-                    utils.callFunctionIfExist(onFailure, e);
+                    _utils.callFunctionIfExist(onFailure, e);
                     logger.info("Call hold request failure. " + e);
                 }
             );
         } else {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
         }
     };
 
@@ -20317,7 +20440,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         logger.info("Called call unhold function.Call id : " + data.callid);
 
         if (!internalCall) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
@@ -20329,16 +20452,16 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
             _rccControlService.retrieveCall(param,
                 function() {
                     self.delegateToCallFSM(internalCall, fsmNotificationEvent.retrieveCall_GUI);
-                    utils.callFunctionIfExist(onSuccess);
+                    _utils.callFunctionIfExist(onSuccess);
                     logger.info("Call unhold request successfuly.");
                 },
                 function(e) {
-                    utils.callFunctionIfExist(onFailure, e);
+                    _utils.callFunctionIfExist(onFailure, e);
                     logger.info("Call unhold request failure. " + e);
                 }
             );
         } else {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
         }
     };
 
@@ -20354,37 +20477,27 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         logger.info("Called call end function.Call id : " + data.callid);
 
         if (!internalCall) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
         _currentState = _rccFSM.getCurrentState(internalCall);
         //check with the state machine if the current state would accept an endCall.
-        if (_currentState === fsmState.CALL_RECEIVED ||
-            _currentState === fsmState.ANSWERED ||
-            _currentState === fsmState.LOCAL_HOLD ||
-            _currentState === fsmState.REMOTE_HOLD ||
-            _currentState === fsmState.BOTH_HOLD ||
-            _currentState === fsmState.RINGING ||
-            // in auto answer not supported device case, if answer called, will get rest request success
-            // and no negative notifications, so let the user end the call while waiting for end call or monitored device
-            // answers call.
-            _currentState === fsmState.ANSWERING_CALL) {
-
-            _rccControlService.endCall(
-                param,
-                function() {
-                    self.delegateToCallFSM(internalCall, fsmNotificationEvent.endCall_GUI);
-                    utils.callFunctionIfExist(onSuccess);
-                    logger.info("Call end request successfuly.");
-                },
-                function(e) {
-                    utils.callFunctionIfExist(onFailure, e);
-                    logger.info("Call end request failure. " + e);
-                }
-            );
+        if (_currentState === fsmState.INIT || _currentState === fsmState.ENDING_CALL) {
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
         } else {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _rccControlService.endCall(
+                    param,
+                    function () {
+                        self.delegateToCallFSM(internalCall, fsmNotificationEvent.endCall_GUI);
+                        _utils.callFunctionIfExist(onSuccess);
+                        logger.info("Call end request successfuly.");
+                    },
+                    function (e) {
+                        _utils.callFunctionIfExist(onFailure, e);
+                        logger.info("Call end request failure. " + e);
+                    }
+            );
         }
     };
 
@@ -20401,7 +20514,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         logger.info("Called call forward function.Call id : " + data.callid + " ,address : " + data.address);
 
         if (!internalCall) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
@@ -20410,15 +20523,15 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
             _rccControlService.deflectCall(param,
                 function() {
                     self.delegateToCallFSM(internalCall, fsmNotificationEvent.deflectCall_GUI);
-                    utils.callFunctionIfExist(onSuccess);
+                    _utils.callFunctionIfExist(onSuccess);
                     logger.info("Call forward request successfuly.");
                 },
                 function(e) {
-                    utils.callFunctionIfExist(onFailure, e);
+                    _utils.callFunctionIfExist(onFailure, e);
                     logger.info("Call forward request failure. " + e);
                 });
         } else {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
         }
     };
 
@@ -20437,7 +20550,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         logger.info("Called call consultativeTransfer function.Current Call Id : " + data.currentCallId + " ,Target Call Id : " + data.targetCallId);
 
         if (!currentInternalCall || !targetInternalCall) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
@@ -20445,18 +20558,18 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         targetCallState = _rccFSM.getCurrentState(targetInternalCall);
         if (currentCallState !== fsmState.ANSWERED) {
             logger.error("consultativeTransfer current call is not in correct state: " + currentCallState);
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
         } else if (targetCallState !== fsmState.LOCAL_HOLD &&
             targetCallState !== fsmState.BOTH_HOLD) {
             logger.error("consultativeTransfer target call is not in correct state: " + targetCallState);
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
         } else {
             _rccControlService.consultativeTransfer(param, function() {
                 self.delegateToCallFSM(currentInternalCall, fsmNotificationEvent.consultativeTransfer_GUI);
-                utils.callFunctionIfExist(onSuccess);
+                _utils.callFunctionIfExist(onSuccess);
                 logger.info("Call consultativeTransfer request successfuly.");
             }, function(e) {
-                utils.callFunctionIfExist(onFailure, e);
+                _utils.callFunctionIfExist(onFailure, e);
                 logger.info("Call consultativeTransfer request failure. " + e);
             });
         }
@@ -20473,7 +20586,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
                 sessionID: getMonitorSessionParam().sessionID
             };
         if (!currentCall && targetCall) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
@@ -20484,29 +20597,29 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
             logger.info("Called call join function. CallId1 : " + data.callid1 + " CallId2 : " + data.callid2);
             _rccControlService.conferenceCall(param, function() {
                 self.delegateToCallFSM(currentCall, fsmNotificationEvent.conferenceCall_GUI);
-                utils.callFunctionIfExist(onSuccess);
+                _utils.callFunctionIfExist(onSuccess);
                 logger.info("Join conference request successfly. ");
             }, function(e) {
-                utils.callFunctionIfExist(onFailure, e);
+                _utils.callFunctionIfExist(onFailure, e);
             });
         } else {
             logger.error("conference call is not in correct state: " + currentCallState);
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
         }
     };
 
     self.getDeviceList = function(data, onSuccess, onFailure) {
         if (!self.isSubscribed()) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
         logger.info("Called getDeviceList function.");
         _rccControlService.getDeviceList(function(responseData) {
-            utils.callFunctionIfExist(onSuccess, responseData.rccDeviceResponse.deviceList);
+            _utils.callFunctionIfExist(onSuccess, responseData.rccDeviceResponse.deviceList);
             logger.info("GetDeviceList request successfuly.");
             logger.debug("Response data: " + JSON.stringify(responseData));
         }, function(e) {
-            utils.callFunctionIfExist(onFailure, e);
+            _utils.callFunctionIfExist(onFailure, e);
             logger.info("GetDeviceList request failure.");
         });
     };
@@ -20525,7 +20638,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         logger.info("Called call directTransfer function.Call Id : " + data.callid + " ,Destination : " + data.destination);
 
         if (!internalCall) {
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
             return;
         }
 
@@ -20538,15 +20651,15 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
             logger.info("[rccManager.directTransfer->sendTransfer : transfer target ]" + data.address);
             _rccControlService.blindTransfer(param, function() {
                 self.delegateToCallFSM(internalCall, fsmNotificationEvent.blind_transfering_GUI);
-                utils.callFunctionIfExist(onSuccess);
+                _utils.callFunctionIfExist(onSuccess);
                 logger.info("[rccManager.directTransfer->sentTransfer : transfer target ]" + data.address);
             }, function(e) {
                 logger.info("Call directTransfer request failure. " + e);
-                utils.callFunctionIfExist(onFailure, e);
+                _utils.callFunctionIfExist(onFailure, e);
             });
         } else {
             logger.error("directTransfer call is not in correct state: " + currentCallState);
-            utils.callFunctionIfExist(onFailure, fcs.Errors.STATE);
+            _utils.callFunctionIfExist(onFailure, _fcs.Errors.STATE);
         }
     };
 
@@ -20571,7 +20684,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
         function triggerCallState(state, data) {
             logger.debug("triggerCallState:  state =   " + state + "    call.statusCode =  " + call.statusCode + "   call.reasonText =  " + call.reasonText + " data = " + JSON.stringify(data));
             call.call.callState = state;
-            utils.callFunctionIfExist(call.call.onStateChange, state, call.statusCode, call.reasonText, data);
+            _utils.callFunctionIfExist(call.call.onStateChange, state, call.statusCode, call.reasonText, data);
         }
 
         function getCallerAndCalleeData(call) {
@@ -20610,6 +20723,15 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
             case transferEvent.callFailed_fsm:
                 clearResources(call.id);
                 triggerCallState(CALL_STATES.REJECTED);
+                break;
+            case transferEvent.blindTransferFailed_fsm:
+                triggerCallState(CALL_STATES.TRANSFER_FAILURE);
+                break;
+            case transferEvent.consultativeTransferFailed_fsm:
+                triggerCallState(CALL_STATES.TRANSFER_FAILURE);
+                break;
+            case transferEvent.conferenceCallFailed_fsm:
+                triggerCallState(CALL_STATES.TRANSFER_FAILURE);
                 break;
             case transferEvent.callEnded_fsm:
                 clearResources(call.id);
@@ -20748,14 +20870,14 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
                 break;
             case fsmNotificationEvent.callFailed:
                 if (internalCall) {
-                    utils.callFunctionIfExist(internalCall.answerFailureCallback, fcs.Errors.CALL_FAILED);
+                    _utils.callFunctionIfExist(internalCall.answerFailureCallback, _fcs.Errors.CALL_FAILED);
                 }
                 handleCallControlNotification(fsmNotificationEvent.callFailed, rccNotifyData);
                 break;
             case fsmNotificationEvent.answered:
                 addCallerAndCalleeToTheCall(rccNotifyData);
                 if (internalCall) {
-                    utils.callFunctionIfExist(internalCall.answerSuccessCallback);
+                    _utils.callFunctionIfExist(internalCall.answerSuccessCallback);
                     // No need to trigger failure callback once answered successfully (answered event is received)
                     if (internalCall.answerFailureCallback) {
                         internalCall.answerFailureCallback = undefined;
@@ -20767,11 +20889,17 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
                 incomingCall.call = new self.IncomingCall(rccNotifyData.callId, options, rccNotifyData.calledParty, rccNotifyData.callingParty);
                 incomingCall.id = rccNotifyData.callId;
                 calls[rccNotifyData.callId] = incomingCall;
-                utils.callFunctionIfExist(fcs.call.onReceived, incomingCall.call);
+                _utils.callFunctionIfExist(_fcs.call.onReceived, incomingCall.call);
                 addCallerAndCalleeToTheCall(rccNotifyData);
                 handleCallControlNotification(fsmNotificationEvent.callReceived, rccNotifyData);
                 break;
             case fsmNotificationEvent.ringing:
+                if (!isCall(rccNotifyData.callId)) {
+                    newOutgoingCall.call = new self.OutgoingCall(rccNotifyData.callId, rccNotifyData.calledParty, rccNotifyData.callingParty);
+                    newOutgoingCall.id = rccNotifyData.callId;
+                    calls[rccNotifyData.callId] = newOutgoingCall;
+                    _utils.callFunctionIfExist(_fcs.call.onOutgoingCall, newOutgoingCall.call);
+                }
                 addCallerAndCalleeToTheCall(rccNotifyData);
                 handleCallControlNotification(fsmNotificationEvent.ringing, rccNotifyData);
                 break;
@@ -20780,7 +20908,7 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
                     newOutgoingCall.call = new self.OutgoingCall(rccNotifyData.callId, rccNotifyData.calledParty, rccNotifyData.callingParty);
                     newOutgoingCall.id = rccNotifyData.callId;
                     calls[rccNotifyData.callId] = newOutgoingCall;
-                    utils.callFunctionIfExist(fcs.call.onOutgoingCall, newOutgoingCall.call);
+                    _utils.callFunctionIfExist(_fcs.call.onOutgoingCall, newOutgoingCall.call);
                 }
                 addCallerAndCalleeToTheCall(rccNotifyData);
                 handleCallControlNotification(fsmNotificationEvent.callInProgress, rccNotifyData);
@@ -20791,9 +20919,26 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
                 break;
             case fsmNotificationEvent.callEnded:
                 if (internalCall) {
-                    utils.callFunctionIfExist(internalCall.answerFailureCallback, fcs.Errors.CALL_ENDED);
+                    _utils.callFunctionIfExist(internalCall.answerFailureCallback, _fcs.Errors.CALL_ENDED);
                 }
                 handleCallControlNotification(fsmNotificationEvent.callEnded, rccNotifyData);
+                break;
+            case fsmNotificationEvent.blindTransferFailed:
+                handleCallControlNotification(fsmNotificationEvent.blindTransferFailed, rccNotifyData);
+                break;
+            case fsmNotificationEvent.consultativeTransferFailed:
+                handleCallControlNotification(fsmNotificationEvent.consultativeTransferFailed, rccNotifyData);
+                break;
+            case fsmNotificationEvent.conferenceCallFailed:
+                handleCallControlNotification(fsmNotificationEvent.conferenceCallFailed, rccNotifyData);
+                break;
+            case monitorSessionLostNotification.monitorSessionRefreshed:
+                _utils.callFunctionIfExist(onMonitorSessionRefreshed);
+                break;
+            case monitorSessionLostNotification.monitorSessionTerminated:
+                stopExtendMonitorDeviceTimer();
+                removeMonitorSessionParam();
+                _utils.callFunctionIfExist(onMonitorSessionTerminated);
                 break;
             default:
                 handleCallControlNotification(fsmNotificationEvent.unknowNotify, rccNotifyData);
@@ -20802,16 +20947,16 @@ var RccManagerImpl = function(_rccFSM, _rccControlService, _logManager, _globalB
     };
     _globalBroadcaster.subscribe(CONSTANTS.EVENT.DEVICE_SUBSCRIPTION_STARTED, subscriptionStarted);
     _globalBroadcaster.subscribe(CONSTANTS.EVENT.DEVICE_SUBSCRIPTION_ENDED, subscriptionStopped);
-
-
 };
 
 //@{fcs-jsl-prod}
-var RccManager = function(_rccFSM, _rccControlService, _logManager, _globalBroadcaster) {
+var RccManager = function(_rccFSM, _rccControlService, _logManager, _globalBroadcaster, _utils, _fcs) {
     return new RccManagerImpl(_rccFSM || rccFSM,
         _rccControlService || rccControlService,
         _logManager || logManager,
-        _globalBroadcaster || globalBroadcaster);
+        _globalBroadcaster || globalBroadcaster,
+        _utils || utils,
+        _fcs || fcs);
 };
 
 var rccManager = new RccManager();
@@ -20991,7 +21136,7 @@ var calllogManager = new CalllogManager();
  * @namespace
  * @memberOf fcs
  *
- * @version 4.0.0.176
+ * @version 4.1.1
  * @since 3.0.0
  */
 var CalllogImpl = function(_manager) {
@@ -21125,7 +21270,7 @@ var CalllogImpl = function(_manager) {
     /**
      * @name fcs.calllog#Entry
      * @class
-     * @version 4.0.0.176
+     * @version 4.1.1
      * @since 3.0.0
      */
     this.Entry = function() {};
@@ -21401,7 +21546,7 @@ var addressbookManager = new AddressbookManager();
  * @name addressbook
  * @namespace
  * @memberOf fcs
- * @version 4.0.0.176
+ * @version 4.1.1
  * @since 3.0.0
  */
 var AddressbookImpl = function(_manager) {
@@ -21667,7 +21812,7 @@ var collaborationManager = new CollaborationManager();
  * @name collaboration
  * @namespace
  * @memberOf fcs
- * @version 4.0.0.176
+ * @version 4.1.1
  * @since 3.1.0
  */
 var CollaborationImpl = function(_manager) {
@@ -21759,7 +21904,7 @@ fcs.collaboration = new Collaboration();
  *
  * @memberOf fcs
  *
- * @version 4.0.0.176
+ * @version 4.1.1
  */
 
 var CallImpl = function(_manager) {
@@ -22963,6 +23108,84 @@ var CallImpl = function(_manager) {
     };
 
     /**
+     * When an monitor session refreshed notification is received, {@link fcs.call#setOnMonitorSessionRefreshed} handler will be invoked.
+     *
+     * This is an RCC service only method.
+     *
+     * @name fcs.call#setOnMonitorSessionRefreshed
+     * @function
+     * @since 4.1.0
+     * @param {function} callback callback function for on monitor session refreshed
+     *
+     * @example
+     * onSuccess = function () {
+     *   console.log('Start monitor success');
+     *
+     *   fcs.call.setOnMonitorSessionRefreshed(
+     *       function () {
+     *           console.log('Received monitor session refreshed.');
+     *       });
+     * }
+     *
+     * onFailure = function () {
+     *   console.log('Start monitor failure');
+     * }
+     *
+     * fcs.call.startMonitorDevice(deviceID, onSuccess, onFailure);
+     *
+     */
+    this.setOnMonitorSessionRefreshed = function (callback) {
+        var param = {
+            callback: callback
+        };
+
+        param = extend(param, {
+            serviceName: 'rcc'
+        });
+
+        return _manager.invoke('call', 'setOnMonitorSessionRefreshed', param);
+    };
+
+    /**
+     * When an monitor session refreshed notification is received, {@link fcs.call#setOnMonitorSessionTerminated} handler will be invoked.
+     *
+     * This is an RCC service only method.
+     *
+     * @name fcs.call#setOnMonitorSessionTerminated
+     * @function
+     * @since 4.1.0
+     * @param {function} callback callback function for on monitor session terminated
+     *
+     * @example
+     * onSuccess = function () {
+     *   console.log('Start monitor success');
+     *
+     *   fcs.call.setOnMonitorSessionTerminated(
+     *       function () {
+     *           console.log('Received monitor session terminated.');
+     *       });
+     * }
+     *
+     * onFailure = function () {
+     *   console.log('Start monitor failure');
+     * }
+     *
+     * fcs.call.startMonitorDevice(deviceID, onSuccess, onFailure);
+     *
+     */
+    this.setOnMonitorSessionTerminated = function (callback) {
+        var param = {
+            callback: callback
+        };
+
+        param = extend(param, {
+            serviceName: 'rcc'
+        });
+
+        return _manager.invoke('call', 'setOnMonitorSessionTerminated', param);
+    };
+
+    /**
      * When an incoming call is received, {@link fcs.call#event:onReceived} handler will be invoked.
      *
      * This is a SPiDR and RCC service class.
@@ -22975,7 +23198,7 @@ var CallImpl = function(_manager) {
      * @param {Object} opts options
      * @param {String} callee Called party information. This is an RCC service parameter.
      * @param {String} caller Calling party information. This is an RCC service parameter.
-     * @version 4.0.0.176
+     * @version 4.1.1
      */
     this.IncomingCall = function() {
 
@@ -24111,7 +24334,7 @@ var CallImpl = function(_manager) {
      * @param {String} callid Unique identifier for the call
      * @param {String} callee Called party information. This is an RCC service parameter. Exists in received calls. Does not exist in rcc client started calls.
      * @param {String} caller Calling party information. This is an RCC service parameter. Exists in received calls. Does not exist in rcc client started calls.
-     * @version 4.0.0.176
+     * @version 4.1.1
      */
     this.OutgoingCall = function() {
 
@@ -25018,7 +25241,7 @@ var routemanagementManager = new RouteManagementManager();
  * @namespace
  * @memberOf fcs
  *
- * @version 4.0.0.176
+ * @version 4.1.1
  * @since 3.0.0
  *
  */
@@ -25027,7 +25250,7 @@ var RouteManagementImpl = function(_manager) {
     /**
      * @name fcs.routes#Entry
      * @class
-     * @version 4.0.0.176
+     * @version 4.1.1
      * @since 3.0.0
      */
     this.Entry = function() {};
@@ -25227,7 +25450,7 @@ var userprofiledataManager = new UserProfileDataManager();
  * @namespace
  * @memberOf fcs
  *
- * @version 4.0.0.176
+ * @version 4.1.1
  * @since 3.0.0
  *
  */
@@ -25261,7 +25484,7 @@ var UserProfileDataImpl = function(_manager) {
      *
      * @name fcs.userprofile#UserProfile
      * @class
-     * @version 4.0.0.176
+     * @version 4.1.1
      * @since 3.0.0
      */
 
@@ -25570,7 +25793,7 @@ var imManager = new IMManager();
  * @namespace
  * @memberOf fcs
  *
- * @version 4.0.0.176
+ * @version 4.1.1
  * @since 3.0.0
  */
 var IMImpl = function(_manager) {
@@ -25622,7 +25845,7 @@ var IMImpl = function(_manager) {
     /**
      * @name fcs.im#Message
      * @class
-     * @version 4.0.0.176
+     * @version 4.1.1
      * @since 3.0.0
      */
     this.Message = function() {};
@@ -25782,7 +26005,7 @@ var mwiManager = new MWIManagerImpl(mwiService);
  * @namespace
  * @memberOf fcs
  *
- * @version 4.0.0.176
+ * @version 4.1.1
  * @since 4.0.0
  */
 
@@ -25814,7 +26037,7 @@ var MWIImpl = function(_manager) {
     /**
      * @name fcs.mwi#Message
      * @class
-     * @version 4.0.0.176
+     * @version 4.1.1
      * @since 4.0.0
      */
     this.Message = function() {};
@@ -25833,7 +26056,7 @@ var MWIImpl = function(_manager) {
      * @function
      * @param {retrieveVoiceMailsRequestSuccess} success callback function
      * @param {function} onFailure The onFailure(err) callback to be called
-     * @version 4.0.0.176
+     * @version 4.1.1
      * @since 4.0.0
      * @example
      * var onSuccess = function(msg){
@@ -25912,7 +26135,7 @@ fcs.mwi = new MWIImpl(mwiManager);
  * @namespace
  * @memberOf fcs
  *
- * @version 4.0.0.176
+ * @version 4.1.1
  * @since 3.0.0
  */
 var Custom = function() {
@@ -25952,8 +26175,19 @@ NotificationCallBacks.custom = function(data) {
 var PRESENCE_URL = "/presence",
     PRESENCE_WATCHER_URL = "/presenceWatcher",
     REQUEST_TYPE_WATCH = "watch",
+    REQUEST_TYPE_SUBSCRIPTION = "subscription",
+    REQUEST_TYPE_WATCHERAUTHORIZATION = "watcherAuthorization",
     REQUEST_TYPE_STOP_WATCH = "stopwatch",
     REQUEST_TYPE_GET = "get",
+    PRESENCE_WATCHER_REQUEST_URLS = {
+        ALLOWED_USERS: '/allowedusers',
+        BANNED_USERS: '/blockedusers',
+        SHOWOFFLINE_USERS: '/politeblockedusers'
+    },
+    PRESENCE_WATCHER_LIST_UPDATE_TYPE = {
+        ADD: "add",
+        DELETE: "delete"
+    },
     PRESENCE_STATE = {
         CONNECTED: 0,
         UNAVAILABLE: 1,
@@ -26101,7 +26335,9 @@ var PresenceStateParser = function() {
 
 var presenceStateParser;
 
-var PresenceServiceImpl = function(_server, _logManager, _presenceStateParser) {
+var presenceWatcherUpdatePendingListNotifyCallback;
+
+var PresenceServiceImpl = function(_server, _logManager, _presenceStateParser, _fcs) {
     var logger = _logManager.getLogger("presenceService");
 
     this.onReceived = null;
@@ -26146,22 +26382,121 @@ var PresenceServiceImpl = function(_server, _logManager, _presenceStateParser) {
     };
 
     this.stopwatch = function(watchedUserList, onSuccess, onFailure) {
-
         makeRequest(watchedUserList, onSuccess, onFailure, REQUEST_TYPE_STOP_WATCH);
     };
 
 
     this.retrieve = function(watchedUserList, onSuccess, onFailure) {
-
         makeRequest(watchedUserList, onSuccess, onFailure, REQUEST_TYPE_GET);
     };
 
+    function makeRemoveFromListRequest(user, urlSuffix, onSuccess, onFailure) {
+        if (user) {
+            var data = {
+                "presenceWatcherRequest": {
+                    "user": user,
+                    "action": PRESENCE_WATCHER_LIST_UPDATE_TYPE.DELETE
+                }
+            };
+            _server.sendPutRequest({
+                "url": getWAMUrl(1, PRESENCE_WATCHER_URL + urlSuffix),
+                "data": data
+            }, onSuccess, function(e) {
+                onFailure(e);
+            });
+        } else {
+            onFailure(_fcs.Errors.INVALID_PARAMETER);
+        }
+    }
+
+    function makeAddToListRequest(userList, urlSuffix, onSuccess, onFailure) {
+        if (userList && userList.length > 0) {
+            var data = {
+                "presenceWatcherRequest": {
+                    "userList": userList,
+                    "action": PRESENCE_WATCHER_LIST_UPDATE_TYPE.ADD
+                }
+            };
+            _server.sendPutRequest({
+                "url": getWAMUrl(1, PRESENCE_WATCHER_URL + urlSuffix),
+                "data": data
+            }, onSuccess, function(e) {
+                onFailure(e);
+            });
+        } else {
+            onFailure(_fcs.Errors.INVALID_PARAMETER);
+        }
+    }
+
+    function makeGetListRequest(urlSuffix, onSuccess, onFailure) {
+        _server.sendGetRequest({
+            "url": getWAMUrl(1, PRESENCE_WATCHER_URL + urlSuffix)
+        }, function(data) {
+            onSuccess(data.presenceWatcherResponse.presenceWatcherEntries);
+        }, function(e) {
+            onFailure(e);
+        });
+    }
+
+
+    this.authWatchers = function(onSuccess, onFailure, notifyCallback) {
+        presenceWatcherUpdatePendingListNotifyCallback = notifyCallback;
+        var data = {
+            "presenceWatcherRequest": {
+                "action": REQUEST_TYPE_WATCHERAUTHORIZATION
+            }
+        };
+        _server.sendPostRequest({
+                "url": getWAMUrl(1, PRESENCE_WATCHER_URL),
+                "data": data
+            },
+            onSuccess,
+            onFailure
+        );
+    };
+
+    this.getAllowedList = function(onSuccess, onFailure) {
+        makeGetListRequest(PRESENCE_WATCHER_REQUEST_URLS.ALLOWED_USERS, onSuccess, onFailure);
+    };
+    this.getBannedList = function(onSuccess, onFailure) {
+        makeGetListRequest(PRESENCE_WATCHER_REQUEST_URLS.BANNED_USERS, onSuccess, onFailure);
+    };
+
+    this.getShowOfflineList = function(onSuccess, onFailure) {
+        makeGetListRequest(PRESENCE_WATCHER_REQUEST_URLS.SHOWOFFLINE_USERS, onSuccess, onFailure);
+    };
+
+
+    this.removeFromBannedList = function(user, onSuccess, onFailure) {
+        makeRemoveFromListRequest(user, PRESENCE_WATCHER_REQUEST_URLS.BANNED_USERS, onSuccess, onFailure);
+    };
+
+    this.removeFromAllowedList = function(user, onSuccess, onFailure) {
+        makeRemoveFromListRequest(user, PRESENCE_WATCHER_REQUEST_URLS.ALLOWED_USERS, onSuccess, onFailure);
+    };
+
+    this.removeFromShowOfflineList = function(user, onSuccess, onFailure) {
+        makeRemoveFromListRequest(user, PRESENCE_WATCHER_REQUEST_URLS.SHOWOFFLINE_USERS, onSuccess, onFailure);
+    };
+
+
+    this.addToBannedList = function(userList, onSuccess, onFailure) {
+        makeAddToListRequest(userList, PRESENCE_WATCHER_REQUEST_URLS.BANNED_USERS, onSuccess, onFailure);
+    };
+
+    this.addToAllowedList = function(userList, onSuccess, onFailure) {
+        makeAddToListRequest(userList, PRESENCE_WATCHER_REQUEST_URLS.ALLOWED_USERS, onSuccess, onFailure);
+    };
+
+    this.addToShowOfflineList = function(userList, onSuccess, onFailure) {
+        makeAddToListRequest(userList, PRESENCE_WATCHER_REQUEST_URLS.SHOWOFFLINE_USERS, onSuccess, onFailure);
+    };
 };
 
 //@{fcs-jsl-prod}
 presenceStateParser = new PresenceStateParser();
 
-var presenceService = new PresenceServiceImpl(server, logManager, presenceStateParser);
+var presenceService = new PresenceServiceImpl(server, logManager, presenceStateParser, fcs);
 
 /*
  * In order to find the users presence client receives 3 parameters from WAM
@@ -26190,6 +26525,11 @@ NotificationCallBacks.presenceWatcher = function(data) {
 
     }
 };
+NotificationCallBacks.presenceWatcherPending = function(data) {
+    fcs.logManager.getLogger("presenceService").info("pending list received: ", data.presenceWatcherAuthorizationEntry);
+    data.presenceWatcherAuthorizationEntry.statusCode = data.statusCode;
+    utils.callFunctionIfExist(presenceWatcherUpdatePendingListNotifyCallback, data.presenceWatcherAuthorizationEntry);
+};
 //@{fcs-jsl-prod}
 
 
@@ -26197,7 +26537,12 @@ var PresenceManagerImpl = function(_service, _fcs, _logManager, _globalBroadcast
     var self = this,
         logger = _logManager.getLogger("presenceMng"),
         watchedUserList = [],
-        presenceExtendInterval = null;
+        storePendingList = new Map(),
+        presenceExtendInterval = null,
+        presenceWatcherExtendInterval = null,
+        presenceAuthWatcherSuccess = null,
+        presenceAuthWatcherFailure = null,
+        setAuthWatcherService = false;
 
     self.Failures = {
         SERVICE_FAILURE: 0
@@ -26244,6 +26589,28 @@ var PresenceManagerImpl = function(_service, _fcs, _logManager, _globalBroadcast
         clearInterval(presenceExtendInterval);
         presenceExtendInterval = null;
         watchedUserList = [];
+        //PWA cache clear
+        setAuthWatcherService = false;
+        clearInterval(presenceWatcherExtendInterval);
+        presenceWatcherExtendInterval = null;
+        storePendingList.clear();
+    }
+
+    function onConnectionLost() {
+        //PWA cache clear
+        clearInterval(presenceWatcherExtendInterval);
+        presenceWatcherExtendInterval = null;
+        storePendingList.clear();
+    }
+
+    function onConnectionReEstablished() {
+        if (setAuthWatcherService) {
+            _service.authWatchers(function() {
+                logger.info("auth watcher ext. subs. success");
+            }, function(e) {
+                logger.error("auth watcher ext. subs. fail", e);
+            });
+        }
     }
 
     function setUpPresenceSubsriptionExtendInterval(expiryValue) {
@@ -26339,11 +26706,141 @@ var PresenceManagerImpl = function(_service, _fcs, _logManager, _globalBroadcast
         sendWatchRequest(watchedUserList);
     }
 
+    function removeUserFromPendingList(updatedUser) {
+        logger.info(updatedUser.watcherAddress + ' remove from store pending list');
+        storePendingList.remove(updatedUser.watcherAddress);
+    }
+
+    function addUserToPendingList(updatedUser) {
+        logger.info(updatedUser.watcherAddress + ' add to store pending list');
+        storePendingList.add(updatedUser.watcherAddress, updatedUser);
+    }
+
+    function triggerOnAuthPendingListUpdate(addObject, removeObject) {
+        if (addObject.enabled) {
+            _utils.callFunctionIfExist(_fcs.presence.onAuthPendingListUpdate, {
+                action: "add",
+                updatedUser: addObject.users
+            });
+        }
+        if (removeObject.enabled) {
+            _utils.callFunctionIfExist(_fcs.presence.onAuthPendingListUpdate, {
+                action: "remove",
+                updatedUser: removeObject.users
+            });
+        }
+    }
+
+    function addPendigListToMap(pendingNotifyData) {
+        if (pendingNotifyData.statusCode !== 0) {
+            clearInterval(presenceWatcherExtendInterval);
+            _utils.callFunctionIfExist(presenceAuthWatcherFailure, _fcs.Errors.AUTH);
+            presenceAuthWatcherFailure = null;
+            presenceAuthWatcherSuccess = null;
+            return;
+        }
+        _utils.callFunctionIfExist(presenceAuthWatcherSuccess);
+        presenceAuthWatcherSuccess = null;
+        presenceAuthWatcherFailure = null;
+        var pendingList = pendingNotifyData.pendingList;
+        // max 10 cycles
+        var addAction = {
+                enabled: false,
+                users: []
+            },
+            removeAction = {
+                enabled: false,
+                users: []
+            };
+        for (var i = 0; i < pendingList.length; i++) {
+            if (storePendingList.get(pendingList[i].watcherAddress)) {
+                if (storePendingList.get(pendingList[i].watcherAddress).status !== pendingList[i].status) {
+                    removeAction.enabled = true;
+                    removeAction.users.push(pendingList[i]);
+                    removeUserFromPendingList(pendingList[i]);
+                }
+            } else {
+                if (pendingList[i].status === 'pending') {
+                    addAction.enabled = true;
+                    addAction.users.push(pendingList[i]);
+                    addUserToPendingList(pendingList[i]);
+                }
+            }
+        }
+        if (addAction.enabled || removeAction.enabled) {
+            triggerOnAuthPendingListUpdate(addAction, removeAction);
+        }
+    }
+
+    function setPresenceWatcherExtendTimer(expiryTime) {
+        clearInterval(presenceWatcherExtendInterval);
+        presenceWatcherExtendInterval = setInterval(function() {
+            _service.authWatchers(function() {
+                logger.info("auth watcher ext. subs. success");
+            }, function(e) {
+                logger.error("auth watcher ext. subs. fail", e);
+            });
+        }, expiryTime / 2 * 1000);
+    }
+
+
+    self.authWatchers = function(onSuccess, onFailure) {
+        presenceAuthWatcherSuccess = onSuccess;
+        presenceAuthWatcherFailure = onFailure;
+        setAuthWatcherService = true;
+        _service.authWatchers(function(data) {
+            setPresenceWatcherExtendTimer(data.presenceWatcherResponse.expiryValue);
+            logger.info("auth watcher subs. success");
+        }, function(e) {
+            _utils.callFunctionIfExist(presenceAuthWatcherFailure, e);
+            presenceAuthWatcherFailure = null;
+            presenceAuthWatcherSuccess = null;
+            logger.error("auth watcher  subs. fail", e);
+        }, addPendigListToMap);
+    };
+
+    self.getPendingList = function(onSuccess) {
+        var returnData = [],
+            storeData = storePendingList.entries();
+        for (var i in storeData) {
+            if (storeData.hasOwnProperty(i)) {
+                returnData.push(storeData[i]);
+            }
+        }
+        _utils.callFunctionIfExist(onSuccess, returnData);
+    };
+
+    self.getAllowedList = _service.getAllowedList;
+
+    self.getBannedList = _service.getBannedList;
+
+    self.getShowOfflineList = _service.getShowOfflineList;
+
+
+    self.addToAllowedList = _service.addToAllowedList;
+
+    self.addToBannedList = _service.addToBannedList;
+
+    self.addToShowOfflineList = _service.addToShowOfflineList;
+
+
+    self.removeFromBannedList = _service.removeFromBannedList;
+
+    self.removeFromAllowedList = _service.removeFromAllowedList;
+
+    self.removeFromShowOfflineList = _service.removeFromShowOfflineList;
+
     _globalBroadcaster.subscribe(CONSTANTS.EVENT.DEVICE_SUBSCRIPTION_STARTED,
         presenceServiceOnSubscriptionStartedHandler);
 
     _globalBroadcaster.subscribe(CONSTANTS.EVENT.DEVICE_SUBSCRIPTION_ENDED,
         clearPresenceSubscriptionExtendIntervalAndWacthedUserList);
+
+    _globalBroadcaster.subscribe(CONSTANTS.EVENT.CONNECTION_LOST,
+        onConnectionLost);
+
+    _globalBroadcaster.subscribe(CONSTANTS.EVENT.CONNECTION_REESTABLISHED,
+        onConnectionReEstablished);
 };
 
 //@{fcs-jsl-prod}
@@ -26359,7 +26856,7 @@ var presenceManager = new PresenceManagerImpl(presenceService, fcs, logManager, 
  * @namespace
  * @memberOf fcs
  *
- * @version 4.0.0.176
+ * @version 4.1.1
  * @since 3.0.0
  */
 var PresenceImpl = function(_manager) {
@@ -26531,7 +27028,7 @@ var PresenceImpl = function(_manager) {
      *
      * @name fcs.presence#UpdateEvent
      * @class
-     * @version 4.0.0.176
+     * @version 4.1.1
      * @since 3.0.0
      */
     this.UpdateEvent = function() {};
@@ -26560,6 +27057,256 @@ var PresenceImpl = function(_manager) {
      * @field
      * @type {String}
      * @since 3.0.0
+     */
+
+    /**
+     *Subscibe to presence watcher list.<br />
+     *
+     * @name fcs.presence#authWatchers
+     * @function
+     * @param {function} onSuccess The onSuccess() callback to be called
+     * @param {function} onFailure The onFailure({@link fcs#Errors}) callback to be called
+     * @since 4.0.1
+     * @example
+     *      fcs.presence.authWatchers(function(){
+     *            window.console.log("Subscribe for presence watcher list success.");
+     *      },function(errorCode){
+     *            window.console.log("Subscribe for presence watcher list failure! Error code : " errorCode);
+     *      });
+     */
+
+    this.authWatchers = function(onSuccess, onFailure) {
+        _manager.authWatchers(onSuccess, onFailure);
+    };
+
+    /**
+     * Get Pending List.<br />
+     *
+     * @name fcs.presence#getPendingList
+     * @function
+     * @param {function} onSuccess The onSuccess(userList<Array>) callback to be called
+     * @since 4.0.1
+     * @example
+     *      fcs.presence.getPandingList(function(pendingList){
+     *            window.console.log("Pending List : " pendingList);
+     *      },function(errorCode){
+     *            window.console.log("Get pending list request failure! Error code : " errorCode);
+     *      });
+     */
+
+
+    this.getPendingList = function(onSuccess) {
+        _manager.getPendingList(onSuccess);
+    };
+
+    /**
+     * Get Allowed List.<br />
+     *
+     * @name fcs.presence#getAllowedList
+     * @function
+     * @param {function} onSuccess The onSuccess(userList<Array>) callback to be called
+     * @since 4.0.1
+     * @example
+     *      fcs.presence.getAllowedList(function(pendingList){
+     *            window.console.log("Allowed List : " pendingList);
+     *      });
+     */
+
+    this.getAllowedList = function(onSuccess, onFailure) {
+        _manager.getAllowedList(onSuccess, onFailure);
+    };
+
+    /**
+     * Get Banned List.<br />
+     *
+     * @name fcs.presence#getBannedList
+     * @function
+     * @param {function} onSuccess The onSuccess(userList<Array>) callback to be called
+     * @param {function} onFailure The onFailure({@link fcs#Errors}) callback to be called
+     * @since 4.0.1
+     * @example
+     *      fcs.presence.getBannedList(function(pendingList){
+     *            window.console.log("Banned List : " pendingList);
+     *      },function(errorCode){
+     *            window.console.log("Get banned list request failure! Error code : " errorCode);
+     *      });
+     */
+
+    this.getBannedList = function(onSuccess, onFailure) {
+        _manager.getBannedList(onSuccess, onFailure);
+    };
+
+    /**
+     * Get Show Offline List.<br />
+     *
+     * @name fcs.presence#getShowOfflineList
+     * @function
+     * @param {function} onSuccess The onSuccess(userList<Array>.) callback to be called
+     * @param {function} onFailure The onFailure({@link fcs#Errors}) callback to be called
+     * @since 4.0.1
+     * @example
+     *      fcs.presence.getShowOfflineList(function(pendingList){
+     *            window.console.log("ShowOffline List : " pendingList);
+     *      },function(errorCode){
+     *            window.console.log("Get show offline list request failure! Error code : " errorCode);
+     *      });
+     */
+
+    this.getShowOfflineList = function(onSuccess, onFailure) {
+        _manager.getShowOfflineList(onSuccess, onFailure);
+    };
+
+    /**
+     * Users add to allowed list <br />
+     *
+     * @name fcs.presence#addToAllowedList
+     * @function
+     * @param {Array.<String>} userList The list of users to move
+     * @param {function} onSuccess The onSuccess() callback to be called
+     * @param {function} onFailure The onFailure({@link fcs#Errors}) callback to be called
+     * @since 4.0.1
+     * @example
+     *      var userList = ["demo@demo.com",demo1@demo.com];
+     *
+     *      fcs.presence.addToAllowedList(userList,function(){
+     *            window.console.log("Add action success");
+     *      },function(errorCode){
+     *            window.console.log("Add action failure! Error code : " errorCode);
+     *      });
+     */
+
+    this.addToAllowedList = function(userList, onSuccess, onFailure) {
+        _manager.addToAllowedList(userList, onSuccess, onFailure);
+    };
+
+
+    /**
+     * Users add to banned list <br />
+     *
+     * @name fcs.presence#addToBannedList
+     * @function
+     * @param {Array.<String>} userList The list of users to move
+     * @param {function} onSuccess The onSuccess() callback to be called
+     * @param {function} onFailure The onFailure({@link fcs#Errors}) callback to be called
+     * @since 4.0.1
+     * @example
+     *      var userList = ["demo@demo.com",demo1@demo.com];
+     *
+     *      fcs.presence.addToBannedList(userList,function(){
+     *            window.console.log("Add action success");
+     *      },function(errorCode){
+     *            window.console.log("Add action failure! Error code : " errorCode);
+     *      });
+     */
+
+    this.addToBannedList = function(userList, onSuccess, onFailure) {
+        _manager.addToBannedList(userList, onSuccess, onFailure);
+    };
+
+    /**
+     * Users add to show offline list <br />
+     *
+     * @name fcs.presence#addToShowOfflineList
+     * @function
+     * @param {Array.<String>} userList The list of users to move
+     * @param {function} onSuccess The onSuccess() callback to be called
+     * @param {function} onFailure The onFailure({@link fcs#Errors}) callback to be called
+     * @since 4.0.1
+     * @example
+     *      var userList = ["demo@demo.com",demo1@demo.com];
+     *
+     *      fcs.presence.addToShowOfflineList(userList,function(){
+     *            window.console.log("Add action success");
+     *      },function(errorCode){
+     *            window.console.log("Add action failure! Error code : " errorCode);
+     *      });
+     */
+
+    this.addToShowOfflineList = function(userList, onSuccess, onFailure) {
+        _manager.addToShowOfflineList(userList, onSuccess, onFailure);
+    };
+
+    /**
+     * User remove from allowed list <br />
+     *
+     * @name fcs.presence#removeFromAllowedList
+     * @function
+     * @param {String} user The user to remove
+     * @param {function} onSuccess The onSuccess() callback to be called
+     * @param {function} onFailure The onFailure({@link fcs#Errors}) callback to be called
+     * @since 4.0.1
+     * @example
+     *      var user = "demo@demo.com";
+     *
+     *      fcs.presence.removeFromAllowedList(user,function(){
+     *            window.console.log("Remove action success");
+     *      },function(errorCode){
+     *            window.console.log("Remove action failure! Error code : " errorCode);
+     *      });
+     */
+
+    this.removeFromAllowedList = function(user, onSuccess, onFailure) {
+        _manager.removeFromAllowedList(user, onSuccess, onFailure);
+    };
+
+    /**
+     * User remove from show offline list <br />
+     *
+     * @name fcs.presence#removeFromShowOfflineList
+     * @function
+     * @param {String} user The user to remove
+     * @param {function} onSuccess The onSuccess() callback to be called
+     * @param {function} onFailure The onFailure({@link fcs#Errors}) callback to be called
+     * @since 4.0.1
+     * @example
+     *      var userList = "demo@demo.com";
+     *
+     *      fcs.presence.removeFromShowOfflineList(user,function(){
+     *            window.console.log("Remove action success");
+     *      },function(errorCode){
+     *            window.console.log("Remove action failure! Error code : " errorCode);
+     *      });
+     */
+
+    this.removeFromShowOfflineList = function(user, onSuccess, onFailure) {
+        _manager.removeFromShowOfflineList(user, onSuccess, onFailure);
+    };
+
+    /**
+     * User remove from banned list <br />
+     *
+     * @name fcs.presence#removeFromBannedList
+     * @function
+     * @param {String} user The user to remove
+     * @param {function} onSuccess The onSuccess() callback to be called
+     * @param {function} onFailure The onFailure({@link fcs#Errors}) callback to be called
+     * @since 4.0.1
+     * @example
+     *      var userList = "demo@demo.com";
+     *
+     *      fcs.presence.removeFromBannedList(user,function(){
+     *            window.console.log("Remove action success");
+     *      },function(errorCode){
+     *            window.console.log("Remove action failure! Error code : " errorCode);
+     *      });
+     */
+
+    this.removeFromBannedList = function(user, onSuccess, onFailure) {
+        _manager.removeFromBannedList(user, onSuccess, onFailure);
+    };
+
+    /**
+     * Handler called for when receiving a update list notification
+     *
+     * @name fcs.presence#onAuthPendingListUpdate
+     * @event
+     * @param {fcs.presence#onAuthPendingListUpdate} event The pending list update event
+     * @since 4.0.1
+     * @example
+     *
+     * fcs.presence.onAuthPendingListUpdate = function(updatedData) {
+     *     window.console.log("Updated Users" + updatedData.updatedUsers);
+     *     window.console.log("Update Action" + updatedData.action);
      */
 };
 
@@ -27483,7 +28230,7 @@ var dataChannelManager = new DataChannelManager();
  * @memberOf fcs
  *
  * @since 4.0.0
- * @version 4.0.0.176
+ * @version 4.1.1
  */
 
 var DataChannelImpl = function(_dataChannelManager) {
@@ -27641,7 +28388,7 @@ var DataChannelImpl = function(_dataChannelManager) {
      *
      * @name fcs.dataChannel#DataChannel
      * @class
-     * @version 4.0.0.176
+     * @version 4.1.1
      * @since 4.0.0
      */
     this.DataChannel = function() {
@@ -27653,7 +28400,7 @@ var DataChannelImpl = function(_dataChannelManager) {
          * @function
          * @param {function} onSuccess The onSuccess() callback function to be called
          * @param {function} onFailure The onFailure({@link fcs#Errors}) callback function to be called
-         * @version 4.0.0.176
+         * @version 4.1.1
          * @since 4.0.0
          *
          * @example
@@ -27670,7 +28417,7 @@ var DataChannelImpl = function(_dataChannelManager) {
          *
          * @name fcs.dataChannel#DataChannel#cancel
          * @function
-         * @version 4.0.0.176
+         * @version 4.1.1
          * @since 4.0.0
          *
          * @example
@@ -27687,7 +28434,7 @@ var DataChannelImpl = function(_dataChannelManager) {
          *
          * @name fcs.dataChannel#DataChannel#close
          * @function
-         * @version 4.0.0.176
+         * @version 4.1.1
          * @since 4.0.0
          *
          * @example
@@ -27704,7 +28451,7 @@ var DataChannelImpl = function(_dataChannelManager) {
          *
          * @name fcs.dataChannel#DataChannel#asnwer
          * @function
-         * @version 4.0.0.176
+         * @version 4.1.1
          * @since 4.0.0
          *
          * @example
@@ -27725,7 +28472,7 @@ var DataChannelImpl = function(_dataChannelManager) {
          *
          * @name fcs.dataChannel#DataChannel#ignore
          * @function
-         * @version 4.0.0.176
+         * @version 4.1.1
          * @since 4.0.0
          *
          * @example
@@ -27742,7 +28489,7 @@ var DataChannelImpl = function(_dataChannelManager) {
          *
          * @name fcs.dataChannel#DataChannel#reject
          * @function
-         * @version 4.0.0.176
+         * @version 4.1.1
          * @since 4.0.0
          *
          * @example

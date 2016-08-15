@@ -38,7 +38,8 @@ define([
             fcs.setUserAuth(getPublicUserId(), '');
 
             // Set ajaxHook for url, headers and data intersection
-            Config.fcsapi.ajaxHook = customAjaxSetup;
+            Config.fcsapi.ajaxHook = "customAjaxSetup";
+            window.customAjaxSetup = customAjaxSetup;
             //Config.fcsapi.localVideoContainer = document.getElementById('localVideo');
             //Config.fcsapi.remoteVideoContainer = document.getElementById('remoteVideo');
             fcs.setup(Config.fcsapi);
@@ -127,7 +128,7 @@ define([
          * @param settings
          * @returns {*}
          */
-        function customAjaxSetup(xhr, scope, settings) {
+        function customAjaxSetup(scope, settings) {
             if (settings) {
 
                 //Use browser to parse out the pathname...
