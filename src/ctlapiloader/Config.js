@@ -5,10 +5,10 @@
  */
 define({
     settings: {
-        'ctlServerURL': 'https://auth.veuxdu.centurylink.com',
-        'loginURI': '/AuthServer/token',
-        'getSubscriptionServiceIdentitiesURI': '/ServiceCatalog/serviceList/RhWnYptT',
-        'getSubscriptionServiceCatalogURI': '/ServiceCatalog/{service}/{publicId}'
+        'ctlServerURL': 'https://lab.iaf.centurylink.com:8889',
+        'loginURI': '/token',
+        'getSubscriptionServiceIdentitiesURI': '/SpeakEasyProvision/v1/util/products',
+        'getSubscriptionServiceCatalogURI': '/SpeakEasyProvision/v1/serviceProfile/{publicId}'
     },
     services: {
         'speakEasyServiceName': 'SpeakEasy',
