@@ -79,14 +79,18 @@ define([
                 }
 
                 var publicIds = Object.keys(products);
-                $.each(publicIds, function (index, value) {
-                    var serviceNames = products[value];
-                    if ($.inArray('SpeakEasy', serviceNames) !== -1 || $.inArray('SpeakEasy-Out', serviceNames) !== -1) {
-                        publicId = value;
-                        return true;
+                for (var val in products) {
+                    if(products.hasOwnProperty(val)) {
+                        for (var serviceName in products[val]) {
+                            if(products[val].hasOwnProperty(serviceName) &&
+                            (products[val][serviceName] === 'SpeakEasy' || products[val][serviceName] === 'SpeakEasy-Out')
+                            ) {
+                                publicId = val;
+                                break;
+                            }
+                        }
                     }
-                    return false;
-                });
+                }
 
                 if (!publicId) {
                     p.done("No SpeakEasy product returned.", request.response);
