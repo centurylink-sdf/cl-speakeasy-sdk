@@ -33,7 +33,7 @@ define([
         function init() {
             self.logger.info('Initializing calling features');
 
-            // initFcsLogger();
+            initFcsLogger();
 
             fcs.setUserAuth(getPublicUserId(), '');
 
@@ -174,6 +174,25 @@ define([
                     }
                     originalOnload(arguments);
                 };
+
+                // var originalOnerror = this.onerror;
+                // this.onerror = function(e) {
+                //     debugger;
+                //     console.log(e);
+                //     originalOnerror(arguments);
+                // };
+                //
+                // this.onreadystatechange = function() {
+                //     console.log("readystate: " + this.readyState);
+                //     if(this.readyState === 4) {
+                //         console.log("status: " + this.status);
+                //         if (this.status === 401) {
+                //             console.log("Your login/password is incorrect");
+                //             return;
+                //         }
+                //         console.log(this.responseText);
+                //     }
+                // };
 
                 settings.headers['Authorization'] = 'Bearer ' +  Utils.get("access_token");
             }

@@ -1,7 +1,6 @@
 define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
-    var btnLogin = $('.btn-login');
-    var btnLogout = $('.btn-logout');
+    var materialize = require(['materialize']);
 
     console.log('Running CtlApi v' + Ctl.getVersion());
 
@@ -13,6 +12,27 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
         e.preventDefault();
         blockUI();
         submitLogin();
+    });
+
+    $('#btnSelectService').click(function(e) {
+        var selectedService = $("input:radio[name ='service']:checked").val();
+        if (selectedService) {
+            var publicId = selectedService.substr(0, selectedService.indexOf(' '));
+            var serviceName = selectedService.substr(selectedService.indexOf('-')+2, selectedService.length-1);
+            Ctl.Auth.setDefaultSubscriptionService(serviceName, publicId, function(error, response) {
+                if (!error && response) {
+                    console.info('Successfully set default service.');
+                    window.location.href = 'call.html';
+                } else {
+                    console.error('Service subscription details retrieval failed: ', error);
+                    unBlockUI();
+                    if (error) {
+                        showLoginError(error.responseMessage);
+                    }
+                }
+
+            });
+        }
     });
 
     function blockUI() {
@@ -47,6 +67,20 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
         $('#progressLogin').hide();
     }
 
+    function populateSubscriptionServices(services) {
+        var publicIds = Object.keys(services);
+        for (var val in services) {
+            if(services.hasOwnProperty(val)) {
+                for (var serviceName in services[val]) {
+                    if(services[val].hasOwnProperty(serviceName)) {
+                        $('#subscriptionTable').append('<p><input name="service" type="radio" id="' + serviceName + '" value="' + val + ' - ' + services[val][serviceName] + '" /><label for="' + serviceName + '">' + val + ' - ' + services[val][serviceName] + '</label></p>');
+                    }
+                }
+            }
+        }
+
+    }
+
     function submitLogin() {
 
         var username = $('#login').val();
@@ -54,8 +88,9 @@ define(['jquery', 'CtlApiLoader'], function($, Ctl) {
 
         Ctl.Auth.login(username, password, function(error, response) {
             if (!error && response) {
-                console.info('Successfully authenticated. Now you can load any CenturyLink API.');
-                window.location.href = 'call.html';
+                console.info('Successfully authenticated. Exposing subscription services selection.');
+                populateSubscriptionServices(response);
+                 $('#subscriptionServicesModal').openModal();
             } else {
                 console.error('Authentication failed: ', error);
                 unBlockUI();

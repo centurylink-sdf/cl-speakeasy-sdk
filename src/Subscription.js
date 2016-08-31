@@ -22,8 +22,6 @@ define([
      */
     function Subscription() {
 
-        var mock = false;
-
         var logger = new Logger('Subscription');
 
         var config = {
@@ -37,112 +35,6 @@ define([
                 }
             }
         };
-
-        var ids = [
-            { "publicID": "7202839128", "ID": "test01" },
-            { "publicID": "7202839129", "ID": "test02" },
-            { "publicID": "7202839243", "ID": "test03" },
-            { "publicID": "7202839244", "ID": "test04" },
-            { "publicID": "7202839245", "ID": "test05" },
-            { "publicID": "3183601228", "ID": "437171125" },
-            { "publicID": "3183601229", "ID": "437171136" },
-            { "publicID": "3183601754", "ID": "444577233" },
-            { "publicID": "3183601755", "ID": "444577277" },
-            { "publicID": "3183601756", "ID": "444577313" },
-            { "publicID": "3183601758", "ID": "444577391" },
-            { "publicID": "3183601759", "ID": "444577426" }
-        ];
-
-        function sync(username) {
-
-            if (mock) return mockSync(username);
-
-            var p = new Promise();
-
-            var serviceListRequest = function() {
-                return getSubscriptionServices();
-            }.bind(this);
-
-            var serviceCatalogRequest = function(err, request) {
-
-                if (err) {
-                    p.done(err, request.response);
-                }
-
-                // FIXME:0 Currently saving subscribed services only for first item
-                // Will be needed to loop through all subscribed services and retrieve catalog info for each.
-
-                var publicId;
-                var products = request.response.Products;
-                if (!products || products.length === 0) {
-                    p.done("No products returned.", request.response);
-                }
-
-                var publicIds = Object.keys(products);
-                for (var val in products) {
-                    if(products.hasOwnProperty(val)) {
-                        for (var serviceName in products[val]) {
-                            if(products[val].hasOwnProperty(serviceName) &&
-                            (products[val][serviceName] === 'SpeakEasy' || products[val][serviceName] === 'SpeakEasy-Out')
-                            ) {
-                                publicId = val;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (!publicId) {
-                    p.done("No SpeakEasy product returned.", request.response);
-                }
-
-                var subscribedServices = ["SpeakEasy","Courier"];
-                setServices(subscribedServices);
-
-                return getSubscriptionServiceDetails(Config.services.speakEasyServiceName, publicId);
-            }.bind(this);
-
-            var oncomplete = function(err, request) {
-                if (!err && request) {
-                    setServiceCatalog(request.response);
-                }
-                p.done(err, request.response);
-            }.bind(this);
-
-            Promise.chain([ serviceListRequest, serviceCatalogRequest ]).then(oncomplete);
-            return p;
-        }
-
-        function mockSync(username) {
-            var p = new Promise();
-
-            var publicId;
-            for(var i=0; i<ids.length; i++) {
-                if (ids[i]["ID"] === username) {
-                    publicId = ids[i]["publicID"];
-                    break;
-                }
-            }
-
-            var subscribedServices = ["SpeakEasy", "Courier"];
-            setServices(subscribedServices);
-
-            var response = {
-                "ServiceCatalog": {
-                    "publicID":"" + publicId,
-                    "serviceName":"SpeakEasy",
-                    "domain":"ctlvoip.lab.centurylink",
-                    "ID": username + "-1",
-                    "WebSocketEndpoints":"www.intg104.centurylink.com:8590$www.intg104.centurylink.com:8590"
-                }
-            };
-
-            setServiceCatalog(response.ServiceCatalog);
-
-            p.done(null, response.ServiceCatalog);
-
-            return p;
-        }
 
         function getSubscriptionServices() {
             var slRequest = new SubscriptionServiceIdentitiesRequest();
@@ -180,8 +72,10 @@ define([
             return Utils.getObject(config.storageKeywords.services + '_' + serviceName);
         }
 
-        this.sync = sync;
+        this.getSubscriptionServices = getSubscriptionServices;
+        this.getSubscriptionServiceDetails = getSubscriptionServiceDetails;
         this.getServiceCatalog = getServiceCatalog;
+        this.setServiceCatalog = setServiceCatalog;
 
     }
 
