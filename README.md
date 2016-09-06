@@ -1,6 +1,6 @@
 # CtlApi
 
-A CenturyLink API loader javascript sdk. Check out the demo in example/example1.html
+A CenturyLink API loader javascript sdk. Check out the demo in kitchensink/www/index.html
 
 ### 1. Installation
 
