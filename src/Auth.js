@@ -72,14 +72,14 @@ define([
 
             }.bind(this);
 
-            var syncSubscriptionServices = function(err, request) {
+            var getSubscriptionServices = function(err, request) {
                 if (!err && request) {
                     BaseRequest.prototype.accessToken = request.response.access_token;
                     BaseRequest.prototype.refreshToken = request.response.refresh_token;
                     setAccessToken(request.response.access_token);
                     setRefreshToken(request.response.refresh_token);
                     setLoginUsername(username);
-                    return Subscription.sync(username);
+                    return Subscription.getSubscriptionServices();
                 } else {
                     var fail = new Promise();
                     fail.done(err.response, null);
@@ -87,11 +87,29 @@ define([
                 }
             }.bind(this);
 
+
             var oncomplete = function(err, request) {
-                Utils.doCallback(callback, [ err, request ]);
+
+                if (!err) {
+                    var products = request.response.Products;
+                    if (!products || products.length === 0) {
+                        err = 'No products returned.';
+                    }
+                }
+
+                Utils.doCallback(callback, [ err, products ]);
             }.bind(this);
 
-            Promise.chain([ getAccessToken, syncSubscriptionServices ]).then(oncomplete);
+            Promise.chain([ getAccessToken, getSubscriptionServices ]).then(oncomplete);
+        }
+
+        function setDefaultSubscriptionService(serviceName, publicId, callback) {
+            Subscription.getSubscriptionServiceDetails(serviceName, publicId).then(function(err, request) {
+                if (!err && request) {
+                    Subscription.setServiceCatalog(request.response);
+                }
+                Utils.doCallback(callback, [ err, request.response ]);
+            });
         }
 
         /**
@@ -221,6 +239,7 @@ define([
         this.isAuthenticated = isAuthenticated;
         this.setLoginUsername = setLoginUsername;
         this.getLoginUsername = getLoginUsername;
+        this.setDefaultSubscriptionService = setDefaultSubscriptionService;
 
     }
 
