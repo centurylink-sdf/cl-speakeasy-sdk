@@ -24,7 +24,7 @@
         "name": "APIs",
         "groups": [
             {
-                "name": "SpeakEasy",
+                "name": "Speak Easy",
                 "classes": [
                     "CallManager",
                     "Call"

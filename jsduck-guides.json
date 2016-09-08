@@ -1,0 +1,60 @@
+[
+    {
+        "title": "API Loader Guides",
+        "items": [
+            {
+                "name": "api_loader_getting_started",
+                "url": "guides/api_loader/getting_started",
+                "title": "Getting Started",
+                "description": "This introduction to CenturyLink API Loader explains how you can get started."
+            },
+            {
+                "name": "api_loader_versioning",
+                "url": "guides/api_loader/versioning",
+                "title": "Versioning",
+                "description": "The versioning fo CenturyLink APIs."
+            },
+            {
+                "name": "api_loader_dynamic_loading",
+                "url": "guides/api_loader/dynamic_loading",
+                "title": "Dynamic Loading",
+                "description": "This section explains dinamic load of CenturyLink APIs."
+            },
+            {
+                "name": "api_loader_available_apis",
+                "url": "guides/api_loader/available_apis",
+                "title": "Available APIs",
+                "description": "The list of available CenturyLink APIs you can use."
+            }
+        ]
+    },
+    {
+        "title": "Speak Easy Guides",
+        "items": [
+            {
+                "name": "speakeasy_getting_started",
+                "url": "guides/speakeasy/getting_started",
+                "title": "Getting Started",
+                "description": "This introduction to CenturyLink Speak Easy explains how you can get started."
+            },
+            {
+                "name": "speakeasy_answering",
+                "url": "guides/speakeasy/answering",
+                "title": "Answering an Incoming Call",
+                "description": "Exaplains how you can handle incoming calls in your web application."
+            },
+            {
+                "name": "speakeasy_video_call",
+                "url": "guides/speakeasy/video_call",
+                "title": "Making Video Call",
+                "description": "Introduces into video calls with Speak Easy API."
+            },
+            {
+                "name": "speakeasy_call_features",
+                "url": "guides/speakeasy/call_features",
+                "title": "Checking and Setting Call Features",
+                "description": "Shows how you can hang up, mute/un-mute, hold/un-hold etc. your call."
+            }
+        ]
+    }
+]

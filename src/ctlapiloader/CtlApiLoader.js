@@ -45,10 +45,13 @@ define([
         }
 
         /**
-         * Loads CenturyLink API
+         * Loads CenturyLink API by version
          *
-         * @param  {String}   name     Name of the API to load
-         * @param  {String}   version  Version of the API to load
+         * @param  {String}   name     Name of the API (e.g., "SpeakEasy", "Courier" or "Dumpster").
+         * @param  {String}   version  Specifies the version of the API module.
+         * You must always specify the version of the API you are using.
+         * If you are unsure which version you want to use, use the version stated in the in the documentation for each API.
+         *
          * @param  {Function} callback Callback to call after API is loaded and initialized
          */
         function load(name, version, callback) {
@@ -65,7 +68,6 @@ define([
 
         /**
          * Logout from services and clear browser's data storage (cookies, localStorage etc.)
-         * @return {[type]} [description]
          */
         function logout() {
             Utils.removeAll();

@@ -1,7 +1,13 @@
 {
-    "--title": "CenturyLink API Docs",
-    "--": "src",
-    "--exclude": "src/lib",
+    "--title": "Documentation",
     "--warnings": "-all",
-    "--categories": "jsduck-categories.json"
+    "--categories": "jsduck-categories.json",
+    "--welcome": "welcome.html",
+    "--guides": "jsduck-guides.json",
+    "--images": "docimages",
+    "--css": "jsduck-custom.css",
+    "--head-html": [
+         "<link rel=\"shortcut icon\" type=\"image/ico\" href=\"../favicon.ico\" />",
+         "<link rel=\"stylesheet\" href=\"../welcome.css\" type=\"text/css\">"
+    ]
 }

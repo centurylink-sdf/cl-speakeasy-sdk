@@ -1,0 +1,21 @@
+/*#north-region {
+    background: #262626;
+}*/
+
+#header-content {
+    height: 23px;
+    line-height: 23px;
+    padding-left: 120px;
+    margin: 7px 0 0 8px;
+    background: no-repeat url("../docimages/logo.png");
+    background-size: contain;
+}
+
+#center-container .guide-container h1 {
+    background: none;
+    padding: 10px 0 10px 0;
+}
+
+.thumb-list dd .thumb img {
+    border: none;
+}
