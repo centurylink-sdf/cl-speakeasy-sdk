@@ -5,6 +5,7 @@ define([], function () {
      * the CenturyLink Services API as easy as possible.
      *
      * @class Ctl.Utils
+     * @private
      *
      */
     function Utils() {

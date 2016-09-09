@@ -2,6 +2,7 @@ define(function(){
 
     /**
      * @class Ctl.model.request.BaseRequest
+     * @private
      *
      * Simple class that represents a Request that will be made by any Ctl.Ajax
      * subclass. All this class does is standardize the representation of a Request

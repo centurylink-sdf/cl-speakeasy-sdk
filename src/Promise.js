@@ -7,6 +7,7 @@ define([
     /**
      * Promise implementation
      * @class Ctl.Promise
+     * @private
      */
     function Promise() {
         this.complete = false;

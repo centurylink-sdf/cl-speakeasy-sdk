@@ -9,6 +9,7 @@ define([
     /**
      * @class Ctl.model.request.SubscriptionServiceCatalogRequest
      * @extends Ctl.model.request.BaseRequest
+     * @private
      *
      * Get subscription service catalog request
      *

@@ -12,6 +12,7 @@ define([
     /**
      * Wrapper for AJAX calls
      * @class Ctl.Ajax
+     * @private
      * @requires Ctl.Logger
      * @requires Ctl.Promise
      */

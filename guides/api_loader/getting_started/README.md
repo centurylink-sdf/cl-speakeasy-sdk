@@ -138,6 +138,6 @@ For example:
 
 Now we can continue and use other CenturyLink APIs without additional authentication steps.
 
-See How it Works in [Kitchensink](/kitchensink/www/index.html)
+See How it Works in [Kitchensink](../kitchensink/www/index.html)
 
 Check out [Speak Easy Getting Started](#!/guide/speakeasy_getting_started) for additional reading.

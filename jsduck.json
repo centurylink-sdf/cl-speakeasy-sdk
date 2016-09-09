@@ -1,7 +1,6 @@
 {
     "--title": "Documentation",
     "--warnings": "-all",
-    "--categories": "jsduck-categories.json",
     "--welcome": "welcome.html",
     "--guides": "jsduck-guides.json",
     "--images": "docimages",

@@ -1,5 +1,6 @@
 /**
  * @class Ctl.speakeasy.Config
+ * @private
  *
  * List of configuration options for Ctl.speakeasy.CtlApiLoader.
  */

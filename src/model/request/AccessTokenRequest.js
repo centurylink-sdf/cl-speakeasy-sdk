@@ -8,6 +8,8 @@ define([
     /**
      * @class Ctl.model.request.AccessTokenRequest
      * @extends Ctl.model.request.BaseRequest
+     * @private
+     * 
      * Access Token Request
      *
      * The Token endpoint authenticates user credentials and in response

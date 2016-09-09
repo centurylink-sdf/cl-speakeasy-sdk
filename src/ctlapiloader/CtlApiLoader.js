@@ -73,6 +73,10 @@ define([
             Utils.removeAll();
         }
 
+        /**
+         * Implements all authentication features
+         * @type {Ctl.Auth}
+         */
         this.Auth = Auth;
         this.getVersion = getVersion;
         this.load = load;

@@ -1,5 +1,6 @@
 /**
  * @class Ctl.speakeasy.Version
+ * @private
  *
  * Holds version of the Ctl.speakeasy JavaScript library.
  */

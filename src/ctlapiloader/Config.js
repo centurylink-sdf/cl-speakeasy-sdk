@@ -1,5 +1,6 @@
 /**
  * @class Ctl.ctlapiloader.Config
+ * @private
  *
  * List of configuration options for Ctl.ctlapiloader.CtlApiLoader.
  */
