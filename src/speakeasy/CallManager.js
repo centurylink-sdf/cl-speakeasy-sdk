@@ -135,14 +135,14 @@ define([
          *
          * @param {String} numToCall The callee's address used to establish the call
          * @param {Boolean} isVideoEnabled In order to make video call set this to true.
-         * @param {function} callback The callback function to be called after success
+         * @param {function} successCallback The callback function to be called after success
          *
          * @return  {OutgoingCall} Contains call object with required info
          */
         function createCall(numToCall, isVideoEnabled, successCallback, failureCallback) {
 
             var domain = Config.settings.defaultOutgoingCallDomain;
-            var numToCall = !/@/.test(numToCall) ?  numToCall + "@" + domain : numToCall;
+            numToCall = !/@/.test(numToCall) ?  numToCall + "@" + domain : numToCall;
 
             var currentUser = fcs.getUser();
 

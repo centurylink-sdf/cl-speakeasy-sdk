@@ -33,6 +33,9 @@ define([
     function BaseCall(fcsCall) {
 
         var self = this;
+        var remoteVideoElement = null;
+        var remoteVideoContainer = document.getElementById(Config.callManager.remoteVideoContainer);
+        var localVideoContainer = document.getElementById(Config.callManager.localVideoContainer);
 
         if (self.constructor === BaseCall) {
             throw new Error("Can't instantiate abstract BaseCall!");
@@ -84,15 +87,20 @@ define([
             self.logger.log('canReceiveVideo: ' + self.fcsCall.canReceiveVideo());
             self.logger.log('canSendVideo: ' + self.fcsCall.canSendVideo());
 
-            if (streamURL && self.fcsCall.canReceiveVideo()) {
+
+            if(streamURL) {
                 self.remoteStreamURL = streamURL;
                 setRemoteStream(streamURL);
-            } else {
-                var remoteUserDisabledVideo = !self.fcsCall.canReceiveVideo() && self.fcsCall.canSendVideo();
-                if (remoteUserDisabledVideo) {
-                    self.logger.log('Remote user has disabled video feature');
+
+                if(self.fcsCall.canReceiveVideo()) {
+                    showRemoteVideo();
                 }
-                removeRemoteStream();
+                else {
+                    var remoteUserDisabledVideo = !self.fcsCall.canReceiveVideo() && self.fcsCall.canSendVideo();
+                    if (remoteUserDisabledVideo) {
+                        self.logger.log('Remote user has disabled video feature');
+                    }
+                }
             }
         }
 
@@ -125,12 +133,22 @@ define([
         }
 
         /**
-         * Creates remote video element in DOM
+         * Show remote video element in DOM
          * @private
          */
         function showRemoteVideo() {
-            if(self.remoteStreamURL && self.fcsCall.canReceiveVideo()) {
-                setRemoteStream(self.remoteStreamURL);
+            if(self.fcsCall.canReceiveVideo() && remoteVideoElement != null) {
+                remoteVideoElement.style.display = 'block';
+            }
+        }
+
+        /**
+         * Hide remote video element in DOM
+         * @private
+         */
+        function hideRemoteVideo() {
+            if(remoteVideoElement != null) {
+                remoteVideoElement.style.display = 'none';
             }
         }
 
@@ -154,19 +172,20 @@ define([
             if(!isRemoteVideoExist(streamUrl)) {
                 removeRemoteStream();
 
-                var videoContainer = document.getElementById(Config.callManager.remoteVideoContainer);
-
                 var video = document.createElement('video');
                 video.id = 'video_' + self.id;
                 video.style.width = '100%';
                 video.style.height = '100%';
+                video.style.display = 'none';
 
-                videoContainer.appendChild(video);
+                remoteVideoContainer.appendChild(video);
 
                 video.pause();
                 video.src = streamUrl;
                 video.load();
                 video.play();
+
+                remoteVideoElement = document.getElementById('video_' + self.id);
             }
         }
 
@@ -175,11 +194,9 @@ define([
          * @private
          */
         function removeRemoteStream() {
-            var videoContainer = document.getElementById(Config.callManager.remoteVideoContainer);
-            var videoElement = document.getElementById('video_' + self.id);
-
-            if(videoElement != null) {
-                videoContainer.removeChild(videoElement);
+            if(remoteVideoElement != null) {
+                remoteVideoContainer.removeChild(remoteVideoElement);
+                remoteVideoElement = null;
             }
         }
 
@@ -194,12 +211,11 @@ define([
             if(!isLocalVideoExist(streamUrl)) {
                 removeLocalStream();
 
-                var videoContainer = document.getElementById(Config.callManager.localVideoContainer);
                 var video = document.createElement('video');
                 video.style.width = '100%';
                 video.style.height = '100%';
 
-                videoContainer.appendChild(video);
+                localVideoContainer.appendChild(video);
 
                 video.src = streamUrl;
                 video.pause();
@@ -217,11 +233,11 @@ define([
             var currentCall = CallInfo.getCurrentCall();
 
             if(currentCall.id == self.id) { //remove local video only for current call
-                var videoContainer = document.getElementById(Config.callManager.localVideoContainer);
-                var videoElements = videoContainer.getElementsByTagName('video');
+
+                var videoElements = localVideoContainer.getElementsByTagName('video');
 
                 if(videoElements.length > 0) {
-                    videoContainer.removeChild(videoElements[0]);
+                    localVideoContainer.removeChild(videoElements[0]);
                 }
             }
         }
@@ -235,6 +251,11 @@ define([
             removeRemoteStream();
         }
 
+        function hideAllVideoStreams() {
+            removeLocalStream();
+            hideRemoteVideo();
+        }
+
         /**
          * Checks if local video element exist in DOM
          * @private
@@ -245,10 +266,9 @@ define([
         function isLocalVideoExist(streamUrl) {
 
             var isExist = false;
-            var videoContainer = document.getElementById(Config.callManager.localVideoContainer);
 
-            if(videoContainer) {
-                var videoElements = videoContainer.getElementsByTagName('video');
+            if(localVideoContainer) {
+                var videoElements = localVideoContainer.getElementsByTagName('video');
                 isExist = videoElements.length > 0 && videoElements[0].src == streamUrl
             }
             return isExist;
@@ -264,10 +284,9 @@ define([
         function isRemoteVideoExist(streamUrl) {
 
             var isExist = false;
-            var videoElement = document.getElementById('video_' + self.id);
 
-            if(videoElement != null) {
-                isExist = videoElement.src == streamUrl
+            if(remoteVideoElement != null) {
+                isExist = remoteVideoElement.src == streamUrl
             }
 
             return isExist;
@@ -311,7 +330,7 @@ define([
                     break;
                 case fcs.call.States.ON_REMOTE_HOLD:
                     self.logger.debug('status changed: ON_REMOTE_HOLD');
-                    removeAllVideoStreams();
+                    hideAllVideoStreams();
                     EventEmitter.trigger(EventEmitter.events.CALL_REMOTE_HELD, self, false, self);
                     break;
                 case fcs.call.States.OUTGOING:
@@ -332,9 +351,6 @@ define([
                     self.logger.debug('status changed: REJECTED');
                     removeAllVideoStreams();
                     EventEmitter.trigger(EventEmitter.events.CALL_REJECTED, self, false,  self);
-                    break;
-                case fcs.call.States.OUTGOING:
-                    self.logger.debug('status changed: OUTGOING');
                     break;
                 case fcs.call.States.EARLY_MEDIA:
                     self.logger.debug('status changed: EARLY_MEDIA');
@@ -402,7 +418,7 @@ define([
 
             self.fcsCall.hold(
                 function () {
-                    removeAllVideoStreams();
+                    hideAllVideoStreams();
                     self.fcsCall.onStateChange(fcs.call.States.ON_HOLD);
                     Utils.doCallback(successCallback);
                 },
