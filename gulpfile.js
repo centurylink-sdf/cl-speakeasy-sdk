@@ -29,7 +29,7 @@ var tasklist = require('gulp-task-listing');
 var runSequence = require('run-sequence');
 var GJSDuck = require("gulp-jsduck");
 var gjsduck = new GJSDuck(["--out", "docs"]);
-// var amdclean  = require('gulp-amdclean');
+var amdclean  = require('gulp-amdclean');
 
 var PROJECT_BASE_PATH = __dirname + '';
 
@@ -62,6 +62,10 @@ gulp.task('build-optimize-ctlapiloader', function (cb) {
     var pkg = require('./package.json');
 
     return gulp.src('./dist/' + pkg.name + '.js')
+        .pipe(amdclean.gulp({
+            'prefixMode': 'standard',
+            'wrap': false
+        }))
         .pipe(rename(pkg.name + '-' + pkg.version + '.js'))
         .pipe(gulp.dest('./dist'))
         .pipe(rename(pkg.name + '-' + pkg.version + '.min.js'))
@@ -82,6 +86,10 @@ gulp.task('build-optimize-speakeasy', function (cb) {
     var pkg = require('./package.json');
 
     return gulp.src('./dist/speakeasy.js')
+        .pipe(amdclean.gulp({
+            'prefixMode': 'standard',
+            'wrap': false
+        }))
         .pipe(rename('speakeasy-' + pkg.version + '.js'))
         .pipe(gulp.dest('./dist'));
 });

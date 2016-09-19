@@ -10,38 +10,11 @@ CenturyLink API loader allows you to easily import one or more [APIs](#!/guide/a
 
 To load the APIs, include the following script in the header of your web page.
 
-    <script data-main="js/index" src="https://onbui.ctl.io/dist/ctlapi.js"></script>
+    <script type="text/javascript" src="https://onbui.ctl.io/dist/ctlapi-0.1.4.js"></script>
 
-In current version of CenturyLink API loader there is built-in [RequireJS](http://requirejs.org/) library.
+After that in **index.js** we could reference API Loader like in example below:
 
-> *RequireJS is a JavaScript file and module loader. It is optimized for in-browser use, but it can be used in other JavaScript environments, like Rhino and Node. Using a modular script loader like RequireJS will improve the speed and quality of your code.*
-
-<br />
-As you can se we are referencing **data-main="js/index"** as a main entry point of our application. The content of the **js/index.js** file is following:
-
-    require(['./common'], function (common) {
-        require(['app/index']);
-    });
-
-As you can see here we included **common.js** module, where we configure RequireJS. **common.js** has such content:
-
-    require.config({
-        paths: {
-          "app": "../app",
-          "CtlApiLoader": "https://onbui.ctl.io/dist/ctlapi"
-        }
-    });
-
-Where we define:
-
-- main application reference: **../app**
-- CenturyLink Api Loader reference: **"CtlApiLoader": "https://onbui.ctl.io/dist/ctlapi"**
-
-After that in **app/index.js** we could require API Loader like in example below:
-
-    define(['CtlApiLoader'], function(Ctl) {
-        // now you can use {@link Ctl.ctlapiloader.CtlApiLoader API Loader} functions of Ctl object
-    });
+    var Ctl = CtlApiLoader;
 
 Next, load the CenturyLink API with  {@link Ctl.ctlapiloader.CtlApiLoader#load Ctl.load(module, version)}, where
 

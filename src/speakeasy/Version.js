@@ -4,4 +4,4 @@
  *
  * Holds version of the Ctl.speakeasy JavaScript library.
  */
-define([], "0.1.6");
+define([], function() { return "0.1.4"; });

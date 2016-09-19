@@ -107,6 +107,7 @@ define([
             Subscription.getSubscriptionServiceDetails(serviceName, publicId).then(function(err, request) {
                 if (!err && request) {
                     Subscription.setServiceCatalog(request.response);
+                    Subscription.setPublicId(publicId);
                 }
                 Utils.doCallback(callback, [ err, request.response ]);
             });

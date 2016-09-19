@@ -1,12 +1,14 @@
 define([
     'Ctl.ctlapiloader/Version',
     'Ctl.ctlapiloader/Config',
+    'Ctl.ctlapiloader/Services',
     'Ctl/Logger',
     'Ctl/Utils',
     'Ctl/Auth'
 ], function (
     Version,
     Config,
+    Services,
     Logger,
     Utils,
     Auth
@@ -55,15 +57,28 @@ define([
          * @param  {Function} callback Callback to call after API is loaded and initialized
          */
         function load(name, version, callback) {
-            require(
-                [name],
-                function(api) {
-                    Utils.doCallback(callback, [null, api]);
-                },
-                function(err) {
-                    Utils.doCallback(callback, [err]);
-                }
-            );
+
+            if (loadedApis.indexOf(name) === -1) {
+
+                var src = Services.SpeakEasy + name.toLowerCase() + '-' + version + '.js';
+                var jsElm = document.createElement("script");
+                jsElm.type = "application/javascript";
+                jsElm.src = src;
+                document.body.appendChild(jsElm);
+
+                jsElm.onload = function() {
+                    loadedApis.push(name);
+                    Utils.doCallback(callback, [null, window.SpeakEasy]);
+                };
+
+                jsElm.onerror = function() {
+                    Utils.doCallback(callback, ['Error loading ' + name]);
+                };
+
+            } else {
+                Utils.doCallback(callback, [null]);
+            }
+
         }
 
         /**

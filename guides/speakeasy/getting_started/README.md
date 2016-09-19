@@ -14,37 +14,13 @@ features in your web application.
 
 ## Loading CenturyLink Speak Easy API
 
-To load the [APIs](#!/guide/api_loader_available_apis), include the following
-script in the header of your web page.
+To load the APIs, include the following script in the header of your web page.
 
-    <script data-main="js/index" src="https://onbui.ctl.io/dist/ctlapi.js"></script>
+    <script type="text/javascript" src="https://onbui.ctl.io/dist/ctlapi-0.1.4.js"></script>
 
-As you can se we are referencing **data-main="js/index"** as a main entry point of our application. The content of the **js/index.js** file is following:
+After that in **index.js** we could reference API Loader like in example below:
 
-    require(['./common'], function (common) {
-        require(['app/index']);
-    });
-
-As you can see here we included **common.js** module, where we configure
-[RequireJS](http://requirejs.org/). **common.js** has such content:
-
-    require.config({
-        paths: {
-          "app": "../app",
-          "CtlApiLoader": "https://onbui.ctl.io/dist/ctlapi"
-        }
-    });
-
-Where we define:
-
-- main application reference: **../app**
-- CenturyLink Api Loader reference: **"CtlApiLoader": "https://onbui.ctl.io/dist/ctlapi"**
-
-After that in **app/index.js** we could require API Loader like in example below:
-
-    define(['CtlApiLoader'], function(Ctl) {
-        // now you can use {@link Ctl.ctlapiloader.CtlApiLoader API Loader} functions of Ctl object
-    });
+    var Ctl = CtlApiLoader;
 
 Before moving forward and loading Speak Easy API we would like to check our authentication state:
 

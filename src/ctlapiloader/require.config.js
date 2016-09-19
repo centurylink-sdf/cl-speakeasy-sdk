@@ -7,6 +7,5 @@ require.config({
     },
     name: 'CtlApiLoader',
     out: '../../dist/ctlapi.js',
-    optimize: 'none',
-    include: ['../lib/require', 'Services']
+    optimize: 'none'
 });

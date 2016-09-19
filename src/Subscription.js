@@ -73,10 +73,20 @@ define([
             return Utils.getObject(config.storageKeywords.services + '_' + serviceName);
         }
 
+        function setPublicId(publicId) {
+            Utils.set(config.storageKeywords.serviceCatalog.publicId, publicId);
+        }
+
+        function getPublicId() {
+            return Utils.get(config.storageKeywords.serviceCatalog.publicId);
+        }
+
         this.getSubscriptionServices = getSubscriptionServices;
         this.getSubscriptionServiceDetails = getSubscriptionServiceDetails;
         this.getServiceCatalog = getServiceCatalog;
         this.setServiceCatalog = setServiceCatalog;
+        this.setPublicId = setPublicId;
+        this.getPublicId = getPublicId;
 
     }
 

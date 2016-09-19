@@ -206,7 +206,8 @@ define([
          */
         function getPublicUserId() {
             var speakEasy = Utils.getObject('services_SpeakEasy');
-            var publicUserId = speakEasy.phoneNumber + speakEasy.rtc.domain;
+            var phoneNumber = Utils.get('publicId');
+            var publicUserId = phoneNumber + speakEasy.rtc.domain;
             return publicUserId;
         }
 
