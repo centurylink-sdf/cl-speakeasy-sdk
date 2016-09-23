@@ -107,7 +107,7 @@ function loadSpeakEasy() {
 
                 // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-hangUp
                 currentCall.hangUp(function() {
-
+                    showInfoMessage('Call is ended!');
                     updateCallButtonsGroup();
 
                     updateCallStatus(currentCall.getCallId(), 'Ended');

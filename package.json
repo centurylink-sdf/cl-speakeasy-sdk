@@ -36,6 +36,7 @@
     "gulp-uglify": "~0.2.0",
     "gulp-util": "~2.2.13",
     "gulp-watch": "^4.3.5",
+    "gulp-amdclean": "^1.1.1",
     "jasmine-core": "^2.4.1",
     "js-yaml": "3.0.x",
     "jshint": "~2.4.3",

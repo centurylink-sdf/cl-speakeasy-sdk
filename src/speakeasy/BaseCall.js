@@ -53,6 +53,7 @@ define([
         self.id = self.fcsCall.getId();
         self.isMuted = false;
         self.isVideoStarted = false;
+        self.isEnded = false;
 
         /**
          * Attaches handlers for listening call events
@@ -341,11 +342,12 @@ define([
                     break;
                 case fcs.call.States.ENDED:
                     self.logger.debug('status changed: ENDED');
-
                     removeAllVideoStreams();
                     EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, null, true, self.id);
-                    EventEmitter.trigger(EventEmitter.events.CALL_ENDED, self, false, self);
 
+                    if(!self.isEnded) {
+                        EventEmitter.trigger(EventEmitter.events.CALL_ENDED, self, false, self);
+                    }
                     break;
                 case fcs.call.States.REJECTED:
                     self.logger.debug('status changed: REJECTED');
@@ -378,16 +380,15 @@ define([
          * @param {Function} failureCallback The callback function to be called after failure
          */
         self.hangUp = function(successCallback, failureCallback) {
-
+            self.isEnded = true;
             self.fcsCall.end(
                 function () {
                     removeAllVideoStreams();
-
                     EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, null, true, self.id);
-
                     Utils.doCallback(successCallback);
                 },
                 function () {
+                    self.isEnded = false;
                     Utils.doCallback(failureCallback);
                 });
         };
