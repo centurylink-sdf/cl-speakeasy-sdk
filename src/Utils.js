@@ -115,9 +115,9 @@ define([], function () {
             this[key] = value;
             if (typeof Storage !== "undefined") {
                 if (value) {
-                    localStorage.setItem(keyStore, value);
+                    sessionStorage.setItem(keyStore, value);
                 } else {
-                    localStorage.removeItem(keyStore);
+                    sessionStorage.removeItem(keyStore);
                 }
             }
         }
@@ -132,15 +132,15 @@ define([], function () {
             if (this[key]) {
                 value = this[key];
             } else if (typeof Storage !== "undefined") {
-                value = localStorage.getItem(keyStore);
+                value = sessionStorage.getItem(keyStore);
             }
             return value;
         }
 
         function removeAll() {
-            for (var i = localStorage.length; i--;){
-                // if (localStorage.key(i).indexOf('ctlapi_') > -1) {
-                    localStorage.removeItem(localStorage.key(i));
+            for (var i = sessionStorage.length; i--;){
+                // if (sessionStorage.key(i).indexOf('ctlapi_') > -1) {
+                    sessionStorage.removeItem(sessionStorage.key(i));
                 // }
             }
         }

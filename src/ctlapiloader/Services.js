@@ -6,4 +6,5 @@
  */
 define({
   "SpeakEasy": "http://localhost:8000/dist/"
+  // "SpeakEasy": "https://speakeasy.veuxdu.centurylink.com/SpeakEasyDemo/dist/"
 });

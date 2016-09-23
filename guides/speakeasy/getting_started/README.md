@@ -46,6 +46,30 @@ The example below loads the latest stable version of the Speak Easy API.
         }
     })
 
+## Standalone Usage of the CenturyLink Speak Easy API
+
+If you already have authentication mechanism implemented, you can use SpeakEasy without
+CenturyLink API Loader:
+
+    <script type="text/javascript" src="https://onbui.ctl.io/dist/speakeasy-0.1.4.js"></script>
+
+Once downloaded, it will be available under global variable **SpeakEasy**.
+But you will need to pass access token, refresh token and publicId (moniker) to
+initialize SpeakEasy like in example below:
+
+    var accessToken = '77c8787aff45466a28082b6647c90e38389c2f7e936f630cbb7ce553b4aadf95';
+    var refreshToken = '77c8787aff45466a28082b6647c90e38389c2f7e936f630cbb7ce553b4aadf95';
+    var publicId = '3031234567';
+
+    SpeakEasy.init(accessToken, refreshToken, publicId, function(error) {
+        if (!error) {
+            console.log('SpeakEasy has been successfully initialized!');
+        } else {
+            console.error('SpeakEasy could not be initialized!');
+        }
+    });
+
+
 ## Setting up CenturyLink Speak Easy API
 
 Before doing calling with Speak Easy API we should init/setup it by calling

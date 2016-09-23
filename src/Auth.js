@@ -74,8 +74,6 @@ define([
 
             var getSubscriptionServices = function(err, request) {
                 if (!err && request) {
-                    BaseRequest.prototype.accessToken = request.response.access_token;
-                    BaseRequest.prototype.refreshToken = request.response.refresh_token;
                     setAccessToken(request.response.access_token);
                     setRefreshToken(request.response.refresh_token);
                     setLoginUsername(username);
@@ -109,7 +107,7 @@ define([
                     Subscription.setServiceCatalog(request.response);
                     Subscription.setPublicId(publicId);
                 }
-                Utils.doCallback(callback, [ err, request.response ]);
+                Utils.doCallback(callback, [ err, request ]);
             });
         }
 
@@ -134,8 +132,6 @@ define([
             var oncomplete = function(err, request) {
 
                 if (!err && request) {
-                    BaseRequest.prototype.accessToken = request.response.access_token;
-                    BaseRequest.prototype.refreshToken = request.response.refresh_token;
                     setAccessToken(request.response.access_token);
                     setRefreshToken(request.response.refresh_token);
                 }
@@ -166,7 +162,7 @@ define([
         }
 
         /**
-         * Remove all related data from localStorage
+         * Remove all related data from sessionStorage
          */
         function logout() {
             // TODO:10 Figure out better place for logout for the all loaded services
@@ -177,12 +173,13 @@ define([
         }
 
         /**
-         * Store the OAuth access token for later use - uses localstorage if available
+         * Store the OAuth access token for later use - uses sessionStorage if available
          *
          * @private
          * @param   {String} token
          */
         function setAccessToken(token) {
+            BaseRequest.prototype.accessToken = token;
             Utils.set(config.storageKeywords.accessToken, token);
         }
 
@@ -193,16 +190,21 @@ define([
          * @return  {String} token
          */
         function getAccessToken() {
-            return Utils.get(config.storageKeywords.accessToken);
+            if (BaseRequest.prototype.accessToken) {
+                return BaseRequest.prototype.accessToken;
+            } else {
+                return Utils.get(config.storageKeywords.accessToken);
+            }
         }
 
         /**
-         * Store the OAuth refresh token for later use - uses localstorage if available
+         * Store the OAuth refresh token for later use - uses sessionStorage if available
          *
          * @private
          * @param   {String} token
          */
         function setRefreshToken(token) {
+            BaseRequest.prototype.refreshToken = token;
             Utils.set(config.storageKeywords.refreshToken, token);
         }
 
@@ -213,11 +215,15 @@ define([
          * @return  {String} token
          */
         function getRefreshToken() {
-            return Utils.get(config.storageKeywords.refreshToken);
+            if (BaseRequest.prototype.refreshToken) {
+                return BaseRequest.prototype.refreshToken;
+            } else {
+                return Utils.get(config.storageKeywords.refreshToken);
+            }
         }
 
         /**
-         * Store the login username for later use - uses localstorage if available
+         * Store the login username for later use - uses sessionStorage if available
          *
          * @param   {String} username
          */
@@ -241,6 +247,9 @@ define([
         this.setLoginUsername = setLoginUsername;
         this.getLoginUsername = getLoginUsername;
         this.setDefaultSubscriptionService = setDefaultSubscriptionService;
+        this.setAccessToken = setAccessToken;
+        this.getAccessToken = getAccessToken;
+        this.setRefreshToken = setRefreshToken;
 
     }
 

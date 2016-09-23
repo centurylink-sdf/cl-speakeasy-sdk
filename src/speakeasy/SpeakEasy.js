@@ -30,93 +30,115 @@ define([
         var self = this;
         self.logger = new Logger('SpeakEasy');
 
-        function init() {
-            self.logger.info('Initializing calling features');
+        function init(accessToken, refreshToken, publicId, callback) {
 
-            initFcsLogger();
-
-            fcs.setUserAuth(getPublicUserId(), '');
-
-            // Set ajaxHook for url, headers and data intersection
-            Config.fcsapi.ajaxHook = "customAjaxSetup";
-            window.customAjaxSetup = customAjaxSetup;
-            //Config.fcsapi.localVideoContainer = document.getElementById('localVideo');
-            //Config.fcsapi.remoteVideoContainer = document.getElementById('remoteVideo');
-            fcs.setup(Config.fcsapi);
-
-            // TODO: Implement support check for WebRTC
-            // fcs.onPluginRequired = function(error) {
-            //     switch (error) {
-            //         case fcs.call.MediaErrors.WRONG_VERSION: // Alert
-            //             showErrorMessage("Media Plugin Version Not Supported. See fcs.call.MediaErrors.WRONG_VERSION");
-            //             pluginDownloadDialog("Media Plugin Version Not Supported");
-            //             break;
-            //
-            //         case fcs.call.MediaErrors.NEW_VERSION_WARNING: //Warning
-            //             showWarningMessage("New Media Version Available Wanrning! See fcs.call.MediaErrors.NEW_VERSION_WARNING");
-            //             break;
-            //
-            //         case fcs.call.MediaErrors.NOT_INITIALIZED: // Alert
-            //             showErrorMessage("Media couldn't be initialized. See fcs.call.MediaErrors.NOT_INITIALIZED");
-            //             break;
-            //
-            //         case fcs.call.MediaErrors.NOT_FOUND: // Alert
-            //             showErrorMessage("Plugin couldn't be found! See fcs.call.MediaErrors.NOT_FOUND");
-            //             pluginDownloadDialog("Plugin couldn't be found!");
-            //             break;
-            //     }
-            // }
-
-            Notification.start(
-                function() {
-                    self.logger.log("You are logged in successfully!");
-                    self.logger.log("Notification system is started up successfully!");
-
-                    fcs.call.initMedia(
-                        function() {
-                            self.logger.info('The media features has been succesfully initialized');
-                        },
-                        function(error) {
-                            self.logger.error('The media features initialization failed');
-                        }
-                    );
-
-                    fcs.call.onReceived = CallManager.processReceivedCall;
-
-                },
-                function(e) {
-                    self.logger.log("An error occurred! Notification subsystem couldn't be started!");
-                    if (e === fcs.Errors.AUTH) {
-                        self.logger.log("Authentication error occured");
+            if (accessToken && refreshToken && publicId) {
+                Auth.setAccessToken(accessToken);
+                Auth.setRefreshToken(refreshToken);
+                Auth.setDefaultSubscriptionService('SpeakEasy', publicId, function(err, response) {
+                    if (!err && response) {
+                        initFcs();
+                    } else {
+                        Utils.doCallback(callback, [ err, response ]);
                     }
-                }
-            );
-
-        }
-
-        init();
-
-        function initFcsLogger() {
-            function jslLogHandler(loggerName, level, logObject) {
-                var LOG_LEVEL = fcs.logManager.Level,
-                    msg = logObject.timestamp + " - " + loggerName + " - " + level + " - " + logObject.message;
-
-                switch(level) {
-                    case LOG_LEVEL.DEBUG:
-                        window.console.debug(msg, logObject.args);
-                        break;
-                    case LOG_LEVEL.INFO:
-                        window.console.info(msg, logObject.args);
-                        break;
-                    case LOG_LEVEL.ERROR:
-                        window.console.error(msg, logObject.args);
-                        break;
-                        default:
-                        window.console.log(msg, logObject.args);
-                }
+                });
+            } else {
+                initFcs();
             }
 
-            fcs.logManager.initLogging(jslLogHandler, true);
+            function initFcs() {
+
+                self.logger.info('Initializing calling features');
+
+                function initFcsLogger() {
+                    function jslLogHandler(loggerName, level, logObject) {
+                        var LOG_LEVEL = fcs.logManager.Level,
+                            msg = logObject.timestamp + " - " + loggerName + " - " + level + " - " + logObject.message;
+
+                        switch(level) {
+                            case LOG_LEVEL.DEBUG:
+                                window.console.debug(msg, logObject.args);
+                                break;
+                            case LOG_LEVEL.INFO:
+                                window.console.info(msg, logObject.args);
+                                break;
+                            case LOG_LEVEL.ERROR:
+                                window.console.error(msg, logObject.args);
+                                break;
+                                default:
+                                window.console.log(msg, logObject.args);
+                        }
+                    }
+
+                    fcs.logManager.initLogging(jslLogHandler, true);
+                }
+                initFcsLogger();
+
+                fcs.setUserAuth(getPublicUserId(), '');
+
+                // Set ajaxHook for url, headers and data intersection
+                Config.fcsapi.ajaxHook = "customAjaxSetup";
+                window.customAjaxSetup = customAjaxSetup;
+
+                fcs.setup(Config.fcsapi);
+
+                // TODO: Implement support check for WebRTC
+                // fcs.onPluginRequired = function(error) {
+                //     switch (error) {
+                //         case fcs.call.MediaErrors.WRONG_VERSION: // Alert
+                //             showErrorMessage("Media Plugin Version Not Supported. See fcs.call.MediaErrors.WRONG_VERSION");
+                //             pluginDownloadDialog("Media Plugin Version Not Supported");
+                //             break;
+                //
+                //         case fcs.call.MediaErrors.NEW_VERSION_WARNING: //Warning
+                //             showWarningMessage("New Media Version Available Wanrning! See fcs.call.MediaErrors.NEW_VERSION_WARNING");
+                //             break;
+                //
+                //         case fcs.call.MediaErrors.NOT_INITIALIZED: // Alert
+                //             showErrorMessage("Media couldn't be initialized. See fcs.call.MediaErrors.NOT_INITIALIZED");
+                //             break;
+                //
+                //         case fcs.call.MediaErrors.NOT_FOUND: // Alert
+                //             showErrorMessage("Plugin couldn't be found! See fcs.call.MediaErrors.NOT_FOUND");
+                //             pluginDownloadDialog("Plugin couldn't be found!");
+                //             break;
+                //     }
+                // }
+
+                Notification.start(
+                    function() {
+                        self.logger.log("You are logged in successfully!");
+                        self.logger.log("Notification system is started up successfully!");
+
+                        fcs.call.initMedia(
+                            function() {
+                                self.logger.info('The media features has been succesfully initialized');
+                                Utils.doCallback(callback);
+                            },
+                            function(error) {
+                                self.logger.error('The media features initialization failed');
+                                Utils.doCallback(callback, [ error ]);
+                            }
+                        );
+
+                        fcs.call.onReceived = CallManager.processReceivedCall;
+
+                    },
+                    function(e) {
+                        var notificationError = "An error occurred! Notification subsystem couldn't be started!";
+                        self.logger.log(notificationError);
+                        if (e === fcs.Errors.AUTH) {
+                            var err = "Authentication error occured";
+                            self.logger.log(err);
+                            Utils.doCallback(callback, [ notificationError + ' ' + err ]);
+                        } else {
+                            Utils.doCallback(callback, [ notificationError ]);
+                        }
+                    }
+                );
+
+            }
+
         }
 
         /**
@@ -194,7 +216,7 @@ define([
                 //     }
                 // };
 
-                settings.headers['Authorization'] = 'Bearer ' +  Utils.get("access_token");
+                settings.headers['Authorization'] = 'Bearer ' + Auth.getAccessToken();
             }
 
             return settings;
@@ -241,6 +263,7 @@ define([
 
         this.version = version;
         this.logout = logout;
+        this.init = init;
         this.getPublicUserId = getPublicUserId;
 
         this.CallManager = CallManager;

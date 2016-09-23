@@ -10,9 +10,5 @@ define({
         'loginURI': '/token',
         'getSubscriptionServiceIdentitiesURI': '/SpeakEasyProvision/v1/util/products',
         'getSubscriptionServiceCatalogURI': '/SpeakEasyProvision/v1/serviceProfile/{publicId}'
-    },
-    services: {
-        'speakEasyServiceName': 'SpeakEasy',
-        'courierServiceName': 'Courier'
     }
 });
