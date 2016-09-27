@@ -13,8 +13,8 @@ define([
      *
      * Get subscription service catalog request
      *
-     * @param {[type]} serviceName name of the service to get info about
-     * @param {[type]} publicId    public user ID
+     * @param {String} serviceName name of the service to get info about
+     * @param {String} publicId    public user ID
      */
     function SubscriptionServiceCatalogRequest(serviceName, publicId) {
         BaseRequest.call(this);

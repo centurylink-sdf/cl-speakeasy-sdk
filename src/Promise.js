@@ -8,6 +8,7 @@ define([
      * Promise implementation
      * @class Ctl.Promise
      * @private
+     * @requires Ctl.Utils
      */
     function Promise() {
         this.complete = false;
@@ -17,8 +18,8 @@ define([
     }
 
     /**
-     * [function description]
-     * @param  {Function} callback [description]
+     * Promise implementation for callback
+     * @param  {Function} callback Call once promise mits requirement
      * @param  {Object}   context  [description]
      * @return {[type]}            [description]
      */
@@ -32,6 +33,12 @@ define([
             this.callbacks.push(f);
         }
     };
+
+    /**
+     * Add handlers to be called when the Deferred object is resolved
+     * @param  {Object}   error  Fired error in case of failure
+     * @param  {Object}   result Result
+     */
     Promise.prototype.done = function(error, result) {
         this.complete = true;
         this.error = error;
@@ -41,6 +48,12 @@ define([
             this.callbacks.length = 0;
         }
     };
+
+    /**
+     * Utility method to join promises
+     * @param  {Ctl.Promise} promises Array of promises
+     * @return {Ctl.Promise} p
+     */
     Promise.join = function(promises) {
         var p = new Promise(), total = promises.length, completed = 0, errors = [], results = [];
         function notifier(i) {
@@ -64,6 +77,13 @@ define([
         return p;
     };
 
+    /**
+     * Utility method to chain Deferred
+     * @param  {Ctl.Promise} promises Array of promises
+     * @param  {Object} error    Error if failed
+     * @param  {Object} result   Result if success
+     * @return {Ctl.Promise}     Promise
+     */
     Promise.chain = function(promises, error, result) {
         var p = new Promise();
         if (promises === null || promises.length === 0) {

@@ -53,7 +53,7 @@ define([
          * @param  {String} method Request method. POST, GET, PUT, DELETE etc.
          * @param  {String} url Url to make request
          * @param  {Object} data Data to send
-         * @return {Ctl.common.Promise} p
+         * @return {Ctl.Promise} p
          */
         function request(method, url, data, headers) {
             var p = new Promise(), timeout;
@@ -104,7 +104,7 @@ define([
          * @method get      Do AJAX GET request
          * @param  {String} url     Url to make request
          * @param  {Object} data    Data to send
-         * @return {Ctl.common.Promise} p
+         * @return {Ctl.Promise} p
          */
         this.get = partial(request, "GET");
 
@@ -112,7 +112,7 @@ define([
          * @method post      Do AJAX POST request
          * @param  {String} url     Url to make request
          * @param  {Object} data    Data to send
-         * @return {Ctl.common.Promise} p
+         * @return {Ctl.Promise} p
          */
         this.post = partial(request, "POST");
 
@@ -120,7 +120,7 @@ define([
          * @method put      Do AJAX PUT request
          * @param  {String} url     Url to make request
          * @param  {Object} data    Data to send
-         * @return {Ctl.common.Promise} p
+         * @return {Ctl.Promise} p
          */
         this.put = partial(request, "PUT");
 
@@ -128,7 +128,7 @@ define([
          * @method delete      Do AJAX DELETE request
          * @param  {String} url     Url to make request
          * @param  {Object} data    Data to send
-         * @return {Ctl.common.Promise} p
+         * @return {Ctl.Promise} p
          */
         this.delete = partial(request, "DELETE");
     }

@@ -103,6 +103,11 @@ define([], function () {
             return returnValue;
         }
 
+        /**
+         * Save object into storage
+         * @param {String} key   Object's key
+         * @param {Object} value Object's value
+         */
         function setObject(key, value) {
             if (value) {
                 value = JSON.stringify(value);
@@ -110,6 +115,11 @@ define([], function () {
             this.set(key, value);
         }
 
+        /**
+         * Save string into storage
+         * @param {String} key   String key
+         * @param {String} value String value
+         */
         function set(key, value) {
             var keyStore = "ctlapi_" + key;
             this[key] = value;
@@ -122,10 +132,20 @@ define([], function () {
             }
         }
 
+        /**
+         * Get object from storage
+         * @param {String} key   Object's key
+         * @return {Object} value Object's value
+         */
         function getObject(key) {
             return JSON.parse(this.get(key));
         }
 
+        /**
+         * Get string from storage
+         * @param {String} key   String key
+         * @return {String} value String value
+         */
         function get(key) {
             var keyStore = "ctlapi_" + key;
             var value = null;
@@ -137,6 +157,9 @@ define([], function () {
             return value;
         }
 
+        /**
+         * Remove all data in storage
+         */
         function removeAll() {
             for (var i = sessionStorage.length; i--;){
                 // if (sessionStorage.key(i).indexOf('ctlapi_') > -1) {

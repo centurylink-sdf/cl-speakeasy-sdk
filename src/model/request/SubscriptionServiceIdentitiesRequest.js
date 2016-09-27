@@ -10,7 +10,7 @@ define([
      * @class Ctl.model.request.SubscriptionServiceIdentitiesRequest
      * @extends Ctl.model.request.BaseRequest
      * @private
-     * 
+     *
      * Get subscription service list request
      *
      */
@@ -27,6 +27,11 @@ define([
     SubscriptionServiceIdentitiesRequest.prototype.getRequestUrl = function () {
             return Config.settings.ctlServerURL + Config.settings.getSubscriptionServiceIdentitiesURI;
     };
+
+    /**
+     * Type of the Ajax request
+     * @type {String}
+     */
     SubscriptionServiceIdentitiesRequest.prototype.type = "GET";
 
     return SubscriptionServiceIdentitiesRequest;

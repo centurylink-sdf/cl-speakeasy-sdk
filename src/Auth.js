@@ -21,11 +21,26 @@ define([
     /**
      * Main class responsible for authentication
      * @class Ctl.Auth
+     *
+     * @requires Ctl.Logger
+     * @requires Ctl.Promise
+     * @requires Ctl.Ajax
+     * @requires Ctl.Utils
+     * @requires Ctl.model.request.BaseRequest
+     * @requires Ctl.model.request.AccessTokenRequest
+     * @requires Ctl.model.request.RefreshTokenRequest
+     * @requires Ctl.Subscription
      */
     function Auth() {
 
         var logger = new Logger('Auth');
 
+        /**
+         * Configuration for storage namings
+         *
+         * @private
+         * @type {Object}
+         */
         var config = {
             storageKeywords: {
                 accessToken: 'access_token',
@@ -40,7 +55,6 @@ define([
          * @param  {String}   username Username to authenticate
          * @param  {String}   password Password to authenticate
          * @param  {Function} callback Callback to call once authentication finished
-         * @return {Promise}  p
          *
          * ## Sample usage:
          *
@@ -57,6 +71,14 @@ define([
             }
         }
 
+        /**
+         * Make service calls to authenticate user
+         * @param  {String}   username Username to authenticate
+         * @param  {String}   password Password to authenticate
+         * @param  {Function} callback Callback to call once authentication finished
+         *
+         * @private
+         */
         function authenticate(username, password, callback) {
 
             var atRequest = new AccessTokenRequest(username, password);
@@ -101,6 +123,12 @@ define([
             Promise.chain([ getAccessToken, getSubscriptionServices ]).then(oncomplete);
         }
 
+        /**
+         * Get details about subscription for specific moniker (public ID)
+         * @param {String}   serviceName Name of the service to get details about
+         * @param {String}   publicId    Moniker (account public ID) for the service
+         * @param {Function} callback    Callback to call once subscription details set
+         */
         function setDefaultSubscriptionService(serviceName, publicId, callback) {
             Subscription.getSubscriptionServiceDetails(serviceName, publicId).then(function(err, request) {
                 if (!err && request) {
@@ -113,7 +141,7 @@ define([
 
         /**
          * Authenticate if access token has expired
-         * @param  {Function} callback [description]
+         * @param  {Function} callback Callback to call once re-authentication finished
          */
         function reAuthenticate(callback) {
             var rtRequest = new RefreshTokenRequest(getRefreshToken());
@@ -154,6 +182,7 @@ define([
         /**
          * Login without additional service requests if client already authenticated
          * @param  {Function} callback function to call once authenticated
+         * @private
          */
         function loginFromCache(callback) {
             BaseRequest.prototype.accessToken = getAccessToken();
@@ -162,7 +191,7 @@ define([
         }
 
         /**
-         * Remove all related data from sessionStorage
+         * Remove all related data from Storage
          */
         function logout() {
             // TODO:10 Figure out better place for logout for the all loaded services
@@ -175,7 +204,7 @@ define([
         /**
          * Store the OAuth access token for later use - uses sessionStorage if available
          *
-         * @private
+         * @protected
          * @param   {String} token
          */
         function setAccessToken(token) {
@@ -186,7 +215,7 @@ define([
         /**
          * Get the OAuth access token
          *
-         * @private
+         * @protected
          * @return  {String} token
          */
         function getAccessToken() {
@@ -200,7 +229,7 @@ define([
         /**
          * Store the OAuth refresh token for later use - uses sessionStorage if available
          *
-         * @private
+         * @protected
          * @param   {String} token
          */
         function setRefreshToken(token) {
@@ -211,7 +240,7 @@ define([
         /**
          * Get the OAuth refresh token
          *
-         * @private
+         * @protected
          * @return  {String} token
          */
         function getRefreshToken() {
@@ -234,7 +263,6 @@ define([
         /**
          * Get the login username
          *
-         * @private
          * @return  {String} username
          */
         function getLoginUsername() {
@@ -242,6 +270,7 @@ define([
         }
 
         this.login = login;
+        this.logout = logout;
         this.reAuthenticate = reAuthenticate;
         this.isAuthenticated = isAuthenticated;
         this.setLoginUsername = setLoginUsername;

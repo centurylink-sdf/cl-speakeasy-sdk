@@ -5,15 +5,21 @@ define([
 ) {
 
     /**
-     * @class Ctl.EventEmitter
+     * Event emitter for internal usage
+     * @class Ctl.speakeasy.EventEmitter
      * @private
      * @singleton
+     * @requires Ctl.Promise
      */
     function EventEmitter() {
 
         var self = this;
         self.subscribedEvents = {};
 
+        /**
+         * Event names for calling
+         * @type {Object}
+         */
         self.events = {
             ON_DELETE_CALL: 'ON_DELETE_CALL',
             BEFORE_ANSWER_CALL: 'BEFORE_ANSWER_CALL',

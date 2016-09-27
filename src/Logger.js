@@ -3,7 +3,7 @@ define([], function () {
     var name = "Logger";
 
     /**
-     * [Logger description]
+     * Logger for internal usage
      * @class Ctl.Logger
      * @private
      * @param {String} name Name of the logger to expose
