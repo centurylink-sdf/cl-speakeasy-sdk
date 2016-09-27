@@ -12,6 +12,8 @@ define([
     /**
      * Wrapper for AJAX calls
      * @class Ctl.Ajax
+     * @author Andrew Kovalenko <andrew@jaybirdgroup.com>
+     * @docauthor Andrew Kovalenko <andrew@jaybirdgroup.com>
      * @private
      * @requires Ctl.Logger
      * @requires Ctl.Promise

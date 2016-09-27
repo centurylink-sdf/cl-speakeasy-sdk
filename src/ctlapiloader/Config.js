@@ -1,5 +1,7 @@
 /**
  * @class Ctl.ctlapiloader.Config
+ * @author Andrew Kovalenko <andrew@jaybirdgroup.com>
+ * @docauthor Andrew Kovalenko <andrew@jaybirdgroup.com>
  * @private
  *
  * List of configuration options for Ctl.ctlapiloader.CtlApiLoader.

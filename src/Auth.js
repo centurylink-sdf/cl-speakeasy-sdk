@@ -21,6 +21,8 @@ define([
     /**
      * Main class responsible for authentication
      * @class Ctl.Auth
+     * @author Andrew Kovalenko <andrew@jaybirdgroup.com>
+     * @docauthor Andrew Kovalenko <andrew@jaybirdgroup.com>
      *
      * @requires Ctl.Logger
      * @requires Ctl.Promise

@@ -23,12 +23,14 @@ define([
      * @class Ctl.speakeasy.BaseCall
      * A base class that implements call functionality
      *
-     * @requires Config
-     * @requires Logger
-     * @requires Promise
-     * @requires Ajax
-     * @requires Utils
-     * @requires CallInfo
+     * @requires Ctl.speakeasy.Config
+     * @requires Ctl.Logger
+     * @requires Ctl.Promise
+     * @requires Ctl.Ajax
+     * @requires Ctl.Utils
+     * @requires fcs
+     * @requires Ctl.speakeasy.EventEmitter
+     * @requires Ctl.speakeasy.CallInfo
      */
     function BaseCall(fcsCall) {
 
@@ -498,7 +500,7 @@ define([
 
         /**
          * Checks if call is established
-         * @returns {boolean} If call established or not
+         * @returns {boolean}   If call established or not
          */
         self.isActive = function() {
             return self.callState == fcs.call.States.IN_CALL || self.callState == fcs.call.States.RENEGOTIATION;

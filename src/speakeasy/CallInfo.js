@@ -10,11 +10,8 @@ define([
      * @class Ctl.speakeasy.CallInfo
      * Store the current calls information
      *
-     * @requires Config
-     * @requires Logger
-     * @requires Promise
-     * @requires Ajax
-     * @requires Utils
+     * @requires Ctl.speakeasy.Config
+     * @requires Ctl.Logger
      */
     function CallInfo() {
 
@@ -25,7 +22,7 @@ define([
 
         /**
          * Get all calls
-         *
+         * @return List of call objects
          */
         function getCalls() {
             return self.calls;
@@ -42,7 +39,7 @@ define([
 
         /**
          * Get active call
-         *
+         * @return {Object} Current call object
          */
         function getCurrentCall() {
             return self.currentCall;
@@ -56,6 +53,11 @@ define([
             self.currentCall = call;
         }
 
+        /**
+         * Add call to the list of calls
+         * @param {Object}  call      Call object
+         * @param {Boolean} isCurrent determines if it is current call
+         */
         function addCall(call, isCurrent) {
 
             var callId = call.getCallId();

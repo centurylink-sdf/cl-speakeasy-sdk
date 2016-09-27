@@ -26,11 +26,16 @@ define([
      * @class Ctl.speakeasy.CallManager
      * Manage calls
      *
-     * @requires Config
-     * @requires Logger
-     * @requires Promise
-     * @requires Ajax
-     * @requires Utils
+     * @requires Ctl.speakeasy.Config
+     * @requires Ctl.Logger
+     * @requires Ctl.Promise
+     * @requires Ctl.Ajax
+     * @requires Ctl.Utils
+     * @requires fcs
+     * @requires Ctl.speakeasy.EventEmitter
+     * @requires Ctl.speakeasy.IncomingCall
+     * @requires Ctl.speakeasy.OutgoingCall
+     * @requires Ctl.speakeasy.CallInfo
      */
     function CallManager() {
 
@@ -39,8 +44,8 @@ define([
 
         /**
          * Setup SpeakEasy main configuration
-         * @param  {[type]} config [description]
-         * @return {[type]}        [description]
+         * @param  {Object} config Configuration to setup calling
+         * @return {Ctl.Promise} p Promise object
          */
         function setup(config) {
             Utils.extend(Config.callManager, config);
@@ -70,6 +75,10 @@ define([
             });
         }
 
+        /**
+         * Put current call on hold
+         * @return {Ctl.Promise} Promise object
+         */
         function holdCurrentCall() {
 
             var promise = new Promise(),
@@ -131,7 +140,7 @@ define([
         }
 
         /**
-         * Starts a call.
+         * Starts a call
          *
          * @param {String} numToCall The callee's address used to establish the call
          * @param {Boolean} isVideoEnabled In order to make video call set this to true.
@@ -211,6 +220,10 @@ define([
             });
         }
 
+        /**
+         * handle incoming call
+         * @param  {Ctl.speakeasy.BaseCall} call Call object
+         */
         function processReceivedCall(call) {
             self.logger.info("There is an incomming call...");
 

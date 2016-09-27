@@ -7,6 +7,8 @@ define([
     /**
      * Promise implementation
      * @class Ctl.Promise
+     * @author Andrew Kovalenko <andrew@jaybirdgroup.com>
+     * @docauthor Andrew Kovalenko <andrew@jaybirdgroup.com>
      * @private
      * @requires Ctl.Utils
      */

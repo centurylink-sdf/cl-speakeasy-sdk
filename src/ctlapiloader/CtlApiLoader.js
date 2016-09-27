@@ -26,6 +26,7 @@ define([
      *
      * @requires Ctl.ctlapiloader.Version
      * @requires Ctl.ctlapiloader.Config
+     * @requires Ctl.ctlapiloader.Services
      * @requires Ctl.Logger
      * @requires Ctl.Utils
      * @requires Ctl.Auth
@@ -60,7 +61,7 @@ define([
 
             if (loadedApis.indexOf(name) === -1) {
 
-                var src = Services.SpeakEasy + name.toLowerCase() + '-' + version + '.js';
+                var src = Services[name] + name.toLowerCase() + '-' + version + '.js';
                 var jsElm = document.createElement("script");
                 jsElm.type = "application/javascript";
                 jsElm.src = src;
@@ -68,7 +69,7 @@ define([
 
                 jsElm.onload = function() {
                     loadedApis.push(name);
-                    Utils.doCallback(callback, [null, window.SpeakEasy]);
+                    Utils.doCallback(callback, [null, window[name]]);
                 };
 
                 jsElm.onerror = function() {

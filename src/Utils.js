@@ -5,8 +5,9 @@ define([], function () {
      * the CenturyLink Services API as easy as possible.
      *
      * @class Ctl.Utils
+     * @author Andrew Kovalenko <andrew@jaybirdgroup.com>
+     * @docauthor Andrew Kovalenko <andrew@jaybirdgroup.com>
      * @private
-     *
      */
     function Utils() {
 

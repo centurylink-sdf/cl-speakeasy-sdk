@@ -5,6 +5,8 @@ define([], function () {
     /**
      * Logger for internal usage
      * @class Ctl.Logger
+     * @author Andrew Kovalenko <andrew@jaybirdgroup.com>
+     * @docauthor Andrew Kovalenko <andrew@jaybirdgroup.com>
      * @private
      * @param {String} name Name of the logger to expose
      */

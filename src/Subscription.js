@@ -19,6 +19,8 @@ define([
     /**
      * Work with subscription services in CenturyLink
      * @class Ctl.Subscription
+     * @author Andrew Kovalenko <andrew@jaybirdgroup.com>
+     * @docauthor Andrew Kovalenko <andrew@jaybirdgroup.com>
      * @private
      * @requires Ctl.ctlapiloader.Config
      * @requires Ctl.Logger
