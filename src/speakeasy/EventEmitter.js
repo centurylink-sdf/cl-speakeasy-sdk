@@ -57,12 +57,12 @@ define([
          */
         function trigger(event, context, usePromises) {
             if (!self.subscribedEvents[event]) return false;
-            var args = Array.prototype.slice.call(arguments, 2),
+            var args = Array.prototype.slice.call(arguments, 3),
                 promises = [];
 
             for (var i = 0, l = self.subscribedEvents[event].length; i < l; i++) {
                 var subscription = self.subscribedEvents[event][i];
-                if(subscription.context === null || subscription.context === context) {
+                if(context === null || subscription.context === context) {
                     if(usePromises) {
                         promises.push(subscription.callback.apply(subscription.context, args));
                     }

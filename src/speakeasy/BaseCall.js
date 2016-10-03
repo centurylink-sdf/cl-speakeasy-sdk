@@ -55,7 +55,7 @@ define([
         self.id = self.fcsCall.getId();
         self.isMuted = false;
         self.isVideoStarted = false;
-        self.isEnded = false;
+        self.isEnded = false; // true if current user ends the call
 
         /**
          * Attaches handlers for listening call events
@@ -344,10 +344,10 @@ define([
                     break;
                 case fcs.call.States.ENDED:
                     self.logger.debug('status changed: ENDED');
-                    removeAllVideoStreams();
-                    EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, null, true, self.id);
 
                     if(!self.isEnded) {
+                        removeAllVideoStreams();
+                        EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, null, true, self.id);
                         EventEmitter.trigger(EventEmitter.events.CALL_ENDED, self, false, self);
                     }
                     break;
