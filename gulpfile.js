@@ -30,6 +30,7 @@ var runSequence = require('run-sequence');
 var GJSDuck = require("gulp-jsduck");
 var gjsduck = new GJSDuck(["--out", "docs"]);
 var amdclean  = require('gulp-amdclean');
+var argv = require('yargs').argv;
 
 var PROJECT_BASE_PATH = __dirname + '';
 
@@ -55,7 +56,12 @@ gulp.task('default', tasklist.withFilters(function(task) {
  */
 
 gulp.task('build-require-ctlapiloader', function (cb) {
-    executeCommand(rJsCommand + ' -o src/ctlapiloader/build.json', cb);
+    if(argv.cert) {
+        executeCommand(rJsCommand + ' -o src/ctlapiloader/build.cert.json', cb);
+    }
+    else {
+        executeCommand(rJsCommand + ' -o src/ctlapiloader/build.json', cb);
+    }
 });
 
 gulp.task('build-optimize-ctlapiloader', function (cb) {
@@ -79,7 +85,13 @@ gulp.task('build-ctlapiloader', function (cb) {
 });
 
 gulp.task('build-require-speakeasy', function (cb) {
-    executeCommand(rJsCommand + ' -o src/speakeasy/build.json', cb);
+
+    if(argv.cert) {
+        executeCommand(rJsCommand + ' -o src/speakeasy/build.cert.json', cb);
+    }
+    else {
+        executeCommand(rJsCommand + ' -o src/speakeasy/build.json', cb);
+    }
 });
 
 gulp.task('build-optimize-speakeasy', function (cb) {

@@ -1,6 +1,6 @@
 define([
     'Ctl.speakeasy/Version',
-    'Ctl.speakeasy/Config',
+    'Ctl.speakeasy.config',
     'Ctl.speakeasy/Notification',
     'Ctl/Logger',
     'Ctl/Promise',
@@ -8,7 +8,9 @@ define([
     'Ctl/Utils',
     'Ctl/Auth',
     'fcs',
-    'Ctl.speakeasy/CallManager'
+    'Ctl.speakeasy/CallManager',
+    'base64',
+    'sha256'
 ], function (Version, Config, Notification, Logger, Promise, Ajax, Utils, Auth, fcs, CallManager) {
 
     /**
@@ -74,7 +76,7 @@ define([
                 }
                 initFcsLogger();
 
-                fcs.setUserAuth(getPublicUserId(), '');
+                fcs.setUserAuth(getPublicUserId(), getVoipTnCipherRef());
 
                 // Set ajaxHook for url, headers and data intersection
                 Config.fcsapi.ajaxHook = "customAjaxSetup";
@@ -146,7 +148,7 @@ define([
          * a third-party URL that is to be proxied through CTL Application Framework (AF),
          * prepend the AF RequestServlet URL to the third-party URL.
          *
-         * @param xhr
+         * @param scope
          * @param settings
          * @returns {*}
          */
@@ -157,13 +159,20 @@ define([
                 var anch = document.createElement('a');
                 anch.href = settings.url;
                 var curPathname;
-                if (anch.pathname.indexOf('@') > -1) {
-                    var part = anch.pathname.substr(anch.pathname.indexOf('@'), anch.pathname.length);
-                    curPathname = part.substr(part.indexOf('/'), part.length);
-                } else {
-                    curPathname = anch.pathname.substr(anch.pathname.lastIndexOf('/'), anch.pathname.length);
+
+                if(Config.useCertification) {
+                    curPathname = anch.pathname;
                 }
-                var pubUserId = getPublicUserId();
+                else {
+                    if (anch.pathname.indexOf('@') > -1) {
+                        var part = anch.pathname.substr(anch.pathname.indexOf('@'), anch.pathname.length);
+                        curPathname = part.substr(part.indexOf('/'), part.length);
+                    } else {
+                        curPathname = anch.pathname.substr(anch.pathname.lastIndexOf('/'), anch.pathname.length);
+                    }
+                }
+
+                var pubUserId = Config.useCertification ? Utils.get('publicId') : getPublicUserId();
 
                 //Fixes for IE11
                 if (anch.origin === undefined) {
@@ -177,8 +186,8 @@ define([
                 for (var i = 0; i < Config.settings.proxyForURLPatterns.length; i++) {
                     var curRE = new RegExp(Config.settings.proxyForURLPatterns[i]);
                     if (curRE.test(settings.url)) {
-                        var sePrependURL = Config.settings.SEProxyPrependURL + pubUserId;
-                        settings.url = anch.origin + sePrependURL + curPathname;
+                        var sePrependURL = Config.settings.SEProxyPrependURL + pubUserId + Config.settings.AFAdditionalURLDetails;
+                        settings.url = anch.origin + sePrependURL + curPathname + anch.search;
                         break;
                     }
                 }
@@ -196,6 +205,25 @@ define([
                     }
                     originalOnload(arguments);
                 };
+
+                if(Config.useCertification)
+                {
+                    if(/RequestServlet/.test(settings.url)){
+                        //add spidr url headers
+                        settings.headers['X-CTLRTC-SPiDR-FQDN'] = Notification.activeWebRTCServer ? Notification.activeWebRTCServer : undefined;
+                    }
+
+                    //If the URL is bound for AFProxy, generate the required SHA256 token
+                    var reAF = new RegExp(".*RWS/restful/(?!(PreRegister))");
+                    if (!settings.disableRewrite) {
+                        if (reAF.exec(settings.url) !== null) {
+                            settings.url = addTokensToUrl(settings.url, settings.type, settings.data);
+                        }
+                    }
+                }
+                else {
+                    settings.headers['Authorization'] = 'Bearer ' + Auth.getAccessToken();
+                }
 
                 // var originalOnerror = this.onerror;
                 // this.onerror = function(e) {
@@ -216,11 +244,81 @@ define([
                 //     }
                 // };
 
-                settings.headers['Authorization'] = 'Bearer ' + Auth.getAccessToken();
             }
 
             return settings;
         }
+
+        /**
+         * Adds token to url request string
+         * @param {string} url
+         * @param {string} type GET,POST, etc.
+         * @param {string} data request payload
+         * @returns {string}
+         */
+        function addTokensToUrl(url, type, data){
+            //Use browser to parse out the pathname...
+            var anch = document.createElement('a');
+            anch.href = url;
+            var curPathname = anch.pathname;
+
+            //Fixes for IE11
+            if (anch.origin === undefined) {
+                anch.origin = anch.protocol + "//" + anch.hostname;
+            }
+            if (curPathname.charAt(0) !== '/') {
+                curPathname = '/' + curPathname;
+            }
+
+            //Get the remaining details from localStorage and settings for the AJAX call...
+            var cipherRef = getVoipTnCipherRef();
+
+            //Get the HMAC vals..
+            var hmacVals = createAFAuthTokens(cipherRef, type, curPathname, data);
+
+            //Create/append to search string in URL with AFProxy auth tokens
+            var searchStr = anch.search.length > 0 ? anch.search + "&" : "?";
+            searchStr = searchStr + "token=" + hmacVals.hmacValue + "&optionstoken=" + hmacVals.optionsHmacValue;
+
+            if(anch.origin.indexOf("https") === -1 && curPathname.indexOf("requestedBy=WEBRTC") === -1 ){
+                searchStr += "&requestedBy=WEBRTC";
+            }
+
+            return anch.origin + curPathname + searchStr;
+        }
+
+        /**
+         * Generate HMAC authentication tokens required by CTL AFProxy
+         *
+         * @param cipherRef - Shared secret between AFProxy & client
+         * @param method - HTTP method (i.e. GET, POST, PUT)
+         * @param path - Path portion of URL (i.e. /RequestServlet/WEBRTC)
+         * @param body - Optional.  Body portion of an HTTP request.
+         * @returns {Object}
+         */
+        function createAFAuthTokens(cipherRef, method, path, body) {
+            var retVal = {};
+
+            //All hmac generation scenarios use cipherRef + method + path...
+            var inputString = utf8_encode(cipherRef + method + path);
+
+            //Generate hmac value for CORS OPTIONS scenario
+            retVal.optionsHmacValue = CryptoJS.SHA256(inputString);
+
+            if (typeof body !==  "string" && !(body instanceof ArrayBuffer)) {
+                body = JSON.stringify(body);
+            }
+
+            //POST method uses first 400 chars of the body.
+            if (method && body && body !== undefined && (method.toLowerCase() == "post" || method.toLowerCase() == "put" || method.toLowerCase() == "delete"))
+                inputString = typeof body === "string" ? inputString + body.substring(0, 400) : inputString;
+
+            //Generate hmac value.
+            retVal.hmacValue = CryptoJS.SHA256(inputString);
+
+            return retVal;
+        }
+
 
         /**
          * Retrieve user's public ID
@@ -231,6 +329,16 @@ define([
             var phoneNumber = Utils.get('publicId');
             var publicUserId = phoneNumber + speakEasy.rtc.domain;
             return publicUserId;
+        }
+
+        /**
+         * Retrieve user's authentication and Ciphering Reference
+         * @returns {String} user's VoipTnCipherRef
+         */
+        function getVoipTnCipherRef() {
+            var speakEasy = Utils.getObject('services_SpeakEasy');
+            var voipTnCipherRef = speakEasy.networkIdentity.authenticationandCipheringReference;
+            return voipTnCipherRef;
         }
 
         /**

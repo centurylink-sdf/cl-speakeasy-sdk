@@ -1,5 +1,4 @@
 define([
-    'Ctl.ctlapiloader/Config',
     'Ctl/Logger',
     'Ctl/Promise',
     'Ctl/Ajax',
@@ -7,7 +6,6 @@ define([
     'Ctl.model.request/SubscriptionServiceIdentitiesRequest',
     'Ctl.model.request/SubscriptionServiceCatalogRequest'
 ], function (
-    Config,
     Logger,
     Promise,
     Ajax,
@@ -22,7 +20,6 @@ define([
      * @author Andrew Kovalenko <andrew@jaybirdgroup.com>
      * @docauthor Andrew Kovalenko <andrew@jaybirdgroup.com>
      * @private
-     * @requires Ctl.ctlapiloader.Config
      * @requires Ctl.Logger
      * @requires Ctl.Promise
      * @requires Ctl.Ajax
@@ -45,7 +42,8 @@ define([
                     publicId: 'publicId',
                     domain: 'domain',
                     id: 'id',
-                    webSocketEndpoints: 'webSocketEndpoints'
+                    webSocketEndpoints: 'webSocketEndpoints',
+                    voipTnCipherRef: 'voipTnCipherRef'
                 }
             }
         };

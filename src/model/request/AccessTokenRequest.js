@@ -1,5 +1,5 @@
 define([
-    'Ctl.ctlapiloader/Config',
+    'Ctl.ctlapiloader.config',
     'Ctl.model.request/BaseRequest'
 ], function (
     Config,
@@ -9,7 +9,7 @@ define([
      * @class Ctl.model.request.AccessTokenRequest
      * @extends Ctl.model.request.BaseRequest
      * @private
-     * 
+     *
      * Access Token Request
      *
      * The Token endpoint authenticates user credentials and in response

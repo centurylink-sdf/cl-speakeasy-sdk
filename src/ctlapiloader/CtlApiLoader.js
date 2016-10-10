@@ -1,6 +1,6 @@
 define([
     'Ctl.ctlapiloader/Version',
-    'Ctl.ctlapiloader/Config',
+    'Ctl.ctlapiloader.config',
     'Ctl.ctlapiloader/Services',
     'Ctl/Logger',
     'Ctl/Utils',

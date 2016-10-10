@@ -1,5 +1,5 @@
 define([
-    'Ctl.ctlapiloader/Config',
+    'Ctl.ctlapiloader.config',
     'Ctl.model.request/BaseRequest'
 ], function (
     Config,
