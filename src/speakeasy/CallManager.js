@@ -43,12 +43,10 @@ define([
         self.logger = new Logger('CallManager');
 
         /**
-         * Setup SpeakEasy main configuration
-         * @param  {Object} config Configuration to setup calling
-         * @return {Ctl.Promise} p Promise object
+         * Attaches handlers for listening calling events
+         * @private
          */
-        function setup(config) {
-            Utils.extend(Config.callManager, config);
+        function attachListeners() {
 
             EventEmitter.on(EventEmitter.events.ON_DELETE_CALL, self, function(callId) {
                 var p = new Promise();
@@ -73,6 +71,15 @@ define([
                 }
                 return p;
             });
+        }
+
+        /**
+         * Setup SpeakEasy main configuration
+         * @param  {Object} config Configuration to setup calling
+         * @return {Ctl.Promise} p Promise object
+         */
+        function setup(config) {
+            Utils.extend(Config.callManager, config);
         }
 
         /**
@@ -190,7 +197,6 @@ define([
                         Config.callManager.videoQuality
                     );
                 }
-
             });
         }
 
@@ -248,6 +254,8 @@ define([
          *
          */
         this.onCallReceived = null;
+
+        attachListeners();
     }
 
     return new CallManager();

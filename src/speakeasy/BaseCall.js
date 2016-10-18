@@ -369,6 +369,39 @@ define([
         }
 
         /**
+         * Checks if video containers are exist
+         * @private
+         */
+        function checkVideoContainersExists() {
+
+            var bodyElements = document.getElementsByTagName('body');
+            var container = null;
+
+            if(bodyElements.length > 0) {
+
+                var body = bodyElements[0];
+
+                if(remoteVideoContainer === null) {
+                    container = document.createElement('div');
+                    container.id = Config.callManager.remoteVideoContainer;
+
+                    body.appendChild(container);
+
+                    remoteVideoContainer = document.getElementById(Config.callManager.remoteVideoContainer);
+                }
+
+                if(localVideoContainer === null) {
+                    container = document.createElement('div');
+                    container.id = Config.callManager.localVideoContainer;
+
+                    body.appendChild(container);
+
+                    localVideoContainer = document.getElementById(Config.callManager.localVideoContainer);
+                }
+            }
+        }
+
+        /**
          * Gets call id
          * @returns {String} Unique identifier for the call
          */
@@ -540,6 +573,7 @@ define([
         };
 
         attachListeners();
+        checkVideoContainersExists();
     }
 
     return BaseCall;

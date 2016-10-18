@@ -87,9 +87,11 @@ gulp.task('build-ctlapiloader', function (cb) {
 gulp.task('build-require-speakeasy', function (cb) {
 
     if(argv.cert) {
+        console.log('Bulding for certification');
         executeCommand(rJsCommand + ' -o src/speakeasy/build.cert.json', cb);
     }
     else {
+        console.log('Bulding for integration');
         executeCommand(rJsCommand + ' -o src/speakeasy/build.json', cb);
     }
 });

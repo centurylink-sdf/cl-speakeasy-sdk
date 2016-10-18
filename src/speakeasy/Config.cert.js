@@ -34,9 +34,8 @@ define({
         'earlyMedia': true
     },
     callManager: {
-        'localVideoContainer': '',
-        'remoteVideoContainer': '',
+        'localVideoContainer': 'speakeasy_localVideoContainer',
+        'remoteVideoContainer': 'speakeasy_remoteVideoContainer',
         'videoQuality': '640x480'
-
     }
 });
