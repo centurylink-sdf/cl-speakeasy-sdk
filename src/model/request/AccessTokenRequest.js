@@ -55,7 +55,7 @@ define([
      * @return {String} string with URL for AccessTokenRequest
      */
     AccessTokenRequest.prototype.getRequestUrl = function () {
-        return Config.settings.ctlServerURL + Config.settings.loginURI;
+        return this.getCtlServerURL() + Config.settings.loginURI;
     };
 
     /**

@@ -25,7 +25,7 @@ define([
      * @return {String} string with URL for SubscriptionServiceIdentitiesRequest
      */
     SubscriptionServiceIdentitiesRequest.prototype.getRequestUrl = function () {
-            return Config.settings.ctlServerURL + Config.settings.getSubscriptionServiceIdentitiesURI;
+            return this.getCtlServerURL() + Config.settings.getSubscriptionServiceIdentitiesURI;
     };
 
     /**

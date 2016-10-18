@@ -7,31 +7,54 @@
  * List of configuration options for Ctl.speakeasy.CtlApiLoader.
  */
 define({
-    useCertification: false,
+    useConfig: 'intg',
     settings: {
         'subscribeServiceURI': '/{serviceName}/{identity}@{domain}/subscription',
         'unsubscribeServiceURI': '/SpeakEasy/{identity}@ctlvoip.lab.centurylink/subscription/{channelId}',
         'getInstantMessageURI': '/rest/version/{versionId}/user/{userId}/notification/{notificationChannelId}',
         'postImByUseridURI': '/rest/version/{versionId}/user/{userId}/instantmessage',
         'postImByDeviceidURI': '/rest/version/{versionId}/device/{deviceId}/instantmessage',
-        'proxyForURLPatterns': ['/rest/version/[0-9]+/user','/rest/version/latest'],
-        'SEProxyPrependURL': '/SpeakEasy/',
-        "AFAdditionalURLDetails": "",
-        "defaultOutgoingCallDomain": "ctlvoip.lab.centurylink"
+        'defaultOutgoingCallDomain': 'ctlvoip.lab.centurylink',
+        'intg': {
+            'proxyForURLPatterns': ['/rest/version/[0-9]+/user','/rest/version/latest'],
+            'SEProxyPrependURL': '/SpeakEasy/',
+            'AFAdditionalURLDetails': ''
+        },
+        'cert': {
+            'proxyForURLPatterns': ['/rest/version/[0-9]+','/rest/version/latest'],
+            'SEProxyPrependURL': '/WEBRTC/RequestServletRWS/restful/',
+            "AFAdditionalURLDetails": '/multiSite/v3_1'
+        }
     },
     fcsapi: {
-        'notificationType': 'websocket',
-        'callAuditTimer': '30000',
-        'codecsToRemove': ['103', '104', '105', '106', '107'],
-        'protocol': 'https',
-        'restUrl': 'lab.iaf.centurylink.com',
-        'restPort': '8889',
-        'clientControlled': 'true',
-        'services':['CallControl', 'custom'],
-        'websocketProtocol': 'wss',
-        // 'websocketIP': 'www.intg104.centurylink.com',
-        // 'websocketPort': '8590',
-        'earlyMedia': true
+        'intg': {
+            'notificationType': 'websocket',
+            'restUrl': 'lab.iaf.centurylink.com',
+            'restPort': '8889',
+            'callAuditTimer': '30000',
+            'codecsToRemove': ['103', '104', '105', '106', '107'],
+            'protocol': 'https',
+            'clientControlled': 'true',
+            'services':['CallControl', 'custom'],
+            'websocketProtocol': 'wss',
+            // 'websocketIP': 'www.intg104.centurylink.com',
+            // 'websocketPort': '8590',
+            'earlyMedia': true
+        },
+        'cert': {
+            'notificationType': 'websocketonly',
+            'restUrl': 'lab.af.centurylink.com',
+            'restPort': '443',
+            'callAuditTimer': '30000',
+            'codecsToRemove': ['103', '104', '105', '106', '107'],
+            'protocol': 'https',
+            'clientControlled': 'true',
+            'services':['CallControl', 'custom'],
+            'websocketProtocol': 'wss',
+            // 'websocketIP': 'www.intg104.centurylink.com',
+            // 'websocketPort': '8590',
+            'earlyMedia': true
+        }
     },
     callManager: {
         'localVideoContainer': 'speakeasy_localVideoContainer',

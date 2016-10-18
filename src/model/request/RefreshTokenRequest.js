@@ -52,7 +52,7 @@ define([
      * @return {String} string with URL for RefreshTokenRequest
      */
     RefreshTokenRequest.prototype.getRequestUrl = function () {
-        return Config.settings.ctlServerURL + Config.settings.loginURI;
+        return this.getCtlServerURL() + Config.settings.loginURI;
     };
 
     /**

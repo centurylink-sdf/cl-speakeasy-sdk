@@ -29,7 +29,7 @@ define([
      * @return {String} string with URL for SubscriptionServiceCatalogRequest
      */
     SubscriptionServiceCatalogRequest.prototype.getRequestUrl = function() {
-            return Config.settings.ctlServerURL +
+            return this.getCtlServerURL() +
                 Config.settings.getSubscriptionServiceCatalogURI
                 .replace('{service}', this.serviceName)
                 .replace('{publicId}', this.publicId);

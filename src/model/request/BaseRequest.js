@@ -1,4 +1,8 @@
-define(function(){
+define([
+    'Ctl.ctlapiloader.config'
+], function(
+    Config
+){
 
     /**
      * @class Ctl.model.request.BaseRequest
@@ -20,6 +24,16 @@ define(function(){
     BaseRequest.prototype = {
         getRequestHeaders: function(){
             return this.requestHeaders;
+        },
+        getCtlServerURL: function() {
+            var configSection = Config.useConfig;
+            var settings = Config.settings[configSection];
+            if(settings) {
+                return settings.ctlServerURL;
+            }
+            else {
+                return Config.settings.intg.ctlServerURL;
+            }
         }
     };
 

@@ -82,7 +82,7 @@ define([
                 Config.fcsapi.ajaxHook = "customAjaxSetup";
                 window.customAjaxSetup = customAjaxSetup;
 
-                fcs.setup(Config.fcsapi);
+                fcs.setup(getFcsApiConfig());
 
                 // TODO: Implement support check for WebRTC
                 // fcs.onPluginRequired = function(error) {
@@ -182,11 +182,13 @@ define([
                     curPathname = '/' + curPathname;
                 }
 
+                var configSettings = getSettings();
+
                 //If the URL is to be proxied by AAA, prepend the required SEProxy portion to the URL path...
-                for (var i = 0; i < Config.settings.proxyForURLPatterns.length; i++) {
-                    var curRE = new RegExp(Config.settings.proxyForURLPatterns[i]);
+                for (var i = 0; i < configSettings.proxyForURLPatterns.length; i++) {
+                    var curRE = new RegExp(configSettings.proxyForURLPatterns[i]);
                     if (curRE.test(settings.url)) {
-                        var sePrependURL = Config.settings.SEProxyPrependURL + pubUserId + Config.settings.AFAdditionalURLDetails;
+                        var sePrependURL = configSettings.SEProxyPrependURL + pubUserId + configSettings.AFAdditionalURLDetails;
                         settings.url = anch.origin + sePrependURL + curPathname + anch.search;
                         break;
                     }
@@ -206,7 +208,7 @@ define([
                     originalOnload(arguments);
                 };
 
-                if(Config.useCertification)
+                if(Config.useConfig === 'cert')
                 {
                     if(/RequestServlet/.test(settings.url)){
                         //add spidr url headers
@@ -339,6 +341,38 @@ define([
             var speakEasy = Utils.getObject('services_SpeakEasy');
             var voipTnCipherRef = speakEasy.networkIdentity.authenticationandCipheringReference;
             return voipTnCipherRef;
+        }
+
+        /**
+         * Get FcsApi setting from config for current environment
+         * @returns {*}
+         */
+        function getFcsApiConfig() {
+            var configSection = Config.useConfig;
+            var fcsapi = Config.fcsapi[configSection];
+
+            if(fcsapi) {
+                return fcsapi;
+            }
+            else {
+                Config.fcsapi.intg;
+            }
+        }
+
+        /**
+         * Get setting from config for current environment
+         * @returns {object} config object
+         */
+        function getSettings() {
+            var configSection = Config.useConfig;
+            var settings = Config.settings[configSection];
+
+            if(settings) {
+                return settings;
+            }
+            else {
+                Config.settings.intg;
+            }
         }
 
         /**
