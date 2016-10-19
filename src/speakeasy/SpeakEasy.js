@@ -76,13 +76,15 @@ define([
                 }
                 initFcsLogger();
 
+                var fcsApiConfig = getFcsApiConfig();
+
                 fcs.setUserAuth(getPublicUserId(), getVoipTnCipherRef());
 
                 // Set ajaxHook for url, headers and data intersection
-                Config.fcsapi.ajaxHook = "customAjaxSetup";
+                fcsApiConfig.ajaxHook = "customAjaxSetup";
                 window.customAjaxSetup = customAjaxSetup;
 
-                fcs.setup(getFcsApiConfig());
+                fcs.setup(fcsApiConfig);
 
                 // TODO: Implement support check for WebRTC
                 // fcs.onPluginRequired = function(error) {
