@@ -67,11 +67,13 @@ function unBlockUI() {
 
 function populateSubscriptionServices(services) {
     var publicIds = Object.keys(services);
+    var i = 0;
     for (var val in services) {
         if(services.hasOwnProperty(val)) {
             for (var serviceName in services[val]) {
                 if(services[val].hasOwnProperty(serviceName)) {
-                    $('#subscriptionTable').append('<p><input name="service" type="radio" id="' + serviceName + '" value="' + val + ' - ' + services[val][serviceName] + '" /><label for="' + serviceName + '">' + val + ' - ' + services[val][serviceName] + '</label></p>');
+                    $('#subscriptionTable').append('<p><input name="service" type="radio" id="' + i + '" value="' + val + ' - ' + services[val][serviceName] + '" /><label for="' + i + '">' + val + ' - ' + services[val][serviceName] + '</label></p>');
+                    i++;
                 }
             }
         }
@@ -88,7 +90,7 @@ function submitLogin() {
         if (!error && response) {
             console.info('Successfully authenticated. Exposing subscription services selection.');
             populateSubscriptionServices(response);
-             $('#subscriptionServicesModal').openModal();
+            $('#subscriptionServicesModal').openModal();
         } else {
             console.error('Authentication failed: ', error);
             unBlockUI();
