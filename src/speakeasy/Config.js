@@ -15,16 +15,8 @@ define({
         'postImByUseridURI': '/rest/version/{versionId}/user/{userId}/instantmessage',
         'postImByDeviceidURI': '/rest/version/{versionId}/device/{deviceId}/instantmessage',
         'defaultOutgoingCallDomain': 'ctlvoip.lab.centurylink',
-        'intg': {
-            'proxyForURLPatterns': ['/rest/version/[0-9]+/user','/rest/version/latest'],
-            'SEProxyPrependURL': '/SpeakEasy/',
-            'AFAdditionalURLDetails': ''
-        },
-        'cert': {
-            'proxyForURLPatterns': ['/rest/version/[0-9]+','/rest/version/latest'],
-            'SEProxyPrependURL': '/WEBRTC/RequestServletRWS/restful/',
-            "AFAdditionalURLDetails": '/multiSite/v3_1'
-        }
+        'proxyForURLPatterns': ['/rest/version/[0-9]+/user','/rest/version/latest'],
+        'SEProxyPrependURL': '/SpeakEasy/'
     },
     fcsapi: {
         'intg': {

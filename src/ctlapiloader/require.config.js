@@ -3,8 +3,7 @@ require.config({
     'paths': {
         'Ctl':                  '../',
         'Ctl.model.request':    '../model/request',
-        'Ctl.ctlapiloader':        './',
-        'Ctl.ctlapiloader.config':        './Config'
+        'Ctl.ctlapiloader':     './'
     },
     name: 'CtlApiLoader',
     out: '../../dist/ctlapi.js',

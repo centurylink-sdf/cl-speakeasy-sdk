@@ -1,5 +1,5 @@
 define([
-    'Ctl.speakeasy.config',
+    'Ctl.speakeasy/Config',
     'Ctl/Subscription',
     'Ctl/Logger',
     'Ctl/Utils',

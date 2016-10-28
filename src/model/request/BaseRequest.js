@@ -1,5 +1,5 @@
 define([
-    'Ctl.ctlapiloader.config'
+    'Ctl.ctlapiloader/Config'
 ], function(
     Config
 ){

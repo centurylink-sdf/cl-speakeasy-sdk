@@ -1,6 +1,6 @@
 define([
     'Ctl.speakeasy/Version',
-    'Ctl.speakeasy.config',
+    'Ctl.speakeasy/Config',
     'Ctl.speakeasy/Notification',
     'Ctl/Logger',
     'Ctl/Promise',
@@ -8,9 +8,7 @@ define([
     'Ctl/Utils',
     'Ctl/Auth',
     'fcs',
-    'Ctl.speakeasy/CallManager',
-    'base64',
-    'sha256'
+    'Ctl.speakeasy/CallManager'
 ], function (Version, Config, Notification, Logger, Promise, Ajax, Utils, Auth, fcs, CallManager) {
 
     /**
@@ -161,20 +159,13 @@ define([
                 var anch = document.createElement('a');
                 anch.href = settings.url;
                 var curPathname;
-
-                if(Config.useCertification) {
-                    curPathname = anch.pathname;
+                if (anch.pathname.indexOf('@') > -1) {
+                    var part = anch.pathname.substr(anch.pathname.indexOf('@'), anch.pathname.length);
+                    curPathname = part.substr(part.indexOf('/'), part.length);
+                } else {
+                    curPathname = anch.pathname.substr(anch.pathname.lastIndexOf('/'), anch.pathname.length);
                 }
-                else {
-                    if (anch.pathname.indexOf('@') > -1) {
-                        var part = anch.pathname.substr(anch.pathname.indexOf('@'), anch.pathname.length);
-                        curPathname = part.substr(part.indexOf('/'), part.length);
-                    } else {
-                        curPathname = anch.pathname.substr(anch.pathname.lastIndexOf('/'), anch.pathname.length);
-                    }
-                }
-
-                var pubUserId = Config.useCertification ? Utils.get('publicId') : getPublicUserId();
+                var pubUserId = getPublicUserId();
 
                 //Fixes for IE11
                 if (anch.origin === undefined) {
@@ -184,14 +175,12 @@ define([
                     curPathname = '/' + curPathname;
                 }
 
-                var configSettings = getSettings();
-
                 //If the URL is to be proxied by AAA, prepend the required SEProxy portion to the URL path...
-                for (var i = 0; i < configSettings.proxyForURLPatterns.length; i++) {
-                    var curRE = new RegExp(configSettings.proxyForURLPatterns[i]);
+                for (var i = 0; i < Config.settings.proxyForURLPatterns.length; i++) {
+                    var curRE = new RegExp(Config.settings.proxyForURLPatterns[i]);
                     if (curRE.test(settings.url)) {
-                        var sePrependURL = configSettings.SEProxyPrependURL + pubUserId + configSettings.AFAdditionalURLDetails;
-                        settings.url = anch.origin + sePrependURL + curPathname + anch.search;
+                        var sePrependURL = Config.settings.SEProxyPrependURL + pubUserId;
+                        settings.url = anch.origin + sePrependURL + curPathname;
                         break;
                     }
                 }
@@ -209,25 +198,6 @@ define([
                     }
                     originalOnload(arguments);
                 };
-
-                if(Config.useConfig === 'cert')
-                {
-                    if(/RequestServlet/.test(settings.url)){
-                        //add spidr url headers
-                        settings.headers['X-CTLRTC-SPiDR-FQDN'] = Notification.activeWebRTCServer ? Notification.activeWebRTCServer : undefined;
-                    }
-
-                    //If the URL is bound for AFProxy, generate the required SHA256 token
-                    var reAF = new RegExp(".*RWS/restful/(?!(PreRegister))");
-                    if (!settings.disableRewrite) {
-                        if (reAF.exec(settings.url) !== null) {
-                            settings.url = addTokensToUrl(settings.url, settings.type, settings.data);
-                        }
-                    }
-                }
-                else {
-                    settings.headers['Authorization'] = 'Bearer ' + Auth.getAccessToken();
-                }
 
                 // var originalOnerror = this.onerror;
                 // this.onerror = function(e) {
@@ -248,81 +218,11 @@ define([
                 //     }
                 // };
 
+                settings.headers['Authorization'] = 'Bearer ' + Auth.getAccessToken();
             }
 
             return settings;
         }
-
-        /**
-         * Adds token to url request string
-         * @param {string} url
-         * @param {string} type GET,POST, etc.
-         * @param {string} data request payload
-         * @returns {string}
-         */
-        function addTokensToUrl(url, type, data){
-            //Use browser to parse out the pathname...
-            var anch = document.createElement('a');
-            anch.href = url;
-            var curPathname = anch.pathname;
-
-            //Fixes for IE11
-            if (anch.origin === undefined) {
-                anch.origin = anch.protocol + "//" + anch.hostname;
-            }
-            if (curPathname.charAt(0) !== '/') {
-                curPathname = '/' + curPathname;
-            }
-
-            //Get the remaining details from localStorage and settings for the AJAX call...
-            var cipherRef = getVoipTnCipherRef();
-
-            //Get the HMAC vals..
-            var hmacVals = createAFAuthTokens(cipherRef, type, curPathname, data);
-
-            //Create/append to search string in URL with AFProxy auth tokens
-            var searchStr = anch.search.length > 0 ? anch.search + "&" : "?";
-            searchStr = searchStr + "token=" + hmacVals.hmacValue + "&optionstoken=" + hmacVals.optionsHmacValue;
-
-            if(anch.origin.indexOf("https") === -1 && curPathname.indexOf("requestedBy=WEBRTC") === -1 ){
-                searchStr += "&requestedBy=WEBRTC";
-            }
-
-            return anch.origin + curPathname + searchStr;
-        }
-
-        /**
-         * Generate HMAC authentication tokens required by CTL AFProxy
-         *
-         * @param cipherRef - Shared secret between AFProxy & client
-         * @param method - HTTP method (i.e. GET, POST, PUT)
-         * @param path - Path portion of URL (i.e. /RequestServlet/WEBRTC)
-         * @param body - Optional.  Body portion of an HTTP request.
-         * @returns {Object}
-         */
-        function createAFAuthTokens(cipherRef, method, path, body) {
-            var retVal = {};
-
-            //All hmac generation scenarios use cipherRef + method + path...
-            var inputString = utf8_encode(cipherRef + method + path);
-
-            //Generate hmac value for CORS OPTIONS scenario
-            retVal.optionsHmacValue = CryptoJS.SHA256(inputString);
-
-            if (typeof body !==  "string" && !(body instanceof ArrayBuffer)) {
-                body = JSON.stringify(body);
-            }
-
-            //POST method uses first 400 chars of the body.
-            if (method && body && body !== undefined && (method.toLowerCase() == "post" || method.toLowerCase() == "put" || method.toLowerCase() == "delete"))
-                inputString = typeof body === "string" ? inputString + body.substring(0, 400) : inputString;
-
-            //Generate hmac value.
-            retVal.hmacValue = CryptoJS.SHA256(inputString);
-
-            return retVal;
-        }
-
 
         /**
          * Retrieve user's public ID
@@ -357,23 +257,7 @@ define([
                 return fcsapi;
             }
             else {
-                Config.fcsapi.intg;
-            }
-        }
-
-        /**
-         * Get setting from config for current environment
-         * @returns {object} config object
-         */
-        function getSettings() {
-            var configSection = Config.useConfig;
-            var settings = Config.settings[configSection];
-
-            if(settings) {
-                return settings;
-            }
-            else {
-                Config.settings.intg;
+                return Config.fcsapi.intg;
             }
         }
 

@@ -1,6 +1,6 @@
 define([
     'Ctl.speakeasy/BaseCall',
-    'Ctl.speakeasy.config',
+    'Ctl.speakeasy/Config',
     'Ctl/Logger',
     'Ctl/Promise',
     'Ctl/Ajax',

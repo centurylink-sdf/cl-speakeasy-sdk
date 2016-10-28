@@ -1,5 +1,5 @@
 define([
-    'Ctl.speakeasy.config',
+    'Ctl.speakeasy/Config',
     'Ctl/Logger',
     'Ctl/Promise',
     'Ctl/Ajax',
@@ -200,6 +200,80 @@ define([
             });
         }
 
+        function createFakeCall(numToCall, isVideoEnabled, successCallback, failureCallback) {
+
+            var domain = Config.settings.defaultOutgoingCallDomain;
+            numToCall = !/@/.test(numToCall) ?  numToCall + "@" + domain : numToCall;
+
+            var currentUser = fcs.getUser();
+
+            holdCurrentCall().then(function(error) {
+
+                if(error) {
+                    Utils.doCallback(failureCallback);
+                }
+                else {
+
+                    var Call = function() {
+
+                        var self = this;
+
+                        self.calleeNumber = numToCall;
+                        self.id = null;
+                        self.holdState = null;
+
+                        self.canReceiveVideo = function() {
+                            return false;
+                        };
+
+                        self.canSendVideo = function() {
+                            return false;
+                        };
+
+                        self.getId = function () {
+                            function s4() {
+                                return Math.floor((1 + Math.random()) * 0x10000)
+                                    .toString(16)
+                                    .substring(1);
+                            }
+
+                            if(self.id === null) {
+                                self.id = s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                                    s4() + '-' + s4() + s4() + s4()
+                            }
+
+                            return self.id;
+                        };
+
+                        self.end = function(successCallback, failureCallback) {
+                            successCallback();
+                        };
+
+                        self.hold = function(successCallback, failureCallback) {
+                            self.holdState = fcs.call.HoldStates.LOCAL_HOLD;
+                            successCallback();
+                        };
+
+                        self.getHoldState = function() {
+                            return self.holdState;
+                        };
+                    };
+
+                    setTimeout(function() {
+
+                        var call = new Call();
+
+                        holdCurrentCall();
+                        var outgoingCall = new OutgoingCall(call);
+                        CallInfo.addCall(outgoingCall, true);
+                        Utils.doCallback(successCallback, [ outgoingCall ]);
+                        call.onStateChange(fcs.call.States.IN_CALL);
+
+                    }, 2000);
+                }
+            });
+        }
+
         /**
          * Make active another call
          * @param {String} callId The call id to switch to
@@ -245,6 +319,7 @@ define([
         this.getCurrentCall = getCurrentCall;
         this.get = get;
         this.createCall = createCall;
+        this.createFakeCall = createFakeCall;
         this.switchTo = switchTo;
         this.processReceivedCall = processReceivedCall;
 
