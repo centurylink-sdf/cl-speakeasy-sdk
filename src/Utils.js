@@ -191,6 +191,15 @@ define([], function () {
             return target;
         }
 
+        /**
+         * Check if value is not null or undefined
+         * @param value
+         * @returns {boolean}
+         */
+        function isNotNull(value) {
+            return value != null && typeof value != 'undefined';
+        }
+
         this.isValidUrl = isValidUrl;
         this.encodeParams = encodeParams;
         this.isFunction = isFunction;
@@ -201,6 +210,7 @@ define([], function () {
         this.get = get;
         this.removeAll = removeAll;
         this.extend = extend;
+        this.isNotNull = isNotNull;
 
     }
 

@@ -62,9 +62,12 @@ define([
 
             var callId = call.getCallId();
 
+            console.log('adding the call: ' + callId);
+
             self.calls[callId] = call;
 
             if(isCurrent) {
+                console.log('Set as current');
                 self.currentCall = call;
             }
         }
@@ -85,9 +88,16 @@ define([
          * @param callId
          */
         function deleteCall(callId) {
+
+            console.log('Deleting call ' + callId);
+
             var callToDelete = self.get(callId);
             if(callToDelete) {
+                console.log('Call found, deleting...');
                 delete self.calls[callId];
+
+                console.log(self.calls);
+
                 if(self.currentCall.id == callId) {
                     self.currentCall = null;
 

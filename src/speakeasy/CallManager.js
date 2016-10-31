@@ -63,7 +63,7 @@ define([
 
                 var p = new Promise();
                 var currentCall = CallInfo.getCurrentCall();
-                if(currentCall != null && currentCall.id != callId) {
+                if(Utils.isNotNull(currentCall) && currentCall.id != callId) {
                     p = holdCurrentCall();
                 }
                 else {
@@ -88,12 +88,16 @@ define([
          */
         function holdCurrentCall() {
 
+            self.logger.debug('trying to hold current call');
+
             var promise = new Promise(),
                 currentCall = CallInfo.getCurrentCall();
 
-            if(currentCall != null) {
+            if(Utils.isNotNull(currentCall)) {
                 // place current call on hold
+                self.logger.debug(currentCall);
                 if(currentCall.isActive()) {
+                    self.logger.debug('hold current call');
                     currentCall.hold(function() {
                         promise.done(false);
                     },
@@ -102,10 +106,12 @@ define([
                     });
                 }
                 else {
+                    self.logger.debug('current call is not active');
                     promise.done(false);
                 }
             }
             else {
+                self.logger.debug('no current calls');
                 promise.done(false);
             }
 
@@ -152,6 +158,7 @@ define([
          * @param {String} numToCall The callee's address used to establish the call
          * @param {Boolean} isVideoEnabled In order to make video call set this to true.
          * @param {function} successCallback The callback function to be called after success
+         * @param {function} failureCallback The callback function to be called after failure
          *
          * @return  {OutgoingCall} Contains call object with required info
          */
@@ -196,80 +203,6 @@ define([
                         isVideoEnabled,
                         Config.callManager.videoQuality
                     );
-                }
-            });
-        }
-
-        function createFakeCall(numToCall, isVideoEnabled, successCallback, failureCallback) {
-
-            var domain = Config.settings.defaultOutgoingCallDomain;
-            numToCall = !/@/.test(numToCall) ?  numToCall + "@" + domain : numToCall;
-
-            var currentUser = fcs.getUser();
-
-            holdCurrentCall().then(function(error) {
-
-                if(error) {
-                    Utils.doCallback(failureCallback);
-                }
-                else {
-
-                    var Call = function() {
-
-                        var self = this;
-
-                        self.calleeNumber = numToCall;
-                        self.id = null;
-                        self.holdState = null;
-
-                        self.canReceiveVideo = function() {
-                            return false;
-                        };
-
-                        self.canSendVideo = function() {
-                            return false;
-                        };
-
-                        self.getId = function () {
-                            function s4() {
-                                return Math.floor((1 + Math.random()) * 0x10000)
-                                    .toString(16)
-                                    .substring(1);
-                            }
-
-                            if(self.id === null) {
-                                self.id = s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-                                    s4() + '-' + s4() + s4() + s4()
-                            }
-
-                            return self.id;
-                        };
-
-                        self.end = function(successCallback, failureCallback) {
-                            successCallback();
-                        };
-
-                        self.hold = function(successCallback, failureCallback) {
-                            self.holdState = fcs.call.HoldStates.LOCAL_HOLD;
-                            successCallback();
-                        };
-
-                        self.getHoldState = function() {
-                            return self.holdState;
-                        };
-                    };
-
-                    setTimeout(function() {
-
-                        var call = new Call();
-
-                        holdCurrentCall();
-                        var outgoingCall = new OutgoingCall(call);
-                        CallInfo.addCall(outgoingCall, true);
-                        Utils.doCallback(successCallback, [ outgoingCall ]);
-                        call.onStateChange(fcs.call.States.IN_CALL);
-
-                    }, 2000);
                 }
             });
         }
@@ -319,7 +252,6 @@ define([
         this.getCurrentCall = getCurrentCall;
         this.get = get;
         this.createCall = createCall;
-        this.createFakeCall = createFakeCall;
         this.switchTo = switchTo;
         this.processReceivedCall = processReceivedCall;
 

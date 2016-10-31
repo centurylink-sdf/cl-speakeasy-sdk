@@ -111,11 +111,11 @@ function loadSpeakEasy() {
                     currentCall.hangUp(function() {
 
                         showInfoMessage('Call is ended!');
-                        updateCallButtonsGroup();
 
                         updateCallStatus(currentCall.getCallId(), 'Ended');
                         setTimeout(function() {
                             removeCall(currentCall.getCallId());
+                            updateCallButtonsGroup();
                         }, 1000);
                     }, function() {
                         showErrorMessage('Call couldn\'t be ended!');
@@ -347,6 +347,7 @@ function attachCallListeners(call) {
     call.on('CALL_STARTED', function() {
         showInfoMessage('Call is started!');
         updateCallStatus(callId, 'In Call');
+        updateCallButtonsGroup();
     });
 
     call.on('CALL_ENDED', function() {

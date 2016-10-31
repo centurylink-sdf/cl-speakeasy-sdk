@@ -546,7 +546,7 @@ define([
         self.isOnHold = function() {
             var holdState = self.fcsCall.getHoldState();
 
-            if(holdState && (holdState == fcs.call.HoldStates.BOTH_HOLD || holdState == fcs.call.HoldStates.LOCAL_HOLD || holdState == fcs.call.HoldStates.REMOTE_HOLD)) {
+            if(Utils.isNotNull(holdState) && (holdState == fcs.call.HoldStates.BOTH_HOLD || holdState == fcs.call.HoldStates.LOCAL_HOLD || holdState == fcs.call.HoldStates.REMOTE_HOLD)) {
                 return true;
             }
             return false;
