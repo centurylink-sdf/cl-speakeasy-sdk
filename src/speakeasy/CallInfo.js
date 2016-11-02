@@ -34,7 +34,7 @@ define([
          */
         function getCallsCount() {
             var calls = self.getCalls();
-            return Object.keys(calls).length;
+            return calls.length;
         }
 
         /**
@@ -74,7 +74,15 @@ define([
          * @return  {Call} Contains call object with required info
          */
         function get(callID) {
-            return self.calls[callID];
+            var result = self.calls.filter(function( call ) {
+                return call.id == callID;
+            });
+            if(result.length > 0) {
+                return result[0];
+            }
+            else {
+                return null;
+            }
         }
 
         /**
@@ -85,7 +93,11 @@ define([
         function deleteCall(callId) {
             var callToDelete = self.get(callId);
             if(callToDelete) {
-                delete self.calls[callId];
+                for (var i = self.calls.length - 1; i >= 0; i--) {
+                    if (self.calls[i].id == callId) {
+                        self.calls.splice(i, 1);
+                    }
+                }
                 if(self.currentCall.id == callId) {
                     self.currentCall = null;
                     //make previous call as current
