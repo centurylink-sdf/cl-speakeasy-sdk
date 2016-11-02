@@ -36,7 +36,7 @@ define({
         'cert': {
             'notificationType': 'websocketonly',
             'restUrl': 'lab.af.centurylink.com',
-            'restPort': '443',
+            'restPort': '8889',
             'callAuditTimer': '30000',
             'codecsToRemove': ['103', '104', '105', '106', '107'],
             'protocol': 'https',
