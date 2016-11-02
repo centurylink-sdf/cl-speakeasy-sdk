@@ -13,7 +13,7 @@ define({
             'ctlServerURL': 'https://lab.iaf.centurylink.com:8889'
         },
         cert: {
-            'ctlServerURL': 'https://lab.af.centurylink.com:443'
+            'ctlServerURL': 'https://lab.af.centurylink.com:8889'
         },
         'loginURI': '/token',
         'getSubscriptionServiceIdentitiesURI': '/SpeakEasyProvision/v1/util/products',

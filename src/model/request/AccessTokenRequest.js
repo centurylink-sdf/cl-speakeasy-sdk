@@ -24,6 +24,7 @@ define([
         this.username = username;
         this.password = password;
         this.grantType = 'password';
+        this.withJWT = true;
     }
 
     AccessTokenRequest.prototype = Object.create(BaseRequest.prototype);
@@ -41,13 +42,12 @@ define([
      * @return {Object} object with all the data about AccessTokenRequest
      */
     AccessTokenRequest.prototype.objectify = function () {
-        var o = {
+        return {
             'grant_type': this.grantType,
             'username': this.username,
-            'password': this.password
+            'password': this.password,
+            'withJWT': this.withJWT
         };
-
-        return o;
     };
 
     /**
