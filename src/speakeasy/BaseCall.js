@@ -374,6 +374,10 @@ define([
          */
         function checkVideoContainersExists() {
 
+            self.logger.debug('Check video containers exist');
+            self.logger.debug('Call manager config: ');
+            self.logger.debug(Config.callManager);
+
             var bodyElements = document.getElementsByTagName('body');
             var container = null;
 
@@ -382,21 +386,39 @@ define([
                 var body = bodyElements[0];
 
                 if(remoteVideoContainer === null) {
-                    container = document.createElement('div');
-                    container.id = Config.callManager.remoteVideoContainer;
 
-                    body.appendChild(container);
-
+                    self.logger.debug('Remote video container did not found. Trying to get one more time...');
                     remoteVideoContainer = document.getElementById(Config.callManager.remoteVideoContainer);
+
+                    if(remoteVideoContainer === null) {
+
+                        self.logger.debug('Remote video container did not found. Creating new one...');
+
+                        container = document.createElement('div');
+                        container.id = Config.callManager.remoteVideoContainer;
+
+                        body.appendChild(container);
+
+                        remoteVideoContainer = document.getElementById(Config.callManager.remoteVideoContainer);
+                    }
                 }
 
                 if(localVideoContainer === null) {
-                    container = document.createElement('div');
-                    container.id = Config.callManager.localVideoContainer;
 
-                    body.appendChild(container);
-
+                    self.logger.debug('Local video container did not found. Trying to get one more time...');
                     localVideoContainer = document.getElementById(Config.callManager.localVideoContainer);
+
+                    if(localVideoContainer === null) {
+
+                        self.logger.debug('Local video container did not found. Creating new one...');
+
+                        container = document.createElement('div');
+                        container.id = Config.callManager.localVideoContainer;
+
+                        body.appendChild(container);
+
+                        localVideoContainer = document.getElementById(Config.callManager.localVideoContainer);
+                    }
                 }
             }
         }

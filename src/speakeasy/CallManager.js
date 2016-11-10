@@ -79,7 +79,12 @@ define([
          * @return {Ctl.Promise} p Promise object
          */
         function setup(config) {
+
+            self.logger.debug('call manager setup. Passed config: ');
+            self.logger.debug(config);
             Utils.extend(Config.callManager, config);
+            self.logger.debug('call manager config: ');
+            self.logger.debug(Config.callManager);
         }
 
         /**
