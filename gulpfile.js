@@ -81,6 +81,7 @@ gulp.task('build-ctlapiloader', function (cb) {
 
 gulp.task('build-require-speakeasy', function (cb) {
     executeCommand(rJsCommand + ' -o src/speakeasy/build.json', cb);
+    gulp.src(['./src/speakeasy/tones/**/*']).pipe(gulp.dest('./dist/tones'));
 });
 
 gulp.task('build-optimize-speakeasy', function (cb) {

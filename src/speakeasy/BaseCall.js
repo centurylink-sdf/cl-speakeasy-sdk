@@ -6,7 +6,8 @@ define([
     'Ctl/Utils',
     'fcs',
     'Ctl.speakeasy/EventEmitter',
-    'Ctl.speakeasy/CallInfo'
+    'Ctl.speakeasy/CallInfo',
+    'Ctl.speakeasy/AudiotonesManager'
 ], function (
     Config,
     Logger,
@@ -15,7 +16,8 @@ define([
     Utils,
     fcs,
     EventEmitter,
-    CallInfo
+    CallInfo,
+    AudiotonesManager
 ) {
 
     /**
@@ -31,6 +33,7 @@ define([
      * @requires fcs
      * @requires Ctl.speakeasy.EventEmitter
      * @requires Ctl.speakeasy.CallInfo
+     * @requires Ctl.speakeasy.AudiotonesManager
      */
     function BaseCall(fcsCall) {
 
@@ -305,9 +308,20 @@ define([
         function processStateChange(state, statusCode) {
             self.callState = state;
 
+            if (state !== fcs.call.States.RINGING && state !== fcsCallStates.INCOMING) {
+                AudiotonesManager.stop(AudiotonesManager.RING_OUT);
+                AudiotonesManager.stop(AudiotonesManager.RING_IN);
+                AudiotonesManager.stop(AudiotonesManager.INTERRUPT);
+            }
+
             switch(state) {
                 case fcs.call.States.RINGING:
                     self.logger.debug('status changed: RINGING');
+
+                    if(statusCode !== '183') {
+                        AudiotonesManager.play(AudiotonesManager.RING_OUT);
+                    }
+
                     EventEmitter.trigger(EventEmitter.events.CALL_RINGING, self, false, self);
                     break;
                 case fcs.call.States.IN_CALL:
@@ -346,6 +360,17 @@ define([
                     self.logger.debug('status changed: ENDED');
 
                     if(!self.isEnded) {
+
+                        if (statusCode == 200 || statusCode === undefined) {
+                            AudiotonesManager.play(AudiotonesManager.HANG_UP);
+                        }
+                        else {
+                            AudiotonesManager.play(AudiotonesManager.BUSY);
+                            setTimeout(function() {
+                                AudiotonesManager.stop(AudiotonesManager.BUSY);
+                            }, 1500);
+                        }
+
                         removeAllVideoStreams();
                         EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, null, true, self.id);
                         EventEmitter.trigger(EventEmitter.events.CALL_ENDED, self, false, self);
@@ -424,6 +449,36 @@ define([
         }
 
         /**
+         * Play dialpad key tone, mutes microphone to prevent feedback
+         * @private
+         *
+         * @param key 0-9, # or *
+         */
+        function playKeyTone(key){
+            var promise = new Promise(),
+                unMutePlease = false,
+                toneComplete;
+
+            if (!self.isMuted ) {
+                unMutePlease = true;
+                self.mute();
+            }
+            toneComplete = AudiotonesManager.dialTonePlay(key);
+
+            if(unMutePlease){
+                toneComplete.then(function(){
+                    self.unmute();
+                    promise.done();
+                });
+            }
+            else {
+                promise.done();
+            }
+
+            return promise;
+        }
+
+        /**
          * Gets call id
          * @returns {String} Unique identifier for the call
          */
@@ -438,6 +493,9 @@ define([
          */
         self.hangUp = function(successCallback, failureCallback) {
             self.isEnded = true;
+            AudiotonesManager.stop(AudiotonesManager.RING_OUT);
+            AudiotonesManager.play(AudiotonesManager.HANG_UP);
+
             self.fcsCall.end(
                 function () {
                     removeAllVideoStreams();
@@ -550,7 +608,9 @@ define([
          * @param {String} digit Digit to be send as dtmf
          */
         self.sendDigits = function(digit) {
-            self.fcsCall.sendDTMF(digit);
+            playKeyTone.then(function() {
+                self.fcsCall.sendDTMF(digit);
+            })
         };
 
         /**

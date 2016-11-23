@@ -71,6 +71,8 @@ define([
          */
         self.reject = function(successCallback, failureCallback) {
 
+            AudiotonesManager.stop(AudiotonesManager.INTERRUPT);
+
             self.fcsCall.reject(
                 function () {
                     self.logger.info("Rejected incomming call...");

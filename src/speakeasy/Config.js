@@ -51,6 +51,7 @@ define({
     callManager: {
         'localVideoContainer': 'speakeasy_localVideoContainer',
         'remoteVideoContainer': 'speakeasy_remoteVideoContainer',
-        'videoQuality': '640x480'
+        'videoQuality': '640x480',
+        'baseToneUrl': '../../dist/tones'
     }
 });

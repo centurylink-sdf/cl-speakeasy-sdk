@@ -8,7 +8,8 @@ define([
     'Ctl.speakeasy/EventEmitter',
     'Ctl.speakeasy/IncomingCall',
     'Ctl.speakeasy/OutgoingCall',
-    'Ctl.speakeasy/CallInfo'
+    'Ctl.speakeasy/CallInfo',
+    'Ctl.speakeasy/AudiotonesManager'
 ], function (
     Config,
     Logger,
@@ -19,7 +20,8 @@ define([
     EventEmitter,
     IncomingCall,
     OutgoingCall,
-    CallInfo
+    CallInfo,
+    AudiotonesManager
 ) {
 
     /**
@@ -36,6 +38,7 @@ define([
      * @requires Ctl.speakeasy.IncomingCall
      * @requires Ctl.speakeasy.OutgoingCall
      * @requires Ctl.speakeasy.CallInfo
+     * @requires Ctl.speakeasy.AudiotonesManager
      */
     function CallManager() {
 
@@ -56,7 +59,7 @@ define([
             });
 
             EventEmitter.on(EventEmitter.events.BEFORE_ANSWER_CALL, self, function() {
-                return holdCurrentCall();
+                return holdCurrentCall(true);
             });
 
             EventEmitter.on(EventEmitter.events.BEFORE_UNHOLD, self, function(callId) {
@@ -64,7 +67,7 @@ define([
                 var p = new Promise();
                 var currentCall = CallInfo.getCurrentCall();
                 if(Utils.isNotNull(currentCall) && currentCall.id != callId) {
-                    p = holdCurrentCall();
+                    p = holdCurrentCall(false);
                 }
                 else {
                     p.done(false);
@@ -91,7 +94,7 @@ define([
          * Put current call on hold
          * @return {Ctl.Promise} Promise object
          */
-        function holdCurrentCall() {
+        function holdCurrentCall(beforeAnswer) {
 
             self.logger.debug('trying to hold current call');
 
@@ -103,6 +106,11 @@ define([
                 self.logger.debug(currentCall);
                 if(currentCall.isActive()) {
                     self.logger.debug('hold current call');
+
+                    if(beforeAnswer) {
+                        AudiotonesManager.stop(AudiotonesManager.INTERRUPT);
+                    }
+
                     currentCall.hold(function() {
                         promise.done(false);
                     },
@@ -112,6 +120,11 @@ define([
                 }
                 else {
                     self.logger.debug('current call is not active');
+
+                    if(beforeAnswer) {
+                        AudiotonesManager.stop(AudiotonesManager.RING_IN);
+                    }
+
                     promise.done(false);
                 }
             }
@@ -174,7 +187,7 @@ define([
 
             var currentUser = fcs.getUser();
 
-            holdCurrentCall().then(function(error) {
+            holdCurrentCall(false).then(function(error) {
 
                 if(error) {
                     Utils.doCallback(failureCallback);
@@ -187,7 +200,7 @@ define([
 
                         function(call) {
 
-                            holdCurrentCall();
+                            holdCurrentCall(false);
 
                             var outgoingCall = new OutgoingCall(call);
 
@@ -219,7 +232,7 @@ define([
          * @param {function} failureCallback The callback function to be called after failure
          */
         function switchTo(callId, successCallback, failureCallback) {
-            holdCurrentCall().then(function(error) {
+            holdCurrentCall(false).then(function(error) {
                 if(error) {
                     Utils.doCallback(failureCallback);
                 }
@@ -239,11 +252,26 @@ define([
         }
 
         /**
+         * Play dialpad key tone
+         * @param key 0-9, # or *
+         */
+        function playDialTone(key) {
+            AudiotonesManager.playDialTone(key);
+        }
+
+        /**
          * handle incoming call
          * @param  {Ctl.speakeasy.BaseCall} call Call object
          */
         function processReceivedCall(call) {
             self.logger.info("There is an incomming call...");
+
+            if(CallInfo.currentCall !== null && !CallInfo.currentCall.isOnHold()) {
+                AudiotonesManager.play(AudiotonesManager.INTERRUPT);
+            }
+            else {
+                AudiotonesManager.play(AudiotonesManager.RING_IN);
+            }
 
             var incomingCall = new IncomingCall(call);
             CallInfo.addCall(incomingCall, false);
@@ -259,6 +287,7 @@ define([
         this.createCall = createCall;
         this.switchTo = switchTo;
         this.processReceivedCall = processReceivedCall;
+        this.playDialTone = playDialTone;
 
         /**
          * @event
