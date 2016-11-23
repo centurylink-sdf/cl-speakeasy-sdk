@@ -227,17 +227,21 @@ function loadSpeakEasy() {
 
                 confDestination.addEventListener('keydown', function (e) {
                     var keyCode = e.keyCode;
+                    console.log('keyCode = ' + keyCode);
+                    var keyStr = String.fromCharCode(keyCode);
+                    var regexKey = /[0-9]|[#]|[*]/;
                     var currentCall = speakEasy.CallManager.getCurrentCall();
                     if (currentCall) {
-                        console.log('keyCode = ' + keyCode);
-                        var keyStr = String.fromCharCode(keyCode);
-
-                        var regexKey = /[0-9]|[#]|[*]/;
                         if (regexKey.test(keyStr)) {
                             // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-sendDigits
                             currentCall.sendDigits(keyStr);
                         }
-
+                    }
+                    else {
+                        if (regexKey.test(keyStr)) {
+                            // just play dialtone
+                            speakEasy.CallManager.dialTonePlay(keyStr);
+                        }
                     }
                 },
                 false);
