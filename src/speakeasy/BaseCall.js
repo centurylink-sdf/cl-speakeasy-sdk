@@ -608,7 +608,7 @@ define([
          * @param {String} digit Digit to be send as dtmf
          */
         self.sendDigits = function(digit) {
-            playKeyTone.then(function() {
+            playKeyTone(digit).then(function() {
                 self.fcsCall.sendDTMF(digit);
             })
         };

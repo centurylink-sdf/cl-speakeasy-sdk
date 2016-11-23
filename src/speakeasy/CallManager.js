@@ -255,8 +255,8 @@ define([
          * Play dialpad key tone
          * @param key 0-9, # or *
          */
-        function playDialTone(key) {
-            AudiotonesManager.playDialTone(key);
+        function dialTonePlay(key) {
+            AudiotonesManager.dialTonePlay(key);
         }
 
         /**
@@ -287,7 +287,7 @@ define([
         this.createCall = createCall;
         this.switchTo = switchTo;
         this.processReceivedCall = processReceivedCall;
-        this.playDialTone = playDialTone;
+        this.dialTonePlay = dialTonePlay;
 
         /**
          * @event
