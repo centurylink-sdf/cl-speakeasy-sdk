@@ -308,7 +308,7 @@ define([
         function processStateChange(state, statusCode) {
             self.callState = state;
 
-            if (state !== fcs.call.States.RINGING && state !== fcsCallStates.INCOMING) {
+            if (state !== fcs.call.States.RINGING && state !== fcs.call.States.INCOMING) {
                 AudiotonesManager.stop(AudiotonesManager.RING_OUT);
                 AudiotonesManager.stop(AudiotonesManager.RING_IN);
                 AudiotonesManager.stop(AudiotonesManager.INTERRUPT);
