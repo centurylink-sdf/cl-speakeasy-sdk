@@ -56,13 +56,12 @@ function loadSpeakEasy() {
                 // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallManager-event-onCallReceived
                 speakEasy.CallManager.onCallReceived = function (call) {
 
-                    attachCallListeners(call);
-
                     // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.IncomingCall-method-getCallerInfo
                     var callerInfo = call.getCallerInfo();
+                    var incomingCallId = call.getCallId();
 
                     // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-getCallId
-                    addCall(call.getCallId(), { name: callerInfo.name, number: callerInfo.number, status: 'Incoming' });
+                    addCall(incomingCallId, { name: callerInfo.name, number: callerInfo.number, status: 'Incoming' });
 
                     // Call dialog box
                     var r = confirm('Incoming call from '+ callerInfo.name +'(' + callerInfo.number + ')! Would you like to answer?');
@@ -71,16 +70,19 @@ function loadSpeakEasy() {
                         // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.IncomingCall-method-answer
                         call.answer(function() {
                             showInfoMessage('Call is answered!');
+                            attachCallListeners(call);
                             updateCallButtonsGroup();
                         }, function() {
+                            removeCall(incomingCallId);
                             showErrorMessage('Call couldn\'t be answered!');
                         });
                     } else {
                         // Rejecting the incomming call
                         // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.IncomingCall-method-reject
                         call.reject(function() {
-
+                            removeCall(incomingCallId);
                         }, function() {
+                            removeCall(incomingCallId);
                             showErrorMessage('Call couldn\'t be rejected!');
                         });
                     }
