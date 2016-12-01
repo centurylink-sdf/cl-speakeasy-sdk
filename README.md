@@ -61,7 +61,6 @@ index.html:
 
 </body>
 </html>
-
 ```
 
 index.js:
@@ -84,7 +83,6 @@ CtlSpeakEasy.CallManager.createCall('3031234567', false, function(call) {
 }, function() {
     console.error('Make new call failed!');
 });
-
 
 ```
 
