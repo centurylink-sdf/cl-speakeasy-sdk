@@ -57,8 +57,8 @@ gulp.task('default', tasklist.withFilters(function(task) {
 
 gulp.task('build-require', function (cb) {
     var pkg = require('./package.json');
-    executeCommand(rJsCommand + ' -o src/' + pkg.name + '/build.json out=dist/' + pkg.name + '-' + pkg.version + '.js', cb);
-    gulp.src(['./src/' + pkg.name + '/tones/**/*']).pipe(gulp.dest('./dist/tones'));
+    executeCommand(rJsCommand + ' -o src/speakeasy/build.json out=dist/' + pkg.name + '-' + pkg.version + '.js', cb);
+    gulp.src(['./src/speakeasy/tones/**/*']).pipe(gulp.dest('./dist/tones'));
 });
 
 gulp.task('build-optimize', function (cb) {
@@ -167,7 +167,7 @@ gulp.task('git-tag-commit', function(cb) {
 gulp.task('example-upgrade-tag', function(){
     var pkg = require('./package.json');
     var v = pkg.version;
-    var file = 'demo/*.html';
+    var file = 'example/*.html';
 
     return gulp.src([file])
         .pipe(replace(/ctlapi-([\d.]+)\.js/g, + pkg.name + '-' + v + '.js'))
