@@ -57,19 +57,18 @@ gulp.task('default', tasklist.withFilters(function(task) {
 
 gulp.task('build-require', function (cb) {
     var pkg = require('./package.json');
-    executeCommand(rJsCommand + ' -o src/' + pkg.name + '/build.json', cb);
+    executeCommand(rJsCommand + ' -o src/' + pkg.name + '/build.json out=dist/' + pkg.name + '-' + pkg.version + '.js', cb);
     gulp.src(['./src/' + pkg.name + '/tones/**/*']).pipe(gulp.dest('./dist/tones'));
 });
 
 gulp.task('build-optimize', function (cb) {
     var pkg = require('./package.json');
 
-    return gulp.src('./dist/' + pkg.name + '.js')
+    return gulp.src('./dist/' + pkg.name + '-' + pkg.version + '.js')
         .pipe(amdclean.gulp({
             'prefixMode': 'standard',
             'wrap': false
         }))
-        .pipe(rename(pkg.name + '-' + pkg.version + '.js'))
         .pipe(gulp.dest('./dist'))
         .pipe(rename(pkg.name + '-' + pkg.version + '.min.js'))
         .pipe(uglify())

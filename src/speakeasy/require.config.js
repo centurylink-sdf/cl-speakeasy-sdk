@@ -7,6 +7,5 @@ require.config({
         'Ctl.model.request':        '../model/request'
     },
     name: 'SpeakEasy',
-    out: '../../dist/speakeasy.js',
     optimize: 'none'
 });
