@@ -202,7 +202,7 @@ define([
 
                             holdCurrentCall(false);
 
-                            var outgoingCall = new OutgoingCall(call);
+                            var outgoingCall = new OutgoingCall(call, isVideoEnabled);
 
                             CallInfo.addCall(outgoingCall, true);
 
@@ -273,7 +273,7 @@ define([
                 AudiotonesManager.play(AudiotonesManager.RING_IN);
             }
 
-            var incomingCall = new IncomingCall(call);
+            var incomingCall = new IncomingCall(call, false);
             CallInfo.addCall(incomingCall, false);
 
             Utils.doCallback(self.onCallReceived, [ incomingCall ]);

@@ -35,7 +35,7 @@ define([
      * @requires Ctl.speakeasy.CallInfo
      * @requires Ctl.speakeasy.AudiotonesManager
      */
-    function BaseCall(fcsCall) {
+    function BaseCall(fcsCall, isVideoEnabled) {
 
         var self = this;
         var remoteVideoElement = null;
@@ -57,7 +57,7 @@ define([
 
         self.id = self.fcsCall.getId();
         self.isMuted = false;
-        self.isVideoStarted = false;
+        self.isVideoStarted = isVideoEnabled;
         self.isEnded = false; // true if current user ends the call
 
         /**
@@ -220,6 +220,7 @@ define([
                 var video = document.createElement('video');
                 video.style.width = '100%';
                 video.style.height = '100%';
+                video.muted = true;
 
                 localVideoContainer.appendChild(video);
 

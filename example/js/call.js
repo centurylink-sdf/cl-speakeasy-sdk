@@ -79,12 +79,18 @@ function initSpeakEasy() {
 
         btnMakeCall.addEventListener('click', function (e) {
             var numToCall = confDestination.value;
+            var isVideoCall = false;
 
             $('#btnGroupCall').show();
             confDestination.value = '';
 
             // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallManager-method-createCall
-            CtlSpeakEasy.CallManager.createCall(numToCall, false, function(call) {
+            CtlSpeakEasy.CallManager.createCall(numToCall, isVideoCall, function(call) {
+
+                if(isVideoCall) {
+                    $('#localVideoContainer').show();
+                }
+
                 updateCallButtonsGroup();
                 attachCallListeners(call);
                 addCall(call.getCallId(), { name: '', number: numToCall, status: 'Ringing' });
