@@ -1,8 +1,7 @@
 {
     "name": "cl-speakeasy-sdk",
-    "preferGlobal": true,
     "analyze": false,
-    "version": "0.1.4",
+    "version": "0.1.5",
     "author": {
         "name": "Andrew Kovalenko",
         "email": "andrew@jaybirdgroup.com"
@@ -22,7 +21,14 @@
     "files": [
         "dist"
     ],
-    "dependencies": {
+    "engines": {
+        "node": ">=0.10",
+        "npm": "1.1.32"
+    },
+    "devDependencies": {
+        "gulp-jsduck": "^0.1.7",
+        "gulp-requirejs-optimize": "^0.3.0",
+        "gulp-shell": "^0.5.1",
         "colors": "0.6.2",
         "gulp": "^3.6.x",
         "gulp-bump": "^0.1.8",
@@ -50,14 +56,5 @@
         "sys": "0.0.1",
         "xml2js": "~0.4.x",
         "yargs": "~1.2.x"
-    },
-    "engines": {
-        "node": ">=0.10",
-        "npm": "1.1.32"
-    },
-    "devDependencies": {
-        "gulp-jsduck": "^0.1.7",
-        "gulp-requirejs-optimize": "^0.3.0",
-        "gulp-shell": "^0.5.1"
     }
 }
