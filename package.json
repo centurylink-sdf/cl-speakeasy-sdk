@@ -1,59 +1,63 @@
 {
-  "name": "speakeasy",
-  "preferGlobal": true,
-  "analyze": false,
-  "version": "0.1.4",
-  "author": {
-    "name": "Andrew Kovalenko",
-    "email": "andrew@jaybirdgroup.com"
-  },
-  "description": "A JavaScript SDK",
-  "repository": {
-    "type": "git",
-    "url": "git@bitbucket.org:centurylink/speakeasy.git"
-  },
-  "keywords": [
-    "sdk",
-    "api",
-    "javascript",
-    "speakeasy"
-  ],
-  "dependencies": {
-    "colors": "0.6.2",
-    "gulp": "^3.6.x",
-    "gulp-bump": "^0.1.8",
-    "gulp-clean": "^0.2.4",
-    "gulp-concat": "~2.1.7",
-    "gulp-debug": "~0.1.2",
-    "gulp-jshint": "~1.5.0",
-    "gulp-notify": "~1.0.0-beta",
-    "gulp-rename": "~0.2.2",
-    "gulp-replace": "^0.3.0",
-    "gulp-size": "^0.3.1",
-    "gulp-task-listing": "^0.3.0",
-    "gulp-uglify": "~0.2.0",
-    "gulp-util": "~2.2.13",
-    "gulp-watch": "^4.3.5",
-    "gulp-amdclean": "^1.1.1",
-    "jasmine-core": "^2.4.1",
-    "js-yaml": "3.0.x",
-    "jshint": "~2.4.3",
-    "jshint-stylish": "^0.2.0",
-    "karma": "0.13.x",
-    "karma-jasmine": "~0.3.8",
-    "karma-junit-reporter": "~0.2.1",
-    "run-sequence": "^0.3.6",
-    "sys": "0.0.1",
-    "xml2js": "~0.4.x",
-    "yargs": "~1.2.x"
-  },
-  "engines": {
-    "node": ">=0.10",
-    "npm": "1.1.32"
-  },
-  "devDependencies": {
-    "gulp-jsduck": "^0.1.7",
-    "gulp-requirejs-optimize": "^0.3.0",
-    "gulp-shell": "^0.5.1"
-  }
+    "name": "cl-speakeasy-sdk",
+    "preferGlobal": true,
+    "analyze": false,
+    "version": "0.1.4",
+    "author": {
+        "name": "Andrew Kovalenko",
+        "email": "andrew@jaybirdgroup.com"
+    },
+    "description": "CenturyLink SpeakEasy JavaScript SDK",
+    "repository": {
+        "type": "git",
+        "url": "git@bitbucket.org:centurylink/speakeasy.git"
+    },
+    "keywords": [
+        "centurylink",
+        "speakeasy",
+        "sdk",
+        "api",
+        "javascript"
+    ],
+    "files": [
+        "dist"
+    ],
+    "dependencies": {
+        "colors": "0.6.2",
+        "gulp": "^3.6.x",
+        "gulp-bump": "^0.1.8",
+        "gulp-clean": "^0.2.4",
+        "gulp-concat": "~2.1.7",
+        "gulp-debug": "~0.1.2",
+        "gulp-jshint": "~1.5.0",
+        "gulp-notify": "~1.0.0-beta",
+        "gulp-rename": "~0.2.2",
+        "gulp-replace": "^0.3.0",
+        "gulp-size": "^0.3.1",
+        "gulp-task-listing": "^0.3.0",
+        "gulp-uglify": "~0.2.0",
+        "gulp-util": "~2.2.13",
+        "gulp-watch": "^4.3.5",
+        "gulp-amdclean": "^1.1.1",
+        "jasmine-core": "^2.4.1",
+        "js-yaml": "3.0.x",
+        "jshint": "~2.4.3",
+        "jshint-stylish": "^0.2.0",
+        "karma": "0.13.x",
+        "karma-jasmine": "~0.3.8",
+        "karma-junit-reporter": "~0.2.1",
+        "run-sequence": "^0.3.6",
+        "sys": "0.0.1",
+        "xml2js": "~0.4.x",
+        "yargs": "~1.2.x"
+    },
+    "engines": {
+        "node": ">=0.10",
+        "npm": "1.1.32"
+    },
+    "devDependencies": {
+        "gulp-jsduck": "^0.1.7",
+        "gulp-requirejs-optimize": "^0.3.0",
+        "gulp-shell": "^0.5.1"
+    }
 }
