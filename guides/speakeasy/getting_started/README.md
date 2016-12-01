@@ -12,49 +12,93 @@ CenturyLink Speak Easy API allows you to easily:
 CenturyLink Speak Easy API JavaScript SDK allows you easily integrate above
 features in your web application.
 
-## Loading CenturyLink Speak Easy API
+## Include CenturyLink SpeakEasy JavaScript SDK in your web application
 
-To load the APIs, include the following script in the header of your web page.
-
-    <script type="text/javascript" src="https://onbui.ctl.io/dist/ctlapi-0.1.4.js"></script>
-
-After that in **index.js** we could reference API Loader like in example below:
-
-    var Ctl = CtlApiLoader;
-
-Before moving forward and loading Speak Easy API we would like to check our authentication state:
-
-    if ({@link Ctl.Auth#isAuthenticated Ctl.Auth.isAuthenticated()}) {
-        // already authenticated, we can load Speak Easy now
-    } else {
-        // not authenticated, we need to follow authentication process
-    }
-
-Next, load the CenturyLink Speak Easy API with  {@link Ctl.ctlapiloader.CtlApiLoader#load Ctl.load(module, version)}, where
-
-- **module** calls the specific API module you wish to use on your page - Speak Easy.
-- **version** is the version number of the module you wish to load.
-
-The example below loads the latest stable version of the Speak Easy API.
-
-    {@link Ctl.ctlapiloader.CtlApiLoader#load Ctl.load}('SpeakEasy', '0.1.4', function(err, speakEasy) {
-        if (err) {
-            console.log('Error loading SpeakEasy', err);
-        } else {
-            console.log('Running SpeakEasy v' + {@link Ctl.speakeasy.SpeakEasy#version speakEasy.version()});
-            // now you can use {@link Ctl.speakeasy.SpeakEasy Speak Easy API} features...
-        }
-    })
-
-## Standalone Usage of the CenturyLink Speak Easy API
-
-If you already have authentication mechanism implemented, you can use SpeakEasy without
-CenturyLink API Loader:
+To include SpeakEasy JavaScript library you simply need to define it on a page:
 
     <script type="text/javascript" src="https://onbui.ctl.io/dist/speakeasy-0.1.4.js"></script>
 
 Once downloaded, it will be available under global variable **SpeakEasy**.
-But you will need to pass access token, refresh token and publicId (moniker) to
+
+
+## Authenticating with CenturyLink Speak Easy JavaScript SDK
+
+CenturyLink Speak Easy JavaScript SDK allows you to authenticate in CenturyLink
+service and re-use it with any other exposed service. All the authentication methods
+placed under {@link Ctl.Auth SpeakEasy.Auth} namespace.
+
+### Checking if Already Authenticated
+
+But before doing authentication you would want to check if client already authenticated.
+You can do it with {@link Ctl.Auth#isAuthenticated SpeakEasy.Auth.isAuthenticated()} method. It simply returns **true** or **false**.
+
+### Login
+
+You can login using {@link Ctl.Auth#login SpeakEasy.Auth.login} method. There are only 3 parameters
+you should pass:
+
+- username
+- password
+- callback to handle successful or failed response
+
+For example:
+
+    {@link Ctl.Auth#login SpeakEasy.Auth.login}(username, password, function(error, response) {
+        if (!error && response) {
+            console.info('Successfully authenticated. Exposing subscription services selection.');
+            // now you can work with list of subscribed services
+        } else {
+            console.error('Authentication failed: ', error);
+        }
+    });
+
+If the login was successful you should be able to see list of available for this
+account products in the response. For example:
+
+    {  
+       "Products":{  
+          "7202839244":[  
+             "SpeakEasy"
+          ]
+       }
+    }
+
+Where:
+
+- **7202839244** is public ID
+- **SpeakEasy** is product/service name
+
+Now you can select required product (subscribed service) from the list and set
+it to use in your client with {@link Ctl.Auth#setDefaultSubscriptionService  SpeakEasy.Auth.setDefaultSubscriptionService} method.
+
+### Select Subscription Services
+
+There are only 3 parameters required to pass into {@link Ctl.Auth#setDefaultSubscriptionService SpeakEasy.Auth.setDefaultSubscriptionService} method:
+
+- **serviceName** represents name of CenturyLink service we are going to use
+- **publicId** represents unique ID of the authenticated user (i.e. phone number or SIP URI)
+- **callback** to handle successful or failed response
+
+For example:
+
+    {@link Ctl.Auth#setDefaultSubscriptionService SpeakEasy.Auth.setDefaultSubscriptionService}(serviceName, publicId, function(error, response) {
+        if (!error && response) {
+            console.info('Successfully set default service.');
+            // now you are authenticated and set default product for usage
+        } else {
+            console.error('Service subscription details retrieval failed: ', error);
+        }
+
+    });
+
+Now we can continue and use CenturyLink SpeakEasy APIs without additional authentication steps.
+
+## Standalone Usage of the CenturyLink Speak Easy API
+
+If you already have authentication mechanism implemented, you can use SpeakEasy without
+embedded authentication mechanism.
+
+You will need to pass access token, refresh token and publicId (moniker) to
 initialize SpeakEasy like in example below:
 
     var accessToken = '77c8787aff45466a28082b6647c90e38389c2f7e936f630cbb7ce553b4aadf95';
