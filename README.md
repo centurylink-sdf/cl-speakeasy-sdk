@@ -4,7 +4,9 @@ A CenturyLink SpeakEasy API JavaScript SDK. Check out the demo in example/index.
 
 ## Installation
 
-```npm install cl-speakeasy-sdk```
+```
+npm install cl-speakeasy-sdk
+```
 
 ## Documentation
 
@@ -15,7 +17,7 @@ can run `gulp doc` and see generated documentation at /docs/.
 ## Build process details
 
 ### Build process requirements
-* Node.js 0.12 (or later)
+* [Node.js](https://nodejs.org/) 0.12 (or later)
 * [r.js](https://github.com/jrburke/r.js)
 * [Gulp](http://gulpjs.com/)
 
@@ -45,8 +47,8 @@ JavaScript SDK.
 
 This example shows some of the functionality supported by the CenturyLink SpeakEasy JavaScript SDK.
 
-index.html
-```
+index.html:
+``` html
 <!DOCTYPE html>
 <html>
 <head>
@@ -62,8 +64,8 @@ index.html
 
 ```
 
-index.js
-```
+index.js:
+``` javascript
 var username = 'joe';
 var password = 'some-secret-pass';
 
@@ -85,3 +87,7 @@ CtlSpeakEasy.CallManager.createCall('3031234567', false, function(call) {
 
 
 ```
+
+## License
+
+This project is licensed under the [Apache License v2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
