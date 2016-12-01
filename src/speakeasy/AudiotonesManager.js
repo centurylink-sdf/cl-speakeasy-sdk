@@ -50,7 +50,7 @@ define([
             }
         }
 
-        function init() {
+        self.init = function() {
 
             var AudioContext = window.AudioContext || window.webkitAudioContext ||
                 window.mozAudioContext || window.oAudioContext || window.msAudioContext;
@@ -296,8 +296,6 @@ define([
 
             return promise;
         };
-
-        init();
     };
 
     return new AudiotonesManager();

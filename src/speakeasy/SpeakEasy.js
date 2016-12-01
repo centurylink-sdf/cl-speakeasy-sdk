@@ -8,7 +8,8 @@ define([
     'Ctl/Utils',
     'Ctl/Auth',
     'fcs',
-    'Ctl.speakeasy/CallManager'
+    'Ctl.speakeasy/CallManager',
+    'Ctl.speakeasy/AudiotonesManager'
 ], function (
     Version,
     Config,
@@ -19,7 +20,8 @@ define([
     Utils,
     Auth,
     fcs,
-    CallManager
+    CallManager,
+    AudiotonesManager
 ) {
 
     /**
@@ -152,6 +154,7 @@ define([
 
             }
 
+            AudiotonesManager.init();
         }
 
         /**
