@@ -3,9 +3,6 @@ var CtlSpeakEasy = SpeakEasy;
 console.log('SpeakEasy has been loaded');
 console.log('Running SpeakEasy v' + CtlSpeakEasy.version());
 
-var btnLogin = $('.btn-login');
-var btnLogout = $('.btn-logout');
-
 // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.Auth-method-isAuthenticated
 if (CtlSpeakEasy.Auth.isAuthenticated()) {
     initSpeakEasy();
@@ -19,20 +16,7 @@ function initSpeakEasy() {
 
         // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.Auth-method-getLoginUsername
         var userName = CtlSpeakEasy.Auth.getLoginUsername();
-
         $('#userName').html(userName);
-
-        var confDestination = document.getElementById('confDestination');
-        var btnMakeCall = document.getElementById('btnMakeCall');
-        var btnEndCall = document.getElementById('btnEndCall');
-        var btnStartVideo = document.getElementById('btnStartVideo');
-        var btnStopVideo = document.getElementById('btnStopVideo');
-        var btnHoldCall = document.getElementById('btnHoldCall');
-        var btnUnHoldCall = document.getElementById('btnUnHoldCall');
-        var btnMute = document.getElementById('btnMute');
-        var btnUnMute = document.getElementById('btnUnMute');
-
-        var btnLogout = document.getElementById('btnLogout');
 
         // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallManager-method-setup
         CtlSpeakEasy.CallManager.setup(
@@ -77,137 +61,172 @@ function initSpeakEasy() {
             }
         };
 
-        btnMakeCall.addEventListener('click', function (e) {
-            var numToCall = confDestination.value;
-            var isVideoCall = false;
+    }, function(error) {
+        showErrorMessage(error);
+    });
 
-            $('#btnGroupCall').show();
-            confDestination.value = '';
+    var confDestination = document.getElementById('confDestination');
+    var btnMakeCall = document.getElementById('btnMakeCall');
+    var btnEndCall = document.getElementById('btnEndCall');
+    var btnStartVideo = document.getElementById('btnStartVideo');
+    var btnStopVideo = document.getElementById('btnStopVideo');
+    var btnHoldCall = document.getElementById('btnHoldCall');
+    var btnUnHoldCall = document.getElementById('btnUnHoldCall');
+    var btnMute = document.getElementById('btnMute');
+    var btnUnMute = document.getElementById('btnUnMute');
+    var btnLogout = document.getElementById('btnLogout');
 
-            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallManager-method-createCall
-            CtlSpeakEasy.CallManager.createCall(numToCall, isVideoCall, function(call) {
+    btnMakeCall.addEventListener('click', function (e) {
+        var numToCall = confDestination.value;
+        var isVideoCall = false;
 
-                if(isVideoCall) {
-                    $('#localVideoContainer').show();
-                }
+        $('#btnGroupCall').show();
+        confDestination.value = '';
 
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallManager-method-createCall
+        CtlSpeakEasy.CallManager.createCall(numToCall, isVideoCall, function(call) {
+
+            if(isVideoCall) {
+                $('#localVideoContainer').show();
+            }
+
+            updateCallButtonsGroup();
+            attachCallListeners(call);
+            addCall(call.getCallId(), { name: '', number: numToCall, status: 'Ringing' });
+        }, function() {
+            showErrorMessage('Make new call failed!');
+        });
+    });
+
+    btnEndCall.addEventListener('click', function (e) {
+
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallInfo-method-getCurrentCall
+        var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
+
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-hangUp
+        currentCall.hangUp(function() {
+
+            showInfoMessage('Call is ended!');
+
+            updateCallStatus(currentCall.getCallId(), 'Ended');
+            setTimeout(function() {
+                removeCall(currentCall.getCallId());
                 updateCallButtonsGroup();
-                attachCallListeners(call);
-                addCall(call.getCallId(), { name: '', number: numToCall, status: 'Ringing' });
-            }, function() {
-                showErrorMessage('Make new call failed!');
-            });
+            }, 1000);
+        }, function() {
+            showErrorMessage('Call couldn\'t be ended!');
         });
+    });
 
-        btnEndCall.addEventListener('click', function (e) {
+    btnStartVideo.addEventListener('click', function (e) {
+        var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
 
-            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallInfo-method-getCurrentCall
-            var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-startVideoSend
+        currentCall.startVideoSend(
+            function() {
+                showInfoMessage('Video is started!');
+                $('#localVideoContainer').show();
+                $(btnStartVideo).hide();
+                $(btnStopVideo).show();
+            },
+            function() {
+                showErrorMessage('Video couldn\'t be started!');
+            }
+        );
+    });
 
-            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-hangUp
-            currentCall.hangUp(function() {
+    btnStopVideo.addEventListener('click', function (e) {
+        var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
 
-                showInfoMessage('Call is ended!');
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-stopVideoSend
+        currentCall.stopVideoSend(
+            function() {
+                showInfoMessage('Video is stopped!');
+                $('#localVideoContainer').hide();
+                $(btnStopVideo).hide();
+                $(btnStartVideo).show();
+            },
+            function() {
+                showErrorMessage('Video couldn\'t be stopped!');
+            }
+        );
+    });
 
-                updateCallStatus(currentCall.getCallId(), 'Ended');
-                setTimeout(function() {
-                    removeCall(currentCall.getCallId());
-                    updateCallButtonsGroup();
-                }, 1000);
-            }, function() {
-                showErrorMessage('Call couldn\'t be ended!');
-            });
-        });
+    btnHoldCall.addEventListener('click', function (e) {
+        var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
 
-        btnStartVideo.addEventListener('click', function (e) {
-            var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-hold
+        currentCall.hold(
+            function() {
+                $(btnHoldCall).hide();
+                $(btnUnHoldCall).show();
+            },
+            function() {
+                showErrorMessage('Call couldn\'t be held!');
+            }
+        );
+    });
 
-            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-startVideoSend
-            currentCall.startVideoSend(
-               function() {
-                   showInfoMessage('Video is started!');
-                   $('#localVideoContainer').show();
-                   $(btnStartVideo).hide();
-                   $(btnStopVideo).show();
-               },
-               function() {
-                   showErrorMessage('Video couldn\'t be started!');
-               }
-           );
-        });
+    btnUnHoldCall.addEventListener('click', function (e) {
+        var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
 
-        btnStopVideo.addEventListener('click', function (e) {
-            var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-unhold
+        currentCall.unhold(
+            function() {
+                $(btnUnHoldCall).hide();
+                $(btnHoldCall).show();
+            },
+            function() {
+                showErrorMessage('Call couldn\'t be resumed!');
+            }
+        );
+    });
 
-            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-stopVideoSend
-            currentCall.stopVideoSend(
-               function() {
-                   showInfoMessage('Video is stopped!');
-                   $('#localVideoContainer').hide();
-                   $(btnStopVideo).hide();
-                   $(btnStartVideo).show();
-               },
-               function() {
-                   showErrorMessage('Video couldn\'t be stopped!');
-               }
-           );
-        });
+    btnMute.addEventListener('click', function (e) {
+        var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
 
-        btnHoldCall.addEventListener('click', function (e) {
-            var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-mute
+        currentCall.mute();
+        showInfoMessage('Call is muted!');
+        $(btnMute).hide();
+        $(btnUnMute).show();
+    });
 
-            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-hold
-            currentCall.hold(
-                function() {
-                    $(btnHoldCall).hide();
-                    $(btnUnHoldCall).show();
-                },
-                function() {
-                    showErrorMessage('Call couldn\'t be held!');
-                }
-            );
-        });
+    btnUnMute.addEventListener('click', function (e) {
+        var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
 
-        btnUnHoldCall.addEventListener('click', function (e) {
-            var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-unmute
+        currentCall.unmute();
+        showInfoMessage('Call is unmuted!');
+        $(btnUnMute).hide();
+        $(btnMute).show();
+    });
 
-            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-unhold
-            currentCall.unhold(
-                function() {
-                    $(btnUnHoldCall).hide();
-                    $(btnHoldCall).show();
-                },
-                function() {
-                    showErrorMessage('Call couldn\'t be resumed!');
-                }
-            );
-        });
+    confDestination.addEventListener('keydown', function (e) {
+        var keyCode = e.keyCode;
+        console.log('keyCode = ' + keyCode);
+        var keyStr = String.fromCharCode(keyCode);
+        var regexKey = /[0-9]|[#]|[*]/;
+        var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
+        if (currentCall) {
+            if (regexKey.test(keyStr)) {
+                // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-sendDigits
+                currentCall.sendDigits(keyStr);
+            }
+        }
+        else {
+            if (regexKey.test(keyStr)) {
+                // just play dialtone
+                CtlSpeakEasy.CallManager.dialTonePlay(keyStr);
+            }
+        }
+    }, false);
 
-        btnMute.addEventListener('click', function (e) {
-            var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
+    btnLogout.addEventListener('click', function (e) {
+        $('#progressLogout').show();
 
-            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-mute
-            currentCall.mute();
-            showInfoMessage('Call is muted!');
-            $(btnMute).hide();
-            $(btnUnMute).show();
-        });
-
-        btnUnMute.addEventListener('click', function (e) {
-            var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
-
-            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-unmute
-            currentCall.unmute();
-            showInfoMessage('Call is unmuted!');
-            $(btnUnMute).hide();
-            $(btnMute).show();
-        });
-
-        btnLogout.addEventListener('click', function (e) {
-            $('#progressLogout').show();
-
-            // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.SpeakEasy-method-logout
-            CtlSpeakEasy.logout(function() {
+        // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.SpeakEasy-method-logout
+        CtlSpeakEasy.logout(function() {
                 showInfoMessage('SpeakEasy logout succeed!');
                 // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.Auth-method-logout
                 CtlSpeakEasy.logout();
@@ -220,29 +239,6 @@ function initSpeakEasy() {
                 $('#progressLogout').hide();
                 window.location.href = 'index.html';
             });
-        });
-
-        confDestination.addEventListener('keydown', function (e) {
-            var keyCode = e.keyCode;
-            console.log('keyCode = ' + keyCode);
-            var keyStr = String.fromCharCode(keyCode);
-            var regexKey = /[0-9]|[#]|[*]/;
-            var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
-            if (currentCall) {
-                if (regexKey.test(keyStr)) {
-                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-sendDigits
-                    currentCall.sendDigits(keyStr);
-                }
-            }
-            else {
-                if (regexKey.test(keyStr)) {
-                    // just play dialtone
-                    CtlSpeakEasy.CallManager.dialTonePlay(keyStr);
-                }
-            }
-        },
-        false);
-
     });
 }
 

@@ -43,7 +43,7 @@ define([
         var self = this;
         self.logger = new Logger('SpeakEasy');
 
-        function init(accessToken, refreshToken, publicId, callback) {
+        function init(accessToken, refreshToken, publicId, successCallback, errorCallback) {
 
             if (accessToken && refreshToken && publicId) {
                 Auth.setAccessToken(accessToken);
@@ -52,7 +52,7 @@ define([
                     if (!err && response) {
                         initFcs();
                     } else {
-                        Utils.doCallback(callback, [ err, response ]);
+                        Utils.doCallback(successCallback, [ err, response ]);
                     }
                 });
             } else {
@@ -128,11 +128,11 @@ define([
                         fcs.call.initMedia(
                             function() {
                                 self.logger.info('The media features has been succesfully initialized');
-                                Utils.doCallback(callback);
+                                Utils.doCallback(successCallback);
                             },
                             function(error) {
                                 self.logger.error('The media features initialization failed');
-                                Utils.doCallback(callback, [ error ]);
+                                Utils.doCallback(errorCallback, [ error ]);
                             }
                         );
 
@@ -141,13 +141,21 @@ define([
                     },
                     function(e) {
                         var notificationError = "An error occurred! Notification subsystem couldn't be started!";
+                        var detailedError = null;
                         self.logger.log(notificationError);
+
                         if (e === fcs.Errors.AUTH) {
-                            var err = "Authentication error occured";
-                            self.logger.log(err);
-                            Utils.doCallback(callback, [ notificationError + ' ' + err ]);
-                        } else {
-                            Utils.doCallback(callback, [ notificationError ]);
+                            detailedError = "Authentication error occured";
+                        } else if(e === fcs.Errors.LOGIN_LIMIT_CLIENT) {
+                            detailedError = "The maximum number of logged clients has reached";
+                        }
+
+                        if(detailedError) {
+                            self.logger.log(detailedError);
+                            Utils.doCallback(errorCallback, [ notificationError + ' ' + detailedError ]);
+                        }
+                        else {
+                            Utils.doCallback(errorCallback, [ notificationError ]);
                         }
                     }
                 );

@@ -21,6 +21,7 @@ define([
 
         var self = this;
         var logger = new Logger('Notification');
+        var lastNotificationError;
 
         var config = {
             storageKeywords: {
@@ -105,14 +106,15 @@ define([
                         self.connectionAttemptCount = 0;
                         onSuccess();
                     }.bind(self),
-                    function(){
+                    function(err){
+                        lastNotificationError = err;
                         start(onSuccess, onFailure); //try again with next attempt
                     }.bind(self)
                 );
 
             }else{
                 if (typeof onFailure === 'function'){
-                    onFailure();
+                    onFailure(lastNotificationError);
                 }
             }
         }
