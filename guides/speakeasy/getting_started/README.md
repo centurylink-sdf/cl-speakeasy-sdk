@@ -181,7 +181,7 @@ We can do it with following approach:
 
 Now you can handle different state changes of the call and adjust your UI appropriately.
 
-See How it Works in [Kitchensink](../kitchensink/www/index.html)
+See How it Works in [Example](../example/index.html)
 
 [Download Speak Easy Getting Started Example](guides/speakeasy_getting_started/getting_started.zip)
 

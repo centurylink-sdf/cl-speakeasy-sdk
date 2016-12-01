@@ -105,4 +105,6 @@ with help of {@link Ctl.speakeasy.BaseCall#sendDigits currentCall.sendDigits(key
 
 That is it.
 
-See How it Works in [Kitchensink](../kitchensink/www/index.html)
+See How it Works in [Example](../example/index.html)
+
+[Download Speak Easy Checking and Setting Call Features Example](guides/call_features/call_features.zip)
