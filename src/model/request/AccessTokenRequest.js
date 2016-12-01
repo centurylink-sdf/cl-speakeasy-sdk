@@ -1,5 +1,5 @@
 define([
-    'Ctl.ctlapiloader/Config',
+    'Ctl.speakeasy/Config',
     'Ctl.model.request/BaseRequest'
 ], function (
     Config,

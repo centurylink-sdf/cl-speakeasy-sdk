@@ -1,5 +1,5 @@
 {
-  "name": "ctlapi",
+  "name": "speakeasy",
   "preferGlobal": true,
   "analyze": false,
   "version": "0.1.4",
@@ -10,13 +10,12 @@
   "description": "A JavaScript SDK",
   "repository": {
     "type": "git",
-    "url": "git@bitbucket.org:centurylink/ctlapi.git"
+    "url": "git@bitbucket.org:centurylink/speakeasy.git"
   },
   "keywords": [
     "sdk",
     "api",
     "javascript",
-    "ctlapiloader",
     "speakeasy"
   ],
   "dependencies": {

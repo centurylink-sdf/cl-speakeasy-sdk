@@ -55,11 +55,13 @@ gulp.task('default', tasklist.withFilters(function(task) {
  * ***********************************************************************************************
  */
 
-gulp.task('build-require-ctlapiloader', function (cb) {
-    executeCommand(rJsCommand + ' -o src/ctlapiloader/build.json', cb);
+gulp.task('build-require', function (cb) {
+    var pkg = require('./package.json');
+    executeCommand(rJsCommand + ' -o src/' + pkg.name + '/build.json', cb);
+    gulp.src(['./src/' + pkg.name + '/tones/**/*']).pipe(gulp.dest('./dist/tones'));
 });
 
-gulp.task('build-optimize-ctlapiloader', function (cb) {
+gulp.task('build-optimize', function (cb) {
     var pkg = require('./package.json');
 
     return gulp.src('./dist/' + pkg.name + '.js')
@@ -75,33 +77,8 @@ gulp.task('build-optimize-ctlapiloader', function (cb) {
         .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('build-ctlapiloader', function (cb) {
-    runSequence('clean', 'build-require-ctlapiloader', 'build-optimize-ctlapiloader', cb);
-});
-
-gulp.task('build-require-speakeasy', function (cb) {
-    executeCommand(rJsCommand + ' -o src/speakeasy/build.json', cb);
-    gulp.src(['./src/speakeasy/tones/**/*']).pipe(gulp.dest('./dist/tones'));
-});
-
-gulp.task('build-optimize-speakeasy', function (cb) {
-    var pkg = require('./package.json');
-
-    return gulp.src('./dist/speakeasy.js')
-        .pipe(amdclean.gulp({
-            'prefixMode': 'standard',
-            'wrap': false
-        }))
-        .pipe(rename('speakeasy-' + pkg.version + '.js'))
-        .pipe(gulp.dest('./dist'));
-});
-
-gulp.task('build-speakeasy', function (cb) {
-    runSequence('clean', 'build-require-speakeasy', 'build-optimize-speakeasy', cb);
-});
-
 gulp.task('build', function (cb) {
-    runSequence('clean', 'build-require-ctlapiloader', 'build-optimize-ctlapiloader', 'build-require-speakeasy', 'build-optimize-speakeasy', cb);
+    runSequence('clean', 'build-require', 'build-optimize', cb);
 });
 
 gulp.task('stream', function (cb) {
@@ -191,21 +168,21 @@ gulp.task('git-tag-commit', function(cb) {
 gulp.task('example-upgrade-tag', function(){
     var pkg = require('./package.json');
     var v = pkg.version;
-    var file = 'kitchensink/www/*.html';
+    var file = 'demo/*.html';
 
     return gulp.src([file])
-        .pipe(replace(/ctlapi-([\d.]+)\.js/g, 'ctlapi-' + v + '.js'))
-        .pipe(gulp.dest('kitchensink/www'));
+        .pipe(replace(/ctlapi-([\d.]+)\.js/g, + pkg.name + '-' + v + '.js'))
+        .pipe(gulp.dest('example'));
 });
 
 gulp.task('upgrade-version', function(){
     var pkg = require('./package.json');
     var v = pkg.version;
-    var file = 'src/Version.js';
+    var file = 'src/' + pkg.name + '/Version.js';
 
     return gulp.src([file])
         .pipe(replace(/[\d.]+/g, v))
-        .pipe(gulp.dest('src'));
+        .pipe(gulp.dest('src/' + pkg.name));
 });
 
 // continous integration tasks

@@ -9,7 +9,18 @@ define([
     'Ctl/Auth',
     'fcs',
     'Ctl.speakeasy/CallManager'
-], function (Version, Config, Notification, Logger, Promise, Ajax, Utils, Auth, fcs, CallManager) {
+], function (
+    Version,
+    Config,
+    Notification,
+    Logger,
+    Promise,
+    Ajax,
+    Utils,
+    Auth,
+    fcs,
+    CallManager
+) {
 
     /**
      * @class Ctl.speakeasy.SpeakEasy
@@ -271,6 +282,8 @@ define([
             fcs.notification.stop(
                 function(){
                     self.logger.log('Notification system is stopped successfully!!');
+                    // clear browser's data storage (cookies, localStorage etc.)
+                    Utils.removeAll();
                     Utils.doCallback(successCallback);
                 },
                 function(){
@@ -293,6 +306,12 @@ define([
         this.logout = logout;
         this.init = init;
         this.getPublicUserId = getPublicUserId;
+
+        /**
+         * Implements all authentication features
+         * @type {Ctl.Auth}
+         */
+        this.Auth = Auth;
 
         this.CallManager = CallManager;
 

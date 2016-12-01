@@ -4,8 +4,7 @@ require.config({
         'Ctl':                      '../',
         'fcs':                      '../lib/fcs-jsl-4.1.1',
         'Ctl.speakeasy':            './',
-        'Ctl.model.request':        '../model/request',
-        'Ctl.ctlapiloader':         '../ctlapiloader/'
+        'Ctl.model.request':        '../model/request'
     },
     name: 'SpeakEasy',
     out: '../../dist/speakeasy.js',

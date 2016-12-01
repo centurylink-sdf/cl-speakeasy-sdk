@@ -9,6 +9,15 @@
 define({
     useConfig: 'intg',
     settings: {
+        intg: {
+            'ctlServerURL': 'https://lab.iaf.centurylink.com:8889'
+        },
+        cert: {
+            'ctlServerURL': 'https://lab.af.centurylink.com:8889'
+        },
+        'loginURI': '/token',
+        'getSubscriptionServiceIdentitiesURI': '/SpeakEasyProvision/v1/util/products',
+        'getSubscriptionServiceCatalogURI': '/SpeakEasyProvision/v1/serviceProfile/{publicId}',
         'subscribeServiceURI': '/{serviceName}/{identity}@{domain}/subscription',
         'unsubscribeServiceURI': '/SpeakEasy/{identity}@ctlvoip.lab.centurylink/subscription/{channelId}',
         'getInstantMessageURI': '/rest/version/{versionId}/user/{userId}/notification/{notificationChannelId}',
