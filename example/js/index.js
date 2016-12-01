@@ -1,7 +1,5 @@
 var CtlSpeakEasy = SpeakEasy;
 
-debugger;
-
 console.log('Running CenuryLink SpeakEasy v' + CtlSpeakEasy.version());
 
 if (CtlSpeakEasy.Auth.isAuthenticated()) {
