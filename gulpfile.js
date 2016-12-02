@@ -57,20 +57,20 @@ gulp.task('default', tasklist.withFilters(function(task) {
 
 gulp.task('build-require', function (cb) {
     var pkg = require('./package.json');
-    executeCommand(rJsCommand + ' -o src/speakeasy/build.json out=dist/' + pkg.name + '-' + pkg.version + '.js', cb);
+    executeCommand(rJsCommand + ' -o src/speakeasy/build.json out=dist/' + pkg.name + '.js', cb);
     gulp.src(['./src/speakeasy/tones/**/*']).pipe(gulp.dest('./dist/tones'));
 });
 
 gulp.task('build-optimize', function (cb) {
     var pkg = require('./package.json');
 
-    return gulp.src('./dist/' + pkg.name + '-' + pkg.version + '.js')
+    return gulp.src('./dist/' + pkg.name + '.js')
         .pipe(amdclean.gulp({
             'prefixMode': 'standard',
             'wrap': false
         }))
         .pipe(gulp.dest('./dist'))
-        .pipe(rename(pkg.name + '-' + pkg.version + '.min.js'))
+        .pipe(rename(pkg.name + '.min.js'))
         .pipe(uglify())
         .pipe(size({showFiles:true}))
         .pipe(gulp.dest('./dist'));
@@ -170,7 +170,7 @@ gulp.task('example-upgrade-tag', function(){
     var file = 'example/*.html';
 
     return gulp.src([file])
-        .pipe(replace(/ctlapi-([\d.]+)\.js/g, + pkg.name + '-' + v + '.js'))
+        .pipe(replace(/ctlapi-([\d.]+)\.js/g, + pkg.name + '.js'))
         .pipe(gulp.dest('example'));
 });
 
