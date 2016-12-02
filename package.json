@@ -1,7 +1,7 @@
 {
   "name": "cl-speakeasy-sdk",
   "analyze": false,
-  "version": "0.1.6",
+  "version": "0.1.6-beta.2",
   "author": {
     "name": "Andrew Kovalenko",
     "email": "andrew@jaybirdgroup.com"
@@ -9,7 +9,7 @@
   "description": "CenturyLink SpeakEasy JavaScript SDK",
   "repository": {
     "type": "git",
-    "url": "git@bitbucket.org:centurylink/speakeasy.git"
+    "url": "git@github.com:centurylink-sdf/cl-speakeasy-sdk.git"
   },
   "keywords": [
     "centurylink",
