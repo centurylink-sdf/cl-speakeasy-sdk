@@ -59,6 +59,11 @@ define([
                 audioContextClass = new AudioContext();
             }
 
+            var existingAudiTonesEl = document.getElementById('audio_tones');
+            if(existingAudiTonesEl != null) {
+                existingAudiTonesEl.parentNode.removeChild(existingAudiTonesEl);
+            }
+
             var audioTonesDiv = document.createElement('div');
             audioTonesDiv.id = 'audio_tones';
 
@@ -152,7 +157,7 @@ define([
             var body = bodyElements[0];
 
             body.appendChild(audioTonesDiv);
-        }
+        };
 
         self.play = function (toneType) {
             var tone = getToneFromString(toneType);

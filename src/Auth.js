@@ -281,6 +281,7 @@ define([
         this.setAccessToken = setAccessToken;
         this.getAccessToken = getAccessToken;
         this.setRefreshToken = setRefreshToken;
+        this.getRefreshToken = getRefreshToken;
 
     }
 

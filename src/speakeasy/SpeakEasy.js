@@ -45,6 +45,11 @@ define([
 
         function init(accessToken, refreshToken, publicId, successCallback, errorCallback) {
 
+            if(Utils.isNull(accessToken) && Utils.isNull(refreshToken)) {
+                accessToken = Auth.getAccessToken();
+                refreshToken = Auth.getRefreshToken();
+            }
+
             if (accessToken && refreshToken && publicId) {
                 Auth.setAccessToken(accessToken);
                 Auth.setRefreshToken(refreshToken);
@@ -52,7 +57,10 @@ define([
                     if (!err && response) {
                         initFcs();
                     } else {
-                        Utils.doCallback(successCallback, [ err, response ]);
+                        if(typeof err == 'object') {
+                            err = 'SpeakEasy initialization failed.';
+                        }
+                        Utils.doCallback(errorCallback, [ err, response ]);
                     }
                 });
             } else {

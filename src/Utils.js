@@ -200,6 +200,15 @@ define([], function () {
             return value != null && typeof value != 'undefined';
         }
 
+        /**
+         * Check if value is null or undefined
+         * @param value
+         * @returns {boolean}
+         */
+        function isNull(value) {
+            return value == null || typeof value == 'undefined';
+        }
+
         this.isValidUrl = isValidUrl;
         this.encodeParams = encodeParams;
         this.isFunction = isFunction;
@@ -211,6 +220,7 @@ define([], function () {
         this.removeAll = removeAll;
         this.extend = extend;
         this.isNotNull = isNotNull;
+        this.isNull = isNull;
 
     }
 
