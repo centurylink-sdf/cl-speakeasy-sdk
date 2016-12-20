@@ -34,6 +34,25 @@ define([
 
         var self = this;
 
+        self.incoming = true;
+
+        function init() {
+            var callerInfo = self.getCallerInfo();
+
+            self.callerName = callerInfo.name;
+            self.callerNumber = callerInfo.number;
+
+            if(self.callerNumber.indexOf('@') >= 0 && self.callerNumber.indexOf('secondary') == -1) {
+                self.callerNumber = self.callerNumber.substring(0, self.callerNumber.indexOf('@'));
+            }
+
+            if (self.callerNumber.indexOf(';transport=UDP') !== -1) {
+                self.callerNumber = self.callerNumber.replace(';transport=UDP','');
+            }
+
+            self.fcsCall.callerNumber = self.callerNumber;
+        }
+
         /**
          * Answers the call
          * @param {Function} successCallback The callback function to be called after success
@@ -52,7 +71,7 @@ define([
                     self.fcsCall.answer(
                         function () {
                             self.logger.info("You are on call.");
-
+                            self.ringing = false;
                             CallInfo.setCurrentCall(self);
                             Utils.doCallback(successCallback);
                         },
@@ -103,6 +122,8 @@ define([
 
             return null;
         }
+
+        init();
     }
 
     IncomingCall.prototype = Object.create(BaseCall.prototype);

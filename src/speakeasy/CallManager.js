@@ -279,6 +279,14 @@ define([
             Utils.doCallback(self.onCallReceived, [ incomingCall ]);
         }
 
+        /**
+         * check if user have any video device
+         * @returns {Boolean}
+         */
+        function hasVideoDevice() {
+            return fcs.call.hasVideoDevice();
+        }
+
         this.setup = setup;
         this.getCalls = getCalls;
         this.getCallsCount = getCallsCount;
@@ -288,6 +296,7 @@ define([
         this.switchTo = switchTo;
         this.processReceivedCall = processReceivedCall;
         this.dialTonePlay = dialTonePlay;
+        this.hasVideoDevice = hasVideoDevice;
 
         /**
          * @event

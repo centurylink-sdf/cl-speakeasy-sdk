@@ -59,6 +59,9 @@ define([
         self.isMuted = false;
         self.isVideoStarted = isVideoEnabled;
         self.isEnded = false; // true if current user ends the call
+        self.ringing = true;
+        self.callerName = '';
+        self.callerNumber = '';
 
         /**
          * Attaches handlers for listening call events
@@ -74,10 +77,12 @@ define([
 
             self.fcsCall.onStreamAdded = function(streamURL) {
                 onStreamAddedHandler(streamURL);
+                EventEmitter.trigger(EventEmitter.events.CALL_STREAM_ADDED, self, false, self, streamURL);
             };
 
             self.fcsCall.onLocalStreamAdded = function(streamURL) {
                 onLocalStreamAddedHandler(streamURL);
+                EventEmitter.trigger(EventEmitter.events.CALL_LOCAL_STREAM_ADDED, self, false, self, streamURL);
             };
         }
 
@@ -259,6 +264,7 @@ define([
         }
 
         function hideAllVideoStreams() {
+            self.isVideoStarted = false;
             removeLocalStream();
             hideRemoteVideo();
         }
@@ -323,12 +329,13 @@ define([
                         AudiotonesManager.play(AudiotonesManager.RING_OUT);
                     }
 
-                    EventEmitter.trigger(EventEmitter.events.CALL_RINGING, self, false, self);
+                    EventEmitter.trigger(EventEmitter.events.CALL_RINGING, self, false, self, statusCode);
                     break;
                 case fcs.call.States.IN_CALL:
+                    self.ringing = false;
                     self.logger.debug('status changed: IN_CALL');
                     showAllVideoStreams();
-                    EventEmitter.trigger(EventEmitter.events.CALL_STARTED, self, false, self);
+                    EventEmitter.trigger(EventEmitter.events.CALL_STARTED, self, false, self, statusCode);
                     break;
                 case fcs.call.States.CALL_IN_PROGRESS:
                     self.logger.debug('status changed: CALL_IN_PROGRESS');
@@ -344,12 +351,12 @@ define([
                     break;
                 case fcs.call.States.ON_HOLD:
                     self.logger.debug('status changed: ON_HOLD');
-                    EventEmitter.trigger(EventEmitter.events.CALL_HELD, self, false, self);
+                    EventEmitter.trigger(EventEmitter.events.CALL_HELD, self, false, self, statusCode);
                     break;
                 case fcs.call.States.ON_REMOTE_HOLD:
                     self.logger.debug('status changed: ON_REMOTE_HOLD');
                     hideAllVideoStreams();
-                    EventEmitter.trigger(EventEmitter.events.CALL_REMOTE_HELD, self, false, self);
+                    EventEmitter.trigger(EventEmitter.events.CALL_REMOTE_HELD, self, false, self, statusCode);
                     break;
                 case fcs.call.States.OUTGOING:
                     self.logger.debug('status changed: OUTGOING');
@@ -374,13 +381,13 @@ define([
 
                         removeAllVideoStreams();
                         EventEmitter.trigger(EventEmitter.events.ON_DELETE_CALL, null, true, self.id);
-                        EventEmitter.trigger(EventEmitter.events.CALL_ENDED, self, false, self);
+                        EventEmitter.trigger(EventEmitter.events.CALL_ENDED, self, false, self, statusCode);
                     }
                     break;
                 case fcs.call.States.REJECTED:
                     self.logger.debug('status changed: REJECTED');
                     removeAllVideoStreams();
-                    EventEmitter.trigger(EventEmitter.events.CALL_REJECTED, self, false,  self);
+                    EventEmitter.trigger(EventEmitter.events.CALL_REJECTED, self, false,  self, statusCode);
                     break;
                 case fcs.call.States.EARLY_MEDIA:
                     self.logger.debug('status changed: EARLY_MEDIA');
@@ -609,8 +616,18 @@ define([
          * @param {String} digit Digit to be send as dtmf
          */
         self.sendDigits = function(digit) {
+            var muted = false;
+            if (!self.isMuted ) {
+                muted = true;
+                self.mute();
+            }
+
             playKeyTone(digit).then(function() {
                 self.fcsCall.sendDTMF(digit);
+
+                if(muted) {
+                    self.unmute();
+                }
             })
         };
 

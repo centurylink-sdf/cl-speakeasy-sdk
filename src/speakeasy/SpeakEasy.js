@@ -144,8 +144,7 @@ define([
                             }
                         );
 
-                        fcs.call.onReceived = CallManager.processReceivedCall;
-
+                        Notification.setOnCallReceived(CallManager.processReceivedCall);
                     },
                     function(e) {
                         var notificationError = "An error occurred! Notification subsystem couldn't be started!";
@@ -261,8 +260,7 @@ define([
         function getPublicUserId() {
             var speakEasy = Utils.getObject('services_SpeakEasy');
             var phoneNumber = Utils.get('publicId');
-            var publicUserId = phoneNumber + speakEasy.rtc.domain;
-            return publicUserId;
+            return phoneNumber + speakEasy.rtc.domain;
         }
 
         /**
@@ -271,8 +269,7 @@ define([
          */
         function getVoipTnCipherRef() {
             var speakEasy = Utils.getObject('services_SpeakEasy');
-            var voipTnCipherRef = speakEasy.networkIdentity.authenticationandCipheringReference;
-            return voipTnCipherRef;
+            return speakEasy.networkIdentity.authenticationandCipheringReference;
         }
 
         /**

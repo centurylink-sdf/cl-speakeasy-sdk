@@ -28,6 +28,7 @@ define([
         BaseCall.apply(this, arguments);
 
         var self = this;
+        self.incoming = false;
 
         /**
          * Gets callee information
@@ -43,7 +44,7 @@ define([
             }
 
             return null;
-        }
+        };
     }
 
     OutgoingCall.prototype = Object.create(BaseCall.prototype);

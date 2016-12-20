@@ -20,7 +20,6 @@ define([
     function Notification() {
 
         var self = this;
-        var logger = new Logger('Notification');
         var lastNotificationError;
 
         var config = {
@@ -51,13 +50,15 @@ define([
                 var sites = JSON.parse(speakEasyServiceCatalog.rtc.routing);
                 for (var i = 0; i < sites.length; i++) {
                     for (var key in sites[i]) {
-                        var endpoints = sites[i][key];
-                        for (var i = 0; i < endpoints.length; i++) {
-                            var temp = endpoints[i].split(':');
-                            self.webRTCServerList.push({
-                                url: temp[0],
-                                port: temp[1]
-                            });
+                        if(sites[i].hasOwnProperty(key)) {
+                            var endpoints = sites[i][key];
+                            for (var j = 0; j < endpoints.length; j++) {
+                                var temp = endpoints[j].split(':');
+                                self.webRTCServerList.push({
+                                    url: temp[0],
+                                    port: temp[1]
+                                });
+                            }
                         }
                     }
                 }
@@ -191,6 +192,7 @@ define([
         }
 
         this.start = start;
+        this.setOnCallReceived = setOnCallReceived;
     }
 
     return new Notification();

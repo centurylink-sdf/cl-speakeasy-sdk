@@ -30,7 +30,9 @@ define([
             CALL_ENDED: 'CALL_ENDED',
             CALL_HELD: 'CALL_HELD',
             CALL_REMOTE_HELD: 'CALL_REMOTE_HELD',
-            CALL_REJECTED: 'CALL_REJECTED'
+            CALL_REJECTED: 'CALL_REJECTED',
+            CALL_STREAM_ADDED: 'CALL_STREAM_ADDED',
+            CALL_LOCAL_STREAM_ADDED: 'CALL_LOCAL_STREAM_ADDED'
         };
 
         /**
