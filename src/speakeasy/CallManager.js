@@ -88,6 +88,8 @@ define([
             Utils.extend(Config.callManager, config);
             self.logger.debug('call manager config: ');
             self.logger.debug(Config.callManager);
+
+            AudiotonesManager.init();
         }
 
         /**

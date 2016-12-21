@@ -55,7 +55,7 @@ define([
             var AudioContext = window.AudioContext || window.webkitAudioContext ||
                 window.mozAudioContext || window.oAudioContext || window.msAudioContext;
 
-            if (AudioContext) {
+            if (AudioContext && audioContextClass == null) {
                 audioContextClass = new AudioContext();
             }
 
