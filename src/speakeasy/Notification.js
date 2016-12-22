@@ -38,6 +38,13 @@ define([
 
         //bind event handler
         this.connectionLostHandler = connectionLostHandler.bind(this);
+        this.connectionErrorHandler = connectionErrorHandler.bind(this);
+
+        var messagesHash = new Map();
+        messagesHash.set( 2, "Authentication error occured");
+        messagesHash.set( 10, "Maximum number of sessions encountered.  Please reduce number of sessions");
+        messagesHash.set( 13, "You have been disconnected by the administrator.  If you think this is an error, please login again");
+        messagesHash.set( 16, "Session expired.  Please login again.");
 
         /**
          * Prepare for use by loading WebRTC server list and listening to events
@@ -109,13 +116,14 @@ define([
                     }.bind(self),
                     function(err){
                         lastNotificationError = err;
+                        connectionErrorHandler(resolveError(err));
                         start(onSuccess, onFailure); //try again with next attempt
                     }.bind(self)
                 );
 
             }else{
                 if (typeof onFailure === 'function'){
-                    onFailure(lastNotificationError);
+                    onFailure(resolveError(lastNotificationError));
                 }
             }
         }
@@ -154,6 +162,15 @@ define([
         }
 
         /**
+         * handle connection error callback from fcs
+         */
+        function connectionErrorHandler(err){
+            if(self.connectionErrorCallback) {
+                self.connectionErrorCallback(err);
+            }
+        }
+
+        /**
          * Place the current webrtc server at lowest priority and promote the next server from list
          */
         function useNextWebRTCServer(){
@@ -184,6 +201,14 @@ define([
         }
 
         /**
+         * set function to call when connection is failed
+         * @param callback
+         */
+        function setOnConnectionError(callback) {
+            self.connectionErrorCallback = callback;
+        }
+
+        /**
          * set function to be called when phone call received
          * @param callback
          */
@@ -191,7 +216,24 @@ define([
             self.callReceivedCallback = callback;
         }
 
+        function resolveError(errorCode) {
+            var errorText = "Failed to establish session. You won't be able to Call, Chat, or receive new message notifications.";
+
+            if( errorCode && messagesHash.get(errorCode) ){
+                errorText = messagesHash.get(errorCode);
+            }
+
+            return {
+                type: 'NOTIFICATION',
+                code: errorCode,
+                message: errorText
+            }
+        }
+
         this.start = start;
+        this.setOnConnectionLost = setOnConnectionLost;
+        this.setOnConnectionEstablished = setOnConnectionEstablished;
+        this.setOnConnectionError = setOnConnectionError;
         this.setOnCallReceived = setOnCallReceived;
     }
 

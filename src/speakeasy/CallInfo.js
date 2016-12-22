@@ -39,7 +39,7 @@ define([
 
         /**
          * Get active call
-         * @return {Object} Current call object
+         * @return {Ctl.speakeasy.IncomingCall | Ctl.speakeasy.OutgoingCall} Current incoming  or outgoing call object
          */
         function getCurrentCall() {
             return self.currentCall;
@@ -47,7 +47,7 @@ define([
 
         /**
          * Set active call
-         * @param call
+         * @param {Ctl.speakeasy.IncomingCall | Ctl.speakeasy.OutgoingCall} call Incoming  or outgoing call object
          */
         function setCurrentCall(call) {
             self.currentCall = call;
@@ -55,7 +55,7 @@ define([
 
         /**
          * Add call to the list of calls
-         * @param {Object}  call      Call object
+         * @param {Ctl.speakeasy.IncomingCall | Ctl.speakeasy.OutgoingCall} call Incoming  or outgoing call object
          * @param {Boolean} isCurrent determines if it is current call
          */
         function addCall(call, isCurrent) {
@@ -71,7 +71,7 @@ define([
          * Get call by callID
          *
          * @param   {String} callID
-         * @return  {Call} Contains call object with required info
+         * @return  {Ctl.speakeasy.IncomingCall | Ctl.speakeasy.OutgoingCall} Incoming  or outgoing call object
          */
         function get(callID) {
             var result = self.calls.filter(function( call ) {

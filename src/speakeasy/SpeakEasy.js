@@ -43,6 +43,37 @@ define([
         var self = this;
         self.logger = new Logger('SpeakEasy');
 
+        /**
+         * Function to call when notification connection will lost
+         * @type {Function}
+         */
+        self.connectionLostCallback = null;
+
+        /**
+         * Function to call when notification connection will established
+         * @type {Function}
+         */
+        self.connectionEstablishedCallback = null;
+
+        /**
+         * Function to call when notification connection will failed
+         * @type {Function}
+         */
+        self.connectionErrorCallback = null;
+
+        /**
+         * SpeakEasy initialization
+         *
+         * @param {string} accessToken The access token from authentication process
+         * @param {string} refreshToken The refresh token from authentication process
+         * @param {string} publicId The user public id
+         * @param {Function} successCallback The function will be called after success initialization
+         * @param {Function} errorCallback The function will be called after some error occurred
+         * @param {object}   errorCallback.error The error object
+         * @param {String}   errorCallback.error.type The error type. Possible values: 'NOTIFICATION', 'MEDIA', 'OTHER'
+         * @param {Integer}   errorCallback.error.code The error code
+         * @param {String}   errorCallback.error.message The error message
+         */
         function init(accessToken, refreshToken, publicId, successCallback, errorCallback) {
 
             if(Utils.isNull(accessToken) && Utils.isNull(refreshToken)) {
@@ -60,7 +91,11 @@ define([
                         if(typeof err == 'object') {
                             err = 'SpeakEasy initialization failed.';
                         }
-                        Utils.doCallback(errorCallback, [ err, response ]);
+                        Utils.doCallback(errorCallback, [ {
+                            type: 'OTHER',
+                            code: 1,
+                            message: err
+                        } ]);
                     }
                 });
             } else {
@@ -128,6 +163,10 @@ define([
                 //     }
                 // }
 
+                Notification.setOnConnectionLost(self.connectionLostCallback);
+                Notification.setOnConnectionEstablished(self.connectionEstablishedCallback);
+                Notification.setOnConnectionError(self.connectionErrorCallback);
+
                 Notification.start(
                     function() {
                         self.logger.log("You are logged in successfully!");
@@ -140,33 +179,22 @@ define([
                             },
                             function(error) {
                                 self.logger.error('The media features initialization failed');
-                                Utils.doCallback(errorCallback, [ error ]);
+
+                                Utils.doCallback(errorCallback, [ {
+                                    type: 'MEDIA',
+                                    code: error,
+                                    message: 'Media initialization failed'
+                                } ]);
                             }
                         );
 
                         Notification.setOnCallReceived(CallManager.processReceivedCall);
                     },
-                    function(e) {
-                        var notificationError = "An error occurred! Notification subsystem couldn't be started!";
-                        var detailedError = null;
-                        self.logger.log(notificationError);
-
-                        if (e === fcs.Errors.AUTH) {
-                            detailedError = "Authentication error occured";
-                        } else if(e === fcs.Errors.LOGIN_LIMIT_CLIENT) {
-                            detailedError = "The maximum number of logged clients has reached";
-                        }
-
-                        if(detailedError) {
-                            self.logger.log(detailedError);
-                            Utils.doCallback(errorCallback, [ notificationError + ' ' + detailedError ]);
-                        }
-                        else {
-                            Utils.doCallback(errorCallback, [ notificationError ]);
-                        }
+                    function(error) {
+                        self.logger.log(error);
+                        Utils.doCallback(errorCallback, [ error ]);
                     }
                 );
-
             }
 
             AudiotonesManager.init();
@@ -329,6 +357,10 @@ define([
          */
         this.Auth = Auth;
 
+        /**
+         * Implements manage calls features
+         * @type {Ctl.speakeasy.CallManager}
+         */
         this.CallManager = CallManager;
 
     }

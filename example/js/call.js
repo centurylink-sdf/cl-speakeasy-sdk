@@ -62,7 +62,7 @@ function initSpeakEasy() {
         };
 
     }, function(error) {
-        showErrorMessage(error);
+        showErrorMessage(error.message);
     });
 
     var confDestination = document.getElementById('confDestination');

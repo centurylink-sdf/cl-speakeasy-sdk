@@ -60,7 +60,17 @@ define([
         self.isVideoStarted = isVideoEnabled;
         self.isEnded = false; // true if current user ends the call
         self.ringing = true;
+
+        /**
+         * The caller name
+         * @type {string}
+         */
         self.callerName = '';
+
+        /**
+         * The caller number
+         * @type {string}
+         */
         self.callerNumber = '';
 
         /**
