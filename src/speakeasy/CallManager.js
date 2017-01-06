@@ -184,47 +184,56 @@ define([
          */
         function createCall(numToCall, isVideoEnabled, successCallback, failureCallback) {
 
-            var domain = Config.settings.defaultOutgoingCallDomain;
-            numToCall = !/@/.test(numToCall) ?  numToCall + "@" + domain : numToCall;
+            numToCall = stripCallId(numToCall);
 
-            var currentUser = fcs.getUser();
+            //check call number has proper format
+            var regexKey = /^[0-9*#]+$/;
+            if (regexKey.test(numToCall)) {
+                var domain = Config.settings.defaultOutgoingCallDomain;
+                numToCall = !/@/.test(numToCall) ?  numToCall + "@" + domain : numToCall;
 
-            holdCurrentCall(false).then(function(error) {
+                var currentUser = fcs.getUser();
 
-                if(error) {
-                    Utils.doCallback(failureCallback);
-                }
-                else {
-                    fcs.call.startCall(
-                        currentUser,
-                        null,
-                        numToCall,
+                holdCurrentCall(false).then(function(error) {
 
-                        function(call) {
+                    if(error) {
+                        Utils.doCallback(failureCallback);
+                    }
+                    else {
+                        fcs.call.startCall(
+                            currentUser,
+                            null,
+                            numToCall,
 
-                            holdCurrentCall(false);
+                            function(call) {
 
-                            var outgoingCall = new OutgoingCall(call, isVideoEnabled);
+                                holdCurrentCall(false);
 
-                            CallInfo.addCall(outgoingCall, true);
+                                var outgoingCall = new OutgoingCall(call, isVideoEnabled);
 
-                            Utils.doCallback(successCallback, [ outgoingCall ]);
+                                CallInfo.addCall(outgoingCall, true);
 
-                        },
-                        function(errorMessage) {
-                            if (errorMessage === 2) {
-                                self.logger.log("CREATE_PEER_FAILED", "error");
-                            } else {
-                                self.logger.log("CALL_FAILED", errorMessage);
-                            }
-                            Utils.doCallback(failureCallback);
-                        },
-                        isVideoEnabled,
-                        isVideoEnabled,
-                        Config.callManager.videoQuality
-                    );
-                }
-            });
+                                Utils.doCallback(successCallback, [ outgoingCall ]);
+
+                            },
+                            function(errorMessage) {
+                                if (errorMessage === 2) {
+                                    self.logger.log("CREATE_PEER_FAILED", "error");
+                                } else {
+                                    self.logger.log("CALL_FAILED", errorMessage);
+                                }
+                                Utils.doCallback(failureCallback);
+                            },
+                            isVideoEnabled,
+                            isVideoEnabled,
+                            Config.callManager.videoQuality
+                        );
+                    }
+                });
+            }
+            else {
+                Utils.doCallback(failureCallback, ['The call number has incorrect characters']);
+            }
         }
 
         /**
@@ -287,6 +296,35 @@ define([
          */
         function hasVideoDevice() {
             return fcs.call.hasVideoDevice();
+        }
+
+        /**
+         * Remove special characters (-,.,(,),+ from phone number
+         * @param {string} phoneNumber
+         * @returns {string} Stripped phone number
+         * @private
+         */
+        function stripCallId(phoneNumber) {
+
+            var bInterNat = phoneNumber.indexOf('+') === 0,
+                regExp = new RegExp(/[.),(+\- ]/g),
+                callId_split = phoneNumber.split('@'),
+                containsAt = phoneNumber.indexOf('@') >= 0;
+
+            var callId_split_0 = callId_split[0].replace(regExp, '');
+            if(phoneNumber.indexOf("@") === -1) {
+                phoneNumber = encodeURIComponent(callId_split_0);
+            } else {
+                phoneNumber = callId_split[0];
+            }
+            if (containsAt ) {
+                phoneNumber = phoneNumber + "@" + callId_split[1];
+            }
+            if (bInterNat) {
+                phoneNumber = '+' + phoneNumber;
+            }
+
+            return phoneNumber;
         }
 
         this.setup = setup;

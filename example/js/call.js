@@ -80,11 +80,11 @@ function initSpeakEasy() {
         var numToCall = confDestination.value;
         var isVideoCall = false;
 
-        $('#btnGroupCall').show();
-        confDestination.value = '';
-
         // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.CallManager-method-createCall
         CtlSpeakEasy.CallManager.createCall(numToCall, isVideoCall, function(call) {
+
+            $('#btnGroupCall').show();
+            confDestination.value = '';
 
             if(isVideoCall) {
                 $('#localVideoContainer').show();
@@ -93,8 +93,13 @@ function initSpeakEasy() {
             updateCallButtonsGroup();
             attachCallListeners(call);
             addCall(call.getCallId(), { name: '', number: numToCall, status: 'Ringing' });
-        }, function() {
-            showErrorMessage('Make new call failed!');
+        }, function(error) {
+            if(error) {
+                showErrorMessage(error);
+            }
+            else {
+                showErrorMessage('Make new call failed!');
+            }
         });
     });
 
@@ -202,22 +207,24 @@ function initSpeakEasy() {
         $(btnMute).show();
     });
 
-    confDestination.addEventListener('keydown', function (e) {
-        var keyCode = e.keyCode;
-        console.log('keyCode = ' + keyCode);
-        var keyStr = String.fromCharCode(keyCode);
-        var regexKey = /[0-9]|[#]|[*]/;
-        var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
-        if (currentCall) {
+    confDestination.addEventListener('keypress', function (e) {
+        var charCode = e.which || e.charCode || e.keyCode || 0;
+        if (charCode !== 13) { //Not enter
+            var keyStr = String.fromCharCode(charCode);
+            var regexKey = /[0-9]|[#]|[*]/;
             if (regexKey.test(keyStr)) {
-                // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-sendDigits
-                currentCall.sendDigits(keyStr);
+                var currentCall = CtlSpeakEasy.CallManager.getCurrentCall();
+                if(currentCall != null && !currentCall.isOnHold()) {
+                    // For more info reference to http://[documentation-domain]/docs/#!/api/Ctl.speakeasy.BaseCall-method-sendDigits
+                    currentCall.sendDigits(keyStr);
+                }
+                else {
+                    CtlSpeakEasy.CallManager.dialTonePlay(keyStr);
+                }
             }
-        }
-        else {
-            if (regexKey.test(keyStr)) {
-                // just play dialtone
-                CtlSpeakEasy.CallManager.dialTonePlay(keyStr);
+            else {
+                e.preventDefault();
+                e.stopPropagation();
             }
         }
     }, false);
