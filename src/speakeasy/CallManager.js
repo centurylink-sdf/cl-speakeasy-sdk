@@ -4,6 +4,7 @@ define([
     'Ctl/Promise',
     'Ctl/Ajax',
     'Ctl/Utils',
+    'Ctl/Error',
     'fcs',
     'Ctl.speakeasy/EventEmitter',
     'Ctl.speakeasy/IncomingCall',
@@ -16,6 +17,7 @@ define([
     Promise,
     Ajax,
     Utils,
+    Error,
     fcs,
     EventEmitter,
     IncomingCall,
@@ -232,7 +234,7 @@ define([
                 });
             }
             else {
-                Utils.doCallback(failureCallback, ['The call number has incorrect characters']);
+                Utils.doCallback(failureCallback, [ new Error(Error.Types.CALLING, 0, 'The call number has incorrect characters') ]);
             }
         }
 

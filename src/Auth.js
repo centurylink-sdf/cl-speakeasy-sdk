@@ -3,6 +3,7 @@ define([
     'Ctl/Promise',
     'Ctl/Ajax',
     'Ctl/Utils',
+    'Ctl/Error',
     'Ctl.model.request/BaseRequest',
     'Ctl.model.request/AccessTokenRequest',
     'Ctl.model.request/RefreshTokenRequest',
@@ -12,6 +13,7 @@ define([
     Promise,
     Ajax,
     Utils,
+    Error,
     BaseRequest,
     AccessTokenRequest,
     RefreshTokenRequest,
@@ -104,7 +106,7 @@ define([
                     return Subscription.getSubscriptionServices();
                 } else {
                     var fail = new Promise();
-                    fail.done(err.response, null);
+                    fail.done(err, null);
                     return fail;
                 }
             }.bind(this);
@@ -115,8 +117,15 @@ define([
                 if (!err) {
                     var products = request.response.Products;
                     if (!products || products.length === 0) {
-                        err = 'No products returned.';
+                        err = new Error(Error.Types.LOGIN, 0, 'No products returned.')
                     }
+                }
+
+                if(err) {
+                    var errorMessage = 'Authentication failed. ';
+                    errorMessage += resolveErrorMessage(err.response);
+
+                    err = new Error(Error.Types.LOGIN, 0, errorMessage);
                 }
 
                 Utils.doCallback(callback, [ err, products ]);
@@ -137,6 +146,15 @@ define([
                     Subscription.setServiceCatalog(request.response);
                     Subscription.setPublicId(publicId);
                 }
+
+                if(err) {
+
+                    var errorMessage = 'Service subscription details retrieval failed. ';
+                    errorMessage += resolveErrorMessage(err.response);
+
+                    err = new Error(Error.Types.LOGIN, 0, errorMessage);
+                }
+
                 Utils.doCallback(callback, [ err, request ]);
             });
         }
@@ -164,6 +182,14 @@ define([
                 if (!err && request) {
                     setAccessToken(request.response.access_token);
                     setRefreshToken(request.response.refresh_token);
+                }
+
+                if(err) {
+
+                    var errorMessage = 'ReAuthentication failed. ';
+                    errorMessage += resolveErrorMessage(err.response);
+
+                    err = new Error(Error.Types.LOGIN, 0, errorMessage);
                 }
 
                 Utils.doCallback(callback, [ err, request ]);
@@ -269,6 +295,30 @@ define([
          */
         function getLoginUsername() {
             return Utils.get(config.storageKeywords.loginUsername);
+        }
+
+
+        /**
+         * Resolve error message from response
+         *
+         * @private
+         * @param {object} response
+         * @returns {string} Resolved error message
+         */
+        function resolveErrorMessage(response) {
+            var errorMessage = '';
+
+            if(response) {
+                if(typeof response == 'object') {
+                    if(response.hasOwnProperty('responseMessage')) {
+                        errorMessage = response.responseMessage;
+                    }
+                }
+                else {
+                    errorMessage = response;
+                }
+            }
+            return errorMessage;
         }
 
         this.login = login;

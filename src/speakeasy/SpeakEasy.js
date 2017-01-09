@@ -7,6 +7,7 @@ define([
     'Ctl/Ajax',
     'Ctl/Utils',
     'Ctl/Auth',
+    'Ctl/Error',
     'fcs',
     'Ctl.speakeasy/CallManager',
     'Ctl.speakeasy/AudiotonesManager'
@@ -19,6 +20,7 @@ define([
     Ajax,
     Utils,
     Auth,
+    Error,
     fcs,
     CallManager,
     AudiotonesManager
@@ -91,11 +93,7 @@ define([
                         if(typeof err == 'object') {
                             err = 'SpeakEasy initialization failed.';
                         }
-                        Utils.doCallback(errorCallback, [ {
-                            type: 'OTHER',
-                            code: 1,
-                            message: err
-                        } ]);
+                        Utils.doCallback(errorCallback, [ new Error(Error.Types.OTHER, 1, err) ]);
                     }
                 });
             } else {
@@ -177,14 +175,10 @@ define([
                                 self.logger.info('The media features has been succesfully initialized');
                                 Utils.doCallback(successCallback);
                             },
-                            function(error) {
+                            function(errorCode) {
                                 self.logger.error('The media features initialization failed');
 
-                                Utils.doCallback(errorCallback, [ {
-                                    type: 'MEDIA',
-                                    code: error,
-                                    message: 'Media initialization failed'
-                                } ]);
+                                Utils.doCallback(errorCallback, [ new Error(Error.Types.MEDIA, errorCode, 'Media initialization failed') ]);
                             }
                         );
 
@@ -286,7 +280,8 @@ define([
          * @return {String} user's client ID
          */
         function getPublicUserId() {
-            var speakEasy = Utils.getObject('services_SpeakEasy');
+            var serviceName = Utils.getObject('serviceName');
+            var speakEasy = Utils.getObject('services_' + serviceName);
             var phoneNumber = Utils.get('publicId');
             return phoneNumber + speakEasy.rtc.domain;
         }
@@ -296,7 +291,8 @@ define([
          * @returns {String} user's VoipTnCipherRef
          */
         function getVoipTnCipherRef() {
-            var speakEasy = Utils.getObject('services_SpeakEasy');
+            var serviceName = Utils.getObject('serviceName');
+            var speakEasy = Utils.getObject('services_' + serviceName);
             return speakEasy.networkIdentity.authenticationandCipheringReference;
         }
 

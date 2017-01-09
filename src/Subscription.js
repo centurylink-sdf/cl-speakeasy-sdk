@@ -38,6 +38,7 @@ define([
         var config = {
             storageKeywords: {
                 services: 'services',
+                serviceName: 'serviceName',
                 serviceCatalog: {
                     publicId: 'publicId',
                     domain: 'domain',
@@ -101,15 +102,16 @@ define([
          * @param {Object} serviceCatalog Object with service details
          */
         function setServiceCatalog(serviceCatalog) {
+            Utils.setObject(config.storageKeywords.serviceName, serviceCatalog.productName);
             Utils.setObject(config.storageKeywords.services + '_' + serviceCatalog.productName, serviceCatalog);
         }
 
         /**
          * Get service details
-         * @param  {String} serviceName Service name to get info about
-         * @return {Object}             Object with service details
+         * @return {Object} Object with service details
          */
-        function getServiceCatalog(serviceName) {
+        function getServiceCatalog() {
+            var serviceName = Utils.getObject(config.storageKeywords.serviceName);
             return Utils.getObject(config.storageKeywords.services + '_' + serviceName);
         }
 

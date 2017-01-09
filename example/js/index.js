@@ -25,7 +25,7 @@ $('#btnSelectService').click(function(e) {
                 console.error('Service subscription details retrieval failed: ', error);
                 unBlockUI();
                 if (error) {
-                    showLoginError(error.responseMessage);
+                    showLoginError(error.message);
                 }
             }
 
@@ -95,7 +95,7 @@ function submitLogin() {
             console.error('Authentication failed: ', error);
             unBlockUI();
             if (error) {
-                showLoginError(error.responseMessage);
+                showLoginError(error.message);
             }
         }
     });
@@ -103,6 +103,11 @@ function submitLogin() {
 }
 
 function showLoginError(message) {
+
+    if($('#cardLoginError').text() != '') {
+        $('#cardLoginError').append('<br/>');
+    }
+
     $('#cardLoginError').append(message);
     $('#cardLoginError').show();
 }

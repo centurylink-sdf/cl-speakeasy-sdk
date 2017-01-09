@@ -68,7 +68,7 @@ define([
                         if (this.status === 200) {
                             p.done(null, this);
                         }
-                        if (this.status === 400) {
+                        if (this.status === 400 || this.status === 403 || this.status === 500) {
                             p.done(this, null);
                         }
                     }
@@ -91,7 +91,7 @@ define([
                 }
                 timeout = setTimeout(function() {
                     xhr.abort();
-                    p.done("API Call timed out.", null);
+                    p.done({ response: 'API Call timed out.'}, null);
                 }, 3e4);
                 //BACKLOG:0 stick that timeout in a config variable
                 xhr.send(encode(data));

@@ -95,7 +95,7 @@ function initSpeakEasy() {
             addCall(call.getCallId(), { name: '', number: numToCall, status: 'Ringing' });
         }, function(error) {
             if(error) {
-                showErrorMessage(error);
+                showErrorMessage(error.message);
             }
             else {
                 showErrorMessage('Make new call failed!');

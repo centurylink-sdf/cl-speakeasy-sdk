@@ -3,12 +3,14 @@ define([
     'Ctl/Subscription',
     'Ctl/Logger',
     'Ctl/Utils',
+    'Ctl/Error',
     'fcs'
 ], function (
     Config,
     Subscription,
     Logger,
     Utils,
+    Error,
     fcs
 ) {
 
@@ -52,7 +54,7 @@ define([
         function init(){
             //get spider servers from localStorage
 
-            var speakEasyServiceCatalog = Subscription.getServiceCatalog('SpeakEasy');
+            var speakEasyServiceCatalog = Subscription.getServiceCatalog();
             if (speakEasyServiceCatalog && speakEasyServiceCatalog.rtc && speakEasyServiceCatalog.rtc.routing) {
                 var sites = JSON.parse(speakEasyServiceCatalog.rtc.routing);
                 for (var i = 0; i < sites.length; i++) {
@@ -223,11 +225,7 @@ define([
                 errorText = messagesHash.get(errorCode);
             }
 
-            return {
-                type: 'NOTIFICATION',
-                code: errorCode,
-                message: errorText
-            }
+            return new Error(Error.Types.NOTIFICATION, errorCode, errorText);
         }
 
         this.start = start;
