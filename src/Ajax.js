@@ -68,7 +68,7 @@ define([
                         if (this.status === 200) {
                             p.done(null, this);
                         }
-                        if (this.status === 400 || this.status === 403 || this.status === 500) {
+                        if ((this.status >= 400 && this.status <= 451) || (this.status >= 500 && this.status <= 511)) {
                             p.done(this, null);
                         }
                     }
