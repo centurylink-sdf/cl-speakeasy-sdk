@@ -11,6 +11,8 @@ define([], function () {
      */
     function Utils() {
 
+        var self = this;
+
         /**
          * Check if the URL is valid
          * @param  {[type]}  url [description]
@@ -183,9 +185,17 @@ define([], function () {
             }
 
             if(object1 != null) {
-                Object.keys(object1).forEach(function(key) {
-                    target[ key ] = object1[ key ];
-                });
+                for (var i in object1) {
+                    // check if the extended object has that property
+                    if (object1.hasOwnProperty(i)) {
+                        // mow check if the child is also and object so we go through it recursively
+                        if (typeof target[i] == "object" && target.hasOwnProperty(i) && target[i] != null) {
+                            self.extend(target[i], object1[i]);
+                        } else {
+                            target[i] = object1[i];
+                        }
+                    }
+                }
             }
 
             return target;

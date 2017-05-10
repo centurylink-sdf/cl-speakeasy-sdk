@@ -64,6 +64,16 @@ define([
         self.connectionErrorCallback = null;
 
         /**
+         * Extends SpeakEasy config
+         * @param {object} config
+         */
+        function setup(config) {
+            if(config) {
+                Utils.extend(Config, config);
+            }
+        }
+
+        /**
          * SpeakEasy initialization
          *
          * @param {string} accessToken The access token from authentication process
@@ -73,7 +83,7 @@ define([
          * @param {Function} errorCallback The function will be called after some error occurred
          * @param {object}   errorCallback.error The error object
          * @param {String}   errorCallback.error.type The error type. Possible values: 'NOTIFICATION', 'MEDIA', 'OTHER'
-         * @param {Integer}   errorCallback.error.code The error code
+         * @param {Number}   errorCallback.error.code The error code
          * @param {String}   errorCallback.error.message The error message
          */
         function init(accessToken, refreshToken, publicId, successCallback, errorCallback) {
@@ -346,6 +356,7 @@ define([
         this.logout = logout;
         this.init = init;
         this.getPublicUserId = getPublicUserId;
+        this.setup = setup;
 
         /**
          * Implements all authentication features
