@@ -145,7 +145,7 @@ gulp.task('git-tag', function(cb) {
 
 gulp.task('git-tag-create', function(cb) {
     var pkg = require('./package.json');
-    var v = 'v' + pkg.version;
+    var v = pkg.version;
     var message = 'Release ' + v;
     var commandLine = 'git tag -a ' + v + ' -m \'' + message + '\'';
     executeCommand(commandLine, cb);
@@ -158,7 +158,7 @@ gulp.task('git-tag-push', function(cb) {
 
 gulp.task('git-tag-commit', function(cb) {
     var pkg = require('./package.json');
-    var v = 'v' + pkg.version;
+    var v = pkg.version;
     var message = 'Release ' + v;
     var commandLine = 'git add -A && git commit -a -m\'' + message + '\'';
     executeCommand(commandLine, cb);
