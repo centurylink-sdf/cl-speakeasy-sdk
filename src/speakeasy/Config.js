@@ -7,7 +7,7 @@
  * List of configuration options for Ctl.speakeasy.CtlApiLoader.
  */
 define({
-    useConfig: 'intg',
+    useConfig: 'cert',
     settings: {
         intg: {
             'ctlServerURL': 'https://lab.iaf.centurylink.com:8889'
