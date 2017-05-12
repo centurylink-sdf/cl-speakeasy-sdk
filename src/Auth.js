@@ -85,16 +85,93 @@ define([
          */
         function authenticate(username, password, callback) {
 
+            if (username.indexOf('@instalink') > 0 || window.location.pathname.lastIndexOf('/instant', 0) === 0){
+
+                if (username.indexOf('@') < 0) {
+                    username += '@instalink';
+                }
+
+                oauth(username, password, callback);
+            } else {
+
+                ctlid(username, password, callback);
+            }
+        }
+
+
+        function ctlid(username, password, callback) {
+
+            var legalAckFail = false;
+            var request = new CtlIDRequest(username, password);
+            var ajaxArgus = {
+                url: request.getRequestUrl(),
+                type: request.type,
+                data: request.getData(),
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                success: function(preRegData) {
+
+                    if (preRegData.HomePreRegisterResponse.CtlIdResponse.completionUrlField){
+                        //Login is successful, but LegalAck has not been signed.
+                        legalAckFail = true;  // set to prevent auth token request
+                        return onFailure("legalAckFail", preRegData.HomePreRegisterResponse.CtlIdResponse.completionUrlField);
+                    } else {
+                        //this.setInternalCredentials(preRegData);
+                    }
+
+
+
+                }.bind(this),
+                error: function(jqXHR) {
+                    onFailure(jqXHR);
+                }
+            };
+
+            return $.ajax(ajaxArgus).done(function() {
+
+                if (legalAckFail) {
+                    return $.Deferred().resolve().promise();
+                }
+
+                var oauthRequest = new OAuthRequest(username, password);
+                var oauthArgs = {
+                    url: oauthRequest.getRequestUrl(),
+                    type: oauthRequest.type,
+                    data: oauthRequest.getData(),
+                    headers: oauthRequest.getRequestHeaders(),
+                    success: function(oAuthRequestResponse) {
+
+                        this.setInternalOAuthLogin(username, oAuthRequestResponse);
+                        BaseOAuthRequest.prototype.accessToken = oAuthRequestResponse.access_token;
+                        onSuccess(false);
+                    }.bind(this),
+                    error: function(jqXHR) {
+
+                        onFailure(jqXHR);
+                    }
+                };
+
+                return $.ajax(oauthArgs);
+            }.bind(this))
+                .fail(function(err) {
+                    onFailure(err);
+                });
+        }
+
+        function oauth(username, password, callback) {
+
             var atRequest = new AccessTokenRequest(username, password);
 
             var getAccessToken = function() {
 
                 return Ajax.request(
-                        atRequest.type,
-                        atRequest.getRequestUrl(),
-                        atRequest.objectify(),
-                        atRequest.getRequestHeaders()
-                    );
+                    atRequest.type,
+                    atRequest.getRequestUrl(),
+                    atRequest.objectify(),
+                    atRequest.getRequestHeaders()
+                );
 
             }.bind(this);
 

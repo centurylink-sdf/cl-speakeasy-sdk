@@ -10,10 +10,12 @@ define({
     useConfig: 'cert',
     settings: {
         intg: {
-            'ctlServerURL': 'https://lab.iaf.centurylink.com:8889'
+            'ctlServerURL': 'https://lab.iaf.centurylink.com:8889',
+            'ctlIdLoginURL': 'https://intg.iaf.centurylink.com/WEBRTC/RequestServletRWS/restful/PreRegister/WEB/v3/login?servicecatalog=true'
         },
         cert: {
-            'ctlServerURL': 'https://lab.af.centurylink.com:8889'
+            'ctlServerURL': 'https://lab.af.centurylink.com:8889',
+            'ctlIdLoginURL': 'https://intg.iaf.centurylink.com/WEBRTC/RequestServletRWS/restful/PreRegister/WEB/v3/login?servicecatalog=true'
         },
         'loginURI': '/token',
         'getSubscriptionServiceIdentitiesURI': '/SpeakEasyProvision/v1/util/products',
