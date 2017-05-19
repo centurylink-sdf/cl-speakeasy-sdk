@@ -9,15 +9,20 @@
 define({
     useConfig: 'cert',
     settings: {
-        intg: {
+        'intg': {
             'ctlServerURL': 'https://lab.iaf.centurylink.com:8889',
-            'ctlIdLoginURL': 'https://intg.iaf.centurylink.com/WEBRTC/RequestServletRWS/restful/PreRegister/WEB/v3/login?servicecatalog=true'
+            'ctlIdServerURL': 'https://intg.iaf.centurylink.com'
         },
-        cert: {
+        'cert': {
             'ctlServerURL': 'https://lab.af.centurylink.com:8889',
-            'ctlIdLoginURL': 'https://intg.iaf.centurylink.com/WEBRTC/RequestServletRWS/restful/PreRegister/WEB/v3/login?servicecatalog=true'
+            'ctlIdServerURL': 'https://lab.af.centurylink.com'
+        },
+        'prod': {
+            'ctlServerURL': 'https://live.af.centurylink.com:8889',
+            'ctlIdServerURL': 'https://live.af.centurylink.com'
         },
         'loginURI': '/token',
+        'ctlIdLoginURI': '/WEBRTC/RequestServletRWS/restful/PreRegister/WEB/v3/login?servicecatalog=true',
         'getSubscriptionServiceIdentitiesURI': '/SpeakEasyProvision/v1/util/products',
         'getSubscriptionServiceCatalogURI': '/SpeakEasyProvision/v1/serviceProfile/{publicId}',
         'subscribeServiceURI': '/{serviceName}/{identity}@{domain}/subscription',
@@ -29,34 +34,32 @@ define({
         'proxyForURLPatterns': ['/rest/version/[0-9]+/user','/rest/version/latest'],
         'SEProxyPrependURL': '/SpeakEasy/'
     },
-    fcsapi: {
+    'fcs-api': {
+        'notificationType': 'websocketonly',
+        'callAuditTimer': '30000',
+        'codecsToRemove': ['103', '104', '105', '106', '107'],
+        'clientControlled': 'true',
+        'services':['CallControl', 'custom'],
+        'earlyMedia': true
+    },
+    'fcs-servers': {
         'intg': {
-            'notificationType': 'websocket',
-            'restUrl': 'lab.iaf.centurylink.com',
-            'restPort': '8889',
-            'callAuditTimer': '30000',
-            'codecsToRemove': ['103', '104', '105', '106', '107'],
             'protocol': 'https',
-            'clientControlled': 'true',
-            'services':['CallControl', 'custom'],
-            'websocketProtocol': 'wss',
-            // 'websocketIP': 'www.intg104.centurylink.com',
-            // 'websocketPort': '8590',
-            'earlyMedia': true
+            'restUrl': 'lab.iaf.centurylink.com',
+            'restPort': '443',
+            'websocketProtocol': 'wss'
         },
         'cert': {
-            'notificationType': 'websocketonly',
-            'restUrl': 'lab.af.centurylink.com',
-            'restPort': '8889',
-            'callAuditTimer': '30000',
-            'codecsToRemove': ['103', '104', '105', '106', '107'],
             'protocol': 'https',
-            'clientControlled': 'true',
-            'services':['CallControl', 'custom'],
-            'websocketProtocol': 'wss',
-            // 'websocketIP': 'www.intg104.centurylink.com',
-            // 'websocketPort': '8590',
-            'earlyMedia': true
+            'restUrl': 'lab.af.centurylink.com',
+            'restPort': '443',
+            'websocketProtocol': 'wss'
+        },
+        'prod': {
+            'protocol': 'https',
+            'restUrl': 'live.af.centurylink.com',
+            'restPort': '443',
+            'websocketProtocol': 'wss'
         }
     },
     callManager: {

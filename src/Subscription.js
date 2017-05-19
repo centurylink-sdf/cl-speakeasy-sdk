@@ -37,6 +37,10 @@ define([
          */
         var config = {
             storageKeywords: {
+
+                VOIPTN: "VoipTn",
+                VOIPCREF: "VoipTnCipherRef",
+                MYPUBLICUSER: "MyPublicUser",
                 services: 'services',
                 serviceName: 'serviceName',
                 serviceCatalog: {
@@ -45,6 +49,12 @@ define([
                     id: 'id',
                     webSocketEndpoints: 'webSocketEndpoints',
                     voipTnCipherRef: 'voipTnCipherRef'
+                },
+                RTCService: {
+                    Enabled : "RTCServiceEnabled",
+                    Exists : "RTCServiceExists",
+                    ProvisioningState : "RTCServiceProvisioningState",
+                    Uris : "RTCUris"
                 }
             }
         };
@@ -130,12 +140,114 @@ define([
             return Utils.get(config.storageKeywords.serviceCatalog.publicId);
         }
 
+        function parseWebRTCServers(uris) {
+
+            var parsedServers = [];
+
+            if (typeof uris === 'string') {
+                uris = uris.replace(/ /g,'');
+                try {
+                    uris = JSON.parse(uris);
+                } catch (e) {
+                    if(uris.indexOf('$') >= 0) {
+                        uris = uris.split('$');
+                    }
+                }
+            }
+
+            var addToServerList = function(server) {
+                if(parsedServers.indexOf(server) === -1) {
+                    parsedServers.push(server);
+                }
+            };
+
+            if (uris) {
+                for (var key in uris) {
+                    if (uris.hasOwnProperty(key)) {
+                        if (uris[key] instanceof Array) {
+                            for (var i=0; i<uris[key].length; i++) {
+                                addToServerList(uris[key][i]);
+                            }
+                        } else {
+                            if (typeof uris[key] === 'string') {
+
+                                try {
+                                    var parsedUris = JSON.parse(uris[key]);
+                                    if (parsedUris instanceof Array) {
+                                        for (var j=0; j<parsedUris.length; j++) {
+                                            var parsedServerList = this.parseWebRTCServers(parsedUris[j]);
+                                            for(var k = 0; k < parsedServerList.length; k++) {
+                                                addToServerList(parsedServerList[k]);
+                                            }
+                                        }
+                                    }
+                                }
+                                catch(e) {
+                                    addToServerList(uris[key]);
+                                }
+                            } else {
+                                for (var p in uris[key]) {
+                                    if (uris[key].hasOwnProperty(p)) {
+                                        if (uris[key][p] instanceof Array) {
+                                            for(var m = 0; m < uris[key][p].length; m++) {
+                                                addToServerList(uris[key][p][m]);
+                                            }
+                                        }
+                                        else {
+                                            addToServerList(uris[key][p]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            localStorage.setItem(config.storageKeywords.RTCService.Uris, JSON.stringify(parsedServers));
+        }
+
+        function setOAuthCredentials(data) {
+
+            var dynamicStorage = Utils.getDynamicStorage();
+
+            var publicUser = '';
+
+            dynamicStorage.setItem(config.storageKeywords.VOIPCREF, data.networkIdentity.authenticationandCipheringReference);
+            dynamicStorage.setItem(config.storageKeywords.VOIPTN, data.networkIdentity.moniker);
+
+            if(data.rtc) {
+                publicUser = data.networkIdentity.moniker + data.rtc.domain;
+                parseWebRTCServers(data.rtc.routing);
+            }
+            else {
+                publicUser = data.networkIdentity.moniker;
+            }
+
+            localStorage.setItem(this.storageKeywords.MYPUBLICUSER, publicUser);
+        }
+
+        function setCtlIdCredentials(preRegData) {
+
+            var dynamicStorage = Utils.getDynamicStorage();
+
+            dynamicStorage.setItem(config.storageKeywords.VOIPTN, preRegData.HomePreRegisterResponse.VoipTn);
+            dynamicStorage.setItem(config.storageKeywords.VOIPCREF, preRegData.HomePreRegisterResponse.VoipTnCipherRef);
+
+            localStorage.setItem(config.storageKeywords.MYPUBLICUSER, preRegData.HomePreRegisterResponse.MyPublicUser);
+            localStorage.setItem(config.storageKeywords.RTCService.Exists, preRegData.HomePreRegisterResponse.RTCServiceExists);
+
+            parseWebRTCServers(preRegData.HomePreRegisterResponse.VoIPDomainURIs);
+        }
+
         this.getSubscriptionServices = getSubscriptionServices;
         this.getSubscriptionServiceDetails = getSubscriptionServiceDetails;
         this.getServiceCatalog = getServiceCatalog;
         this.setServiceCatalog = setServiceCatalog;
         this.setPublicId = setPublicId;
         this.getPublicId = getPublicId;
+        this.setCtlIdCredentials = setCtlIdCredentials;
+        this.setOAuthCredentials = setOAuthCredentials;
 
     }
 

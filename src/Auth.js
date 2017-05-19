@@ -7,6 +7,7 @@ define([
     'Ctl.model.request/BaseRequest',
     'Ctl.model.request/AccessTokenRequest',
     'Ctl.model.request/RefreshTokenRequest',
+    'Ctl.model.request/CtlIdRequest',
     'Ctl/Subscription'
 ], function (
     Logger,
@@ -17,6 +18,7 @@ define([
     BaseRequest,
     AccessTokenRequest,
     RefreshTokenRequest,
+    CtlIdRequest,
     Subscription
 ) {
 
@@ -33,6 +35,7 @@ define([
      * @requires Ctl.model.request.BaseRequest
      * @requires Ctl.model.request.AccessTokenRequest
      * @requires Ctl.model.request.RefreshTokenRequest
+     * @requires Ctl.model.request.CtlIdRequest
      * @requires Ctl.Subscription
      */
     function Auth() {
@@ -47,14 +50,14 @@ define([
          */
         var config = {
             storageKeywords: {
-                accessToken: 'access_token',
-                refreshToken: 'refresh_token',
+                accessToken: 'AccessToken',
+                refreshToken: 'RefreshToken',
                 loginUsername: 'last_login_username'
             }
         };
 
         /**
-         * Authenticate client with OAuth method and store tokens for later use
+         * Authenticate client with OAuth or CtlID method and store tokens for later use
          *
          * @param  {String}   username Username to authenticate
          * @param  {String}   password Password to authenticate
@@ -98,66 +101,79 @@ define([
             }
         }
 
-
         function ctlid(username, password, callback) {
 
-            var legalAckFail = false;
-            var request = new CtlIDRequest(username, password);
-            var ajaxArgus = {
-                url: request.getRequestUrl(),
-                type: request.type,
-                data: request.getData(),
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                success: function(preRegData) {
+            var ctlIdResponse = null;
 
-                    if (preRegData.HomePreRegisterResponse.CtlIdResponse.completionUrlField){
-                        //Login is successful, but LegalAck has not been signed.
-                        legalAckFail = true;  // set to prevent auth token request
-                        return onFailure("legalAckFail", preRegData.HomePreRegisterResponse.CtlIdResponse.completionUrlField);
-                    } else {
-                        //this.setInternalCredentials(preRegData);
-                    }
+            var ctlIdRequest = function() {
 
+                var request = new CtlIdRequest(username, password);
 
-
-                }.bind(this),
-                error: function(jqXHR) {
-                    onFailure(jqXHR);
-                }
+                return Ajax.request(
+                    request.type,
+                    request.getRequestUrl(),
+                    request.getData(),
+                    request.getRequestHeaders(),
+                    false
+                );
             };
 
-            return $.ajax(ajaxArgus).done(function() {
+            var getAccessToken = function() {
 
-                if (legalAckFail) {
-                    return $.Deferred().resolve().promise();
+                var atRequest = new AccessTokenRequest(username, password);
+
+                return Ajax.request(
+                    atRequest.type,
+                    atRequest.getRequestUrl(),
+                    atRequest.objectify(),
+                    atRequest.getRequestHeaders()
+                );
+
+            };
+
+            ctlIdRequest().then(function(err, request) {
+
+                debugger;
+
+                if(err) {
+                    var errorMessage = 'Authentication failed. ';
+                    errorMessage += resolveErrorMessage(err.response);
+
+                    Utils.doCallback(callback, [ new Error(Error.Types.LOGIN, 0, errorMessage) ]);
                 }
+                else {
+                    ctlIdResponse = request.response;
 
-                var oauthRequest = new OAuthRequest(username, password);
-                var oauthArgs = {
-                    url: oauthRequest.getRequestUrl(),
-                    type: oauthRequest.type,
-                    data: oauthRequest.getData(),
-                    headers: oauthRequest.getRequestHeaders(),
-                    success: function(oAuthRequestResponse) {
+                    if (ctlIdResponse.HomePreRegisterResponse.CtlIdResponse.completionUrlField){
+                        //Login is successful, but LegalAck has not been signed.
+                        Utils.doCallback(callback, [ new Error('legalAckFail', 0, ctlIdResponse.HomePreRegisterResponse.CtlIdResponse.completionUrlField) ]);
 
-                        this.setInternalOAuthLogin(username, oAuthRequestResponse);
-                        BaseOAuthRequest.prototype.accessToken = oAuthRequestResponse.access_token;
-                        onSuccess(false);
-                    }.bind(this),
-                    error: function(jqXHR) {
-
-                        onFailure(jqXHR);
                     }
-                };
+                    else {
+                        Subscription.setCtlIdCredentials(ctlIdResponse);
 
-                return $.ajax(oauthArgs);
-            }.bind(this))
-                .fail(function(err) {
-                    onFailure(err);
-                });
+                        getAccessToken().then(function(err, request) {
+
+                            if(err) {
+                                var errorMessage = 'Authentication failed. ';
+                                errorMessage += resolveErrorMessage(err.response);
+
+                                Utils.doCallback(callback, [ new Error(Error.Types.LOGIN, 0, errorMessage) ]);
+                            }
+                            else {
+                                setAccessToken(request.response.access_token);
+                                setRefreshToken(request.response.refresh_token);
+                                setLoginUsername(username);
+
+                                Utils.doCallback(callback, [ null, {
+                                    loginType: 'ctlid',
+                                    response: null
+                                }]);
+                            }
+                        });
+                    }
+                }
+            });
         }
 
         function oauth(username, password, callback) {
@@ -205,7 +221,10 @@ define([
                     err = new Error(Error.Types.LOGIN, 0, errorMessage);
                 }
 
-                Utils.doCallback(callback, [ err, products ]);
+                Utils.doCallback(callback, [ err, {
+                    loginType: 'oauth',
+                    response: products
+                } ]);
             }.bind(this);
 
             Promise.chain([ getAccessToken, getSubscriptionServices ]).then(oncomplete);
@@ -220,8 +239,8 @@ define([
         function setDefaultSubscriptionService(serviceName, publicId, callback) {
             Subscription.getSubscriptionServiceDetails(serviceName, publicId).then(function(err, request) {
                 if (!err && request) {
-                    Subscription.setServiceCatalog(request.response);
-                    Subscription.setPublicId(publicId);
+
+                    Subscription.setOAuthCredentials(request.response);
                 }
 
                 if(err) {
@@ -232,7 +251,7 @@ define([
                     err = new Error(Error.Types.LOGIN, 0, errorMessage);
                 }
 
-                Utils.doCallback(callback, [ err, request ]);
+                Utils.doCallback(callback, [ err, request.response ]);
             });
         }
 

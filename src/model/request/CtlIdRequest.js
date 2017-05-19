@@ -1,9 +1,7 @@
 define([
-    'Ctl.speakeasy/Config',
-    'Ctl.model.request/BaseRequest'
+    'Ctl.speakeasy/Config'
 ], function (
-    Config,
-    BaseRequest
+    Config
 ) {
     /**
      * @class Ctl.model.request.CtlIdRequest
@@ -20,14 +18,16 @@ define([
      * @constructor
      */
     function CtlIdRequest(username, password) {
-        BaseRequest.call(this);
+
         this.username = username;
         this.password = password;
-        this.grantType = 'password';
-        this.withJWT = true;
-    }
 
-    CtlIdRequest.prototype = Object.create(BaseRequest.prototype);
+        this.requestHeaders = [
+            [ 'Content-Type', 'application/json' ],
+            [ 'Accept', 'application/json' ]
+
+        ];
+    }
 
     /**
      * Retrieves data as a string of the AccessTokenRequest
@@ -62,7 +62,22 @@ define([
      * @return {String} string with URL for AccessTokenRequest
      */
     CtlIdRequest.prototype.getRequestUrl = function () {
-        return this.getCtlServerURL() + Config.settings.loginURI;
+        return this.getCtlIdServerURL() + Config.settings.ctlIdLoginURI;
+    };
+
+    CtlIdRequest.prototype.getRequestHeaders = function () {
+        return this.requestHeaders;
+    };
+
+    CtlIdRequest.prototype.getCtlIdServerURL = function () {
+        var configSection = Config.useConfig;
+        var settings = Config.settings[configSection];
+        if(settings) {
+            return settings.ctlIdServerURL;
+        }
+        else {
+            return Config.settings.intg.ctlIdServerURL;
+        }
     };
 
     /**
