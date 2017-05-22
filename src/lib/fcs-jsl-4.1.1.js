@@ -726,7 +726,7 @@ var JQrestfulImpl = function(_globalBroadcaster) {
 
         // ajax hook to modify url and headers
         if (fcsConfig.ajaxHook) {
-            modValues = window[fcsConfig.ajaxHook].call(xhr, window, {
+            modValues = utils.callFunctionIfExist(fcsConfig.ajaxHook, xhr, window, {
                 type: method,
                 url: url,
                 headers: headers,
@@ -761,8 +761,6 @@ var JQrestfulImpl = function(_globalBroadcaster) {
                 xhr.setRequestHeader(headerKey, finalHeaders[headerKey]);
             }
         }
-
-        xhr.setRequestHeader('X-CtlRTC-SPIDR-FQDN', fcs.fcsConfig.websocketIP);
 
         if (typeof data !== "string") {
             data = JSON.stringify(data);
@@ -2251,7 +2249,6 @@ var Utils = function(_logManager) {
         var args = Array.prototype.slice.call(arguments),
             func;
         func = args.shift();
-
         if (typeof(func) === 'function') {
             try {
                 return func.apply(null, args);
@@ -7738,7 +7735,7 @@ var WebRtcAdaptorImpl = function(_super, _decorator, _model, _logManager, _utils
     self.createPeer = function(call, useIceServer, onSuccess, onFailure) {
         try {
             var pc, constraints, i, servers = [],
-                iceServerUrl, stunturn;
+                iceServerUrl, config;
 
             logger.info('useIceServer: ' + useIceServer);
             if (useIceServer) {
@@ -7754,8 +7751,11 @@ var WebRtcAdaptorImpl = function(_super, _decorator, _model, _logManager, _utils
             } else {
                 servers[0] = iceServerUrl;
             }
-            stunturn = {
-                iceServers: servers
+            config = {
+                iceServers: servers,
+                // NOTE: This is added temporarily because Chrome and Firefox have required set
+                // by default and the media broker doesn't support multiplexing. ADG-14986
+                rtcpMuxPolicy: 'negotiate'
             };
 
             constraints = {
@@ -7763,7 +7763,7 @@ var WebRtcAdaptorImpl = function(_super, _decorator, _model, _logManager, _utils
                     "DtlsSrtpKeyAgreement": self.isDtlsEnabled()
                 }]
             };
-            pc = self.getRtcLibrary().createRTCPeerConnection(stunturn, constraints);
+            pc = self.getRtcLibrary().createRTCPeerConnection(config, constraints);
 
             self.setPeerCount(self.getPeerCount() + 1);
             call.peer = pc;
@@ -9622,7 +9622,7 @@ var WebRtcPluginAdaptorImpl = function(_super, _decorator, _model, _logManager, 
     self.createPeer = function(call, useIceServer, onsuccess, onfailure) {
         try {
             var pc, constraints, i, servers = [],
-                iceServerUrl, stunturn;
+                iceServerUrl, config;
 
             logger.info('useIceServer: ' + useIceServer);
             if (useIceServer) {
@@ -9638,8 +9638,11 @@ var WebRtcPluginAdaptorImpl = function(_super, _decorator, _model, _logManager, 
             } else {
                 servers[0] = iceServerUrl;
             }
-            stunturn = {
-                iceServers: servers
+            config = {
+                iceServers: servers,
+                // NOTE: This is added temporarily because Chrome and Firefox have required set
+                // by default and the media broker doesn't support multiplexing. ADG-14986
+                rtcpMuxPolicy: 'negotiate'
             };
 
             constraints = {
@@ -9647,7 +9650,7 @@ var WebRtcPluginAdaptorImpl = function(_super, _decorator, _model, _logManager, 
                     "DtlsSrtpKeyAgreement": self.isDtlsEnabled()
                 }
             };
-            pc = self.getRtcLibrary().createRTCPeerConnection(stunturn, constraints);
+            pc = self.getRtcLibrary().createRTCPeerConnection(config, constraints);
 
             self.setPeerCount(self.getPeerCount() + 1);
             call.peer = pc;
@@ -11283,7 +11286,7 @@ var WebRtcFirefoxAdaptorImpl = function(_super, _decorator, _model, _logManager,
     self.createPeer = function(call, useIceServer, onSuccess, onFailure) {
         try {
             var pc, constraints, i, servers = [],
-                iceServerUrl, stunturn, serverType;
+                iceServerUrl, config, serverType;
 
             logger.info('useIceServer: ' + useIceServer);
             if (useIceServer) {
@@ -11300,8 +11303,11 @@ var WebRtcFirefoxAdaptorImpl = function(_super, _decorator, _model, _logManager,
             } else {
                 servers[0] = iceServerUrl;
             }
-            stunturn = {
-                iceServers: servers
+            config = {
+                iceServers: servers,
+                // NOTE: This is added temporarily because Chrome and Firefox have required set
+                // by default and the media broker doesn't support multiplexing. ADG-14986
+                rtcpMuxPolicy: 'negotiate'
             };
 
             constraints = {
@@ -11309,7 +11315,7 @@ var WebRtcFirefoxAdaptorImpl = function(_super, _decorator, _model, _logManager,
                     "DtlsSrtpKeyAgreement": self.isDtlsEnabled()
                 }]
             };
-            pc = self.getRtcLibrary().createRTCPeerConnection(stunturn, constraints);
+            pc = self.getRtcLibrary().createRTCPeerConnection(config, constraints);
 
             self.setPeerCount(self.getPeerCount() + 1);
             call.peer = pc;
