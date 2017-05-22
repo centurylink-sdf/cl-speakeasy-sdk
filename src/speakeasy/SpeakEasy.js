@@ -143,8 +143,7 @@ define([
                 fcs.setUserAuth(getPublicUserId(), getVoipTnCipherRef());
 
                 // Set ajaxHook for url, headers and data intersection
-                fcsApiConfig.ajaxHook = "customAjaxSetup";
-                window.customAjaxSetup = customAjaxSetup;
+                fcsApiConfig.ajaxHook = customAjaxSetup;
 
                 fcs.setup(fcsApiConfig);
 
@@ -213,7 +212,7 @@ define([
          * @param settings
          * @returns {*}
          */
-        function customAjaxSetup(scope, settings) {
+        function customAjaxSetup(xhr, target, settings) {
             if (settings) {
 
                 //Use browser to parse out the pathname...

@@ -53,6 +53,7 @@ define([
          */
         function init(){
             //get spider servers from localStorage
+            this.fcsConfig = fcs.g || fcs.fcsConfig;
 
             var speakEasyServiceCatalog = Subscription.getServiceCatalog();
             if (speakEasyServiceCatalog && speakEasyServiceCatalog.rtc && speakEasyServiceCatalog.rtc.routing) {
@@ -73,8 +74,8 @@ define([
                 }
             }
 
-            if(fcs.fcsConfig.websocketPort) {
-                self.defaultWebsocketPort = fcs.fcsConfig.websocketPort;
+            if(this.fcsConfig.websocketPort) {
+                self.defaultWebsocketPort = this.fcsConfig.websocketPort;
             }
             updateLibraryConfig();
             attachListeners();
@@ -83,12 +84,12 @@ define([
 
         function updateLibraryConfig(){
             self.activeWebRTCServer = self.webRTCServerList[self.serverIndex].url;
-            fcs.fcsConfig.websocketIP = self.activeWebRTCServer;
+            this.fcsConfig.websocketIP = self.activeWebRTCServer;
             var port = self.webRTCServerList[self.serverIndex].port;
             if(port){
-                fcs.fcsConfig.websocketPort = port;
+                this.fcsConfig.websocketPort = port;
             }else{
-                fcs.fcsConfig.websocketPort = self.defaultWebsocketPort;
+                this.fcsConfig.websocketPort = self.defaultWebsocketPort;
             }
         }
 
