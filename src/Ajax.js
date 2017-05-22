@@ -59,7 +59,7 @@ define([
          */
         function request(method, url, data, headers, encodeData) {
             var p = new Promise(), timeout;
-            encodeData = (encodeData === null || typeof encodeData === undefined) ? true : encodeData;
+            encodeData = (encodeData === null || typeof encodeData === 'undefined') ? true : encodeData;
 
             self.logger.time(method + " " + url);
             (function(xhr) {

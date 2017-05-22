@@ -132,9 +132,6 @@ define([
             };
 
             ctlIdRequest().then(function(err, request) {
-
-                debugger;
-
                 if(err) {
                     var errorMessage = 'Authentication failed. ';
                     errorMessage += resolveErrorMessage(err.response);

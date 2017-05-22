@@ -88,9 +88,16 @@ function submitLogin() {
 
     CtlSpeakEasy.Auth.login(username, password, function(error, response) {
         if (!error && response) {
-            console.info('Successfully authenticated. Exposing subscription services selection.');
-            populateSubscriptionServices(response);
-            $('#subscriptionServicesModal').openModal();
+
+            if(response.loginType === 'oauth') {
+                console.info('Successfully authenticated. Exposing subscription services selection.');
+                populateSubscriptionServices(response.response);
+                $('#subscriptionServicesModal').openModal();
+            }
+            else {
+                window.location.href = 'call.html';
+            }
+
         } else {
             console.error('Authentication failed: ', error);
             unBlockUI();

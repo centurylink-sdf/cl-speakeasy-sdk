@@ -221,8 +221,8 @@ define([
                         break;
                     }
                 }
-                var originalOnload = this.onload;
-                this.onload = function(e) {
+                var originalOnload = xhr.onload;
+                xhr.onload = function(e) {
                     if (e.target && e.target.status === 401) {
                         Auth.reAuthenticate(function(error, response) {
                             if(!error) {
