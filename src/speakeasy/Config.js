@@ -21,6 +21,7 @@ define({
             'ctlServerURL': 'https://live.af.centurylink.com:8889',
             'ctlIdServerURL': 'https://live.af.centurylink.com'
         },
+        'OAuthUserDomains': ['@instalink', '@consumer', '@ctlvoip'],
         'loginURI': '/token',
         'ctlIdLoginURI': '/WEBRTC/RequestServletRWS/restful/PreRegister/WEB/v3/login?servicecatalog=true',
         'getSubscriptionServiceIdentitiesURI': '/SpeakEasyProvision/v1/util/products',

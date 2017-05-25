@@ -4,6 +4,7 @@ define([
     'Ctl/Ajax',
     'Ctl/Utils',
     'Ctl/Error',
+    'Ctl.speakeasy/Config',
     'Ctl.model.request/BaseRequest',
     'Ctl.model.request/AccessTokenRequest',
     'Ctl.model.request/RefreshTokenRequest',
@@ -15,6 +16,7 @@ define([
     Ajax,
     Utils,
     Error,
+    Config,
     BaseRequest,
     AccessTokenRequest,
     RefreshTokenRequest,
@@ -78,6 +80,18 @@ define([
             }
         }
 
+        function isOAuthUsername(username, userDomains) {
+            var result = false;
+
+            for (var i = 0, len = userDomains.length; i < len; i++) {
+                if (username.indexOf(userDomains[i]) > 0) {
+                    result = true;
+                }
+            }
+
+            return result;
+        }
+
         /**
          * Make service calls to authenticate user
          * @param  {String}   username Username to authenticate
@@ -88,15 +102,15 @@ define([
          */
         function authenticate(username, password, callback) {
 
-            if (username.indexOf('@instalink') > 0 || window.location.pathname.lastIndexOf('/instant', 0) === 0){
-
+            if (username.indexOf('@instalink') > 0 || window.location.pathname.lastIndexOf('/instant', 0) === 0) {
                 if (username.indexOf('@') < 0) {
                     username += '@instalink';
                 }
+            }
 
+            if (isOAuthUsername(username, Config.settings.OAuthUserDomains)) {
                 oauth(username, password, callback);
             } else {
-
                 ctlid(username, password, callback);
             }
         }
