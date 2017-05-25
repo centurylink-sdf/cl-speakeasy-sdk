@@ -226,6 +226,10 @@ define([
                 }
 
                 if(err) {
+
+                    //clear local storage
+                    Utils.removeAll();
+
                     var errorMessage = 'Authentication failed. ';
                     errorMessage += resolveErrorMessage(err.response);
 
@@ -255,6 +259,9 @@ define([
                 }
 
                 if(err) {
+
+                    //clear local storage
+                    Utils.removeAll();
 
                     var errorMessage = 'Service subscription details retrieval failed. ';
                     errorMessage += resolveErrorMessage(err.response);

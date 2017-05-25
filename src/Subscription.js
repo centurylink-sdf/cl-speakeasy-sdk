@@ -224,7 +224,7 @@ define([
                 publicUser = data.networkIdentity.moniker;
             }
 
-            localStorage.setItem(this.storageKeywords.MYPUBLICUSER, publicUser);
+            localStorage.setItem(config.storageKeywords.MYPUBLICUSER, publicUser);
         }
 
         function setCtlIdCredentials(preRegData) {
