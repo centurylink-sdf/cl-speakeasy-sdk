@@ -26,6 +26,12 @@ define({
         'ctlIdLoginURI': '/WEBRTC/RequestServletRWS/restful/PreRegister/WEB/v3/login?servicecatalog=true',
         'getSubscriptionServiceIdentitiesURI': '/SpeakEasyProvision/v1/util/products',
         'getSubscriptionServiceCatalogURI': '/SpeakEasyProvision/v1/serviceProfile/{publicId}',
+
+        'Instalink': {
+            'getSubscriptionServiceIdentitiesURI': '/CVoipON/api/v1/communicator/products',
+            'getSubscriptionServiceCatalogURI': '/CVoipON/api/v1/communicator/profile/{publicId}'
+        },
+
         'subscribeServiceURI': '/{serviceName}/{identity}@{domain}/subscription',
         'unsubscribeServiceURI': '/SpeakEasy/{identity}@ctlvoip.lab.centurylink/subscription/{channelId}',
         'getInstantMessageURI': '/rest/version/{versionId}/user/{userId}/notification/{notificationChannelId}',

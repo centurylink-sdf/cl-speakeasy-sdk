@@ -109,6 +109,12 @@ define([
             }
 
             if (isOAuthUsername(username, Config.settings.OAuthUserDomains)) {
+                if (username.indexOf('@instalink') > 0) {
+                    Utils.set('instalink', 'true');
+                }
+                else {
+                    Utils.set('instalink', 'false');
+                }
                 oauth(username, password, callback);
             } else {
                 ctlid(username, password, callback);
@@ -219,7 +225,12 @@ define([
             var oncomplete = function(err, request) {
 
                 if (!err) {
-                    var products = request.response.Products;
+                    var products = request.response.products || request.response.Products;
+
+                    if (!Array.isArray(products)) {
+                        products = [products];
+                    }
+
                     if (!products || products.length === 0) {
                         err = new Error(Error.Types.LOGIN, 0, 'No products returned.')
                     }
@@ -269,7 +280,7 @@ define([
                     err = new Error(Error.Types.LOGIN, 0, errorMessage);
                 }
 
-                Utils.doCallback(callback, [ err, request.response ]);
+                Utils.doCallback(callback, [ err, request ? request.response : null ]);
             });
         }
 
