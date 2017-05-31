@@ -53,13 +53,13 @@ define({
         'intg': {
             'protocol': 'https',
             'restUrl': 'lab.iaf.centurylink.com',
-            'restPort': '443',
+            'restPort': '8889',
             'websocketProtocol': 'wss'
         },
         'cert': {
             'protocol': 'https',
             'restUrl': 'lab.af.centurylink.com',
-            'restPort': '443',
+            'restPort': '8889',
             'websocketProtocol': 'wss'
         },
         'prod': {
