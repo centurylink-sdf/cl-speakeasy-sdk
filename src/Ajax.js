@@ -57,8 +57,10 @@ define([
          * @param  {Object} data Data to send
          * @return {Ctl.Promise} p
          */
-        function request(method, url, data, headers) {
+        function request(method, url, data, headers, encodeData) {
             var p = new Promise(), timeout;
+            encodeData = (encodeData === null || typeof encodeData === 'undefined') ? true : encodeData;
+
             self.logger.time(method + " " + url);
             (function(xhr) {
                 xhr.onreadystatechange = function() {
@@ -94,7 +96,7 @@ define([
                     p.done({ response: 'API Call timed out.'}, null);
                 }, 3e4);
                 //BACKLOG:0 stick that timeout in a config variable
-                xhr.send(encode(data));
+                xhr.send(encodeData ? encode(data) : data);
             })(new XMLHttpRequest());
             return p;
         }

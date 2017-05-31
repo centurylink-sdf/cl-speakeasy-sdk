@@ -1,7 +1,9 @@
 define([
+    'Ctl/Utils',
     'Ctl.speakeasy/Config',
     'Ctl.model.request/BaseRequest'
 ], function (
+    Utils,
     Config,
     BaseRequest
 ) {
@@ -25,7 +27,9 @@ define([
      * @return {String} string with URL for SubscriptionServiceIdentitiesRequest
      */
     SubscriptionServiceIdentitiesRequest.prototype.getRequestUrl = function () {
-            return this.getCtlServerURL() + Config.settings.getSubscriptionServiceIdentitiesURI;
+
+        var instalinkAccount = Utils.get('instalink');
+        return this.getCtlServerURL() + (instalinkAccount === 'true' ? Config.settings.Instalink.getSubscriptionServiceIdentitiesURI : Config.settings.getSubscriptionServiceIdentitiesURI);
     };
 
     /**

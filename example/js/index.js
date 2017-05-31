@@ -66,19 +66,20 @@ function unBlockUI() {
 }
 
 function populateSubscriptionServices(services) {
-    var publicIds = Object.keys(services);
-    var i = 0;
-    for (var val in services) {
-        if(services.hasOwnProperty(val)) {
-            for (var serviceName in services[val]) {
-                if(services[val].hasOwnProperty(serviceName)) {
-                    $('#subscriptionTable').append('<p><input name="service" type="radio" id="' + i + '" value="' + val + ' - ' + services[val][serviceName] + '" /><label for="' + i + '">' + val + ' - ' + services[val][serviceName] + '</label></p>');
-                    i++;
+
+    var index = 0;
+    for(var i = 0; i < services.length; i++) {
+        for (var publicId in services[i]) {
+            if(services[i].hasOwnProperty(publicId)) {
+                for (var serviceName in services[i][publicId]) {
+                    if(services[i][publicId].hasOwnProperty(serviceName)) {
+                        $('#subscriptionTable').append('<p><input name="service" type="radio" id="' + index + '" value="' + publicId + ' - ' + services[i][publicId][serviceName] + '" /><label for="' + index + '">' + publicId + ' - ' + services[i][publicId][serviceName] + '</label></p>');
+                        index++;
+                    }
                 }
             }
         }
     }
-
 }
 
 function submitLogin() {
@@ -88,9 +89,16 @@ function submitLogin() {
 
     CtlSpeakEasy.Auth.login(username, password, function(error, response) {
         if (!error && response) {
-            console.info('Successfully authenticated. Exposing subscription services selection.');
-            populateSubscriptionServices(response);
-            $('#subscriptionServicesModal').openModal();
+
+            if(response.loginType === 'oauth') {
+                console.info('Successfully authenticated. Exposing subscription services selection.');
+                populateSubscriptionServices(response.response);
+                $('#subscriptionServicesModal').openModal();
+            }
+            else {
+                window.location.href = 'call.html';
+            }
+
         } else {
             console.error('Authentication failed: ', error);
             unBlockUI();

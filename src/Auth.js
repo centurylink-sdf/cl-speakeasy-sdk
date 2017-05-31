@@ -4,9 +4,11 @@ define([
     'Ctl/Ajax',
     'Ctl/Utils',
     'Ctl/Error',
+    'Ctl.speakeasy/Config',
     'Ctl.model.request/BaseRequest',
     'Ctl.model.request/AccessTokenRequest',
     'Ctl.model.request/RefreshTokenRequest',
+    'Ctl.model.request/CtlIdRequest',
     'Ctl/Subscription'
 ], function (
     Logger,
@@ -14,9 +16,11 @@ define([
     Ajax,
     Utils,
     Error,
+    Config,
     BaseRequest,
     AccessTokenRequest,
     RefreshTokenRequest,
+    CtlIdRequest,
     Subscription
 ) {
 
@@ -33,6 +37,7 @@ define([
      * @requires Ctl.model.request.BaseRequest
      * @requires Ctl.model.request.AccessTokenRequest
      * @requires Ctl.model.request.RefreshTokenRequest
+     * @requires Ctl.model.request.CtlIdRequest
      * @requires Ctl.Subscription
      */
     function Auth() {
@@ -47,14 +52,14 @@ define([
          */
         var config = {
             storageKeywords: {
-                accessToken: 'access_token',
-                refreshToken: 'refresh_token',
+                accessToken: 'AccessToken',
+                refreshToken: 'RefreshToken',
                 loginUsername: 'last_login_username'
             }
         };
 
         /**
-         * Authenticate client with OAuth method and store tokens for later use
+         * Authenticate client with OAuth or CtlID method and store tokens for later use
          *
          * @param  {String}   username Username to authenticate
          * @param  {String}   password Password to authenticate
@@ -75,6 +80,18 @@ define([
             }
         }
 
+        function isOAuthUsername(username, userDomains) {
+            var result = false;
+
+            for (var i = 0, len = userDomains.length; i < len; i++) {
+                if (username.indexOf(userDomains[i]) > 0) {
+                    result = true;
+                }
+            }
+
+            return result;
+        }
+
         /**
          * Make service calls to authenticate user
          * @param  {String}   username Username to authenticate
@@ -85,16 +102,109 @@ define([
          */
         function authenticate(username, password, callback) {
 
+            if (username.indexOf('@instalink') > 0 || window.location.pathname.lastIndexOf('/instant', 0) === 0) {
+                if (username.indexOf('@') < 0) {
+                    username += '@instalink';
+                }
+            }
+
+            if (isOAuthUsername(username, Config.settings.OAuthUserDomains)) {
+                if (username.indexOf('@instalink') > 0) {
+                    Utils.set('instalink', 'true');
+                }
+                else {
+                    Utils.set('instalink', 'false');
+                }
+                oauth(username, password, callback);
+            } else {
+                ctlid(username, password, callback);
+            }
+        }
+
+        function ctlid(username, password, callback) {
+
+            var ctlIdResponse = null;
+
+            var ctlIdRequest = function() {
+
+                var request = new CtlIdRequest(username, password);
+
+                return Ajax.request(
+                    request.type,
+                    request.getRequestUrl(),
+                    request.getData(),
+                    request.getRequestHeaders(),
+                    false
+                );
+            };
+
+            var getAccessToken = function() {
+
+                var atRequest = new AccessTokenRequest(username, password);
+
+                return Ajax.request(
+                    atRequest.type,
+                    atRequest.getRequestUrl(),
+                    atRequest.objectify(),
+                    atRequest.getRequestHeaders()
+                );
+
+            };
+
+            ctlIdRequest().then(function(err, request) {
+                if(err) {
+                    var errorMessage = 'Authentication failed. ';
+                    errorMessage += resolveErrorMessage(err.response);
+
+                    Utils.doCallback(callback, [ new Error(Error.Types.LOGIN, 0, errorMessage) ]);
+                }
+                else {
+                    ctlIdResponse = request.response;
+
+                    if (ctlIdResponse.HomePreRegisterResponse.CtlIdResponse.completionUrlField){
+                        //Login is successful, but LegalAck has not been signed.
+                        Utils.doCallback(callback, [ new Error('legalAckFail', 0, ctlIdResponse.HomePreRegisterResponse.CtlIdResponse.completionUrlField) ]);
+
+                    }
+                    else {
+                        Subscription.setCtlIdCredentials(ctlIdResponse);
+
+                        getAccessToken().then(function(err, request) {
+
+                            if(err) {
+                                var errorMessage = 'Authentication failed. ';
+                                errorMessage += resolveErrorMessage(err.response);
+
+                                Utils.doCallback(callback, [ new Error(Error.Types.LOGIN, 0, errorMessage) ]);
+                            }
+                            else {
+                                setAccessToken(request.response.access_token);
+                                setRefreshToken(request.response.refresh_token);
+                                setLoginUsername(username);
+
+                                Utils.doCallback(callback, [ null, {
+                                    loginType: 'ctlid',
+                                    response: null
+                                }]);
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        function oauth(username, password, callback) {
+
             var atRequest = new AccessTokenRequest(username, password);
 
             var getAccessToken = function() {
 
                 return Ajax.request(
-                        atRequest.type,
-                        atRequest.getRequestUrl(),
-                        atRequest.objectify(),
-                        atRequest.getRequestHeaders()
-                    );
+                    atRequest.type,
+                    atRequest.getRequestUrl(),
+                    atRequest.objectify(),
+                    atRequest.getRequestHeaders()
+                );
 
             }.bind(this);
 
@@ -115,20 +225,32 @@ define([
             var oncomplete = function(err, request) {
 
                 if (!err) {
-                    var products = request.response.Products;
+                    var products = request.response.products || request.response.Products;
+
+                    if (!Array.isArray(products)) {
+                        products = [products];
+                    }
+
                     if (!products || products.length === 0) {
                         err = new Error(Error.Types.LOGIN, 0, 'No products returned.')
                     }
                 }
 
                 if(err) {
+
+                    //clear local storage
+                    Utils.removeAll();
+
                     var errorMessage = 'Authentication failed. ';
                     errorMessage += resolveErrorMessage(err.response);
 
                     err = new Error(Error.Types.LOGIN, 0, errorMessage);
                 }
 
-                Utils.doCallback(callback, [ err, products ]);
+                Utils.doCallback(callback, [ err, {
+                    loginType: 'oauth',
+                    response: products
+                } ]);
             }.bind(this);
 
             Promise.chain([ getAccessToken, getSubscriptionServices ]).then(oncomplete);
@@ -143,11 +265,14 @@ define([
         function setDefaultSubscriptionService(serviceName, publicId, callback) {
             Subscription.getSubscriptionServiceDetails(serviceName, publicId).then(function(err, request) {
                 if (!err && request) {
-                    Subscription.setServiceCatalog(request.response);
-                    Subscription.setPublicId(publicId);
+
+                    Subscription.setOAuthCredentials(request.response);
                 }
 
                 if(err) {
+
+                    //clear local storage
+                    Utils.removeAll();
 
                     var errorMessage = 'Service subscription details retrieval failed. ';
                     errorMessage += resolveErrorMessage(err.response);
@@ -155,7 +280,7 @@ define([
                     err = new Error(Error.Types.LOGIN, 0, errorMessage);
                 }
 
-                Utils.doCallback(callback, [ err, request ]);
+                Utils.doCallback(callback, [ err, request ? request.response : null ]);
             });
         }
 

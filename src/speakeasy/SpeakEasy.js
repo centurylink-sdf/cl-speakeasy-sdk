@@ -147,29 +147,6 @@ define([
 
                 fcs.setup(fcsApiConfig);
 
-                // TODO: Implement support check for WebRTC
-                // fcs.onPluginRequired = function(error) {
-                //     switch (error) {
-                //         case fcs.call.MediaErrors.WRONG_VERSION: // Alert
-                //             showErrorMessage("Media Plugin Version Not Supported. See fcs.call.MediaErrors.WRONG_VERSION");
-                //             pluginDownloadDialog("Media Plugin Version Not Supported");
-                //             break;
-                //
-                //         case fcs.call.MediaErrors.NEW_VERSION_WARNING: //Warning
-                //             showWarningMessage("New Media Version Available Wanrning! See fcs.call.MediaErrors.NEW_VERSION_WARNING");
-                //             break;
-                //
-                //         case fcs.call.MediaErrors.NOT_INITIALIZED: // Alert
-                //             showErrorMessage("Media couldn't be initialized. See fcs.call.MediaErrors.NOT_INITIALIZED");
-                //             break;
-                //
-                //         case fcs.call.MediaErrors.NOT_FOUND: // Alert
-                //             showErrorMessage("Plugin couldn't be found! See fcs.call.MediaErrors.NOT_FOUND");
-                //             pluginDownloadDialog("Plugin couldn't be found!");
-                //             break;
-                //     }
-                // }
-
                 Notification.setOnConnectionLost(self.connectionLostCallback);
                 Notification.setOnConnectionEstablished(self.connectionEstablishedCallback);
                 Notification.setOnConnectionError(self.connectionErrorCallback);
@@ -244,8 +221,8 @@ define([
                         break;
                     }
                 }
-                var originalOnload = this.onload;
-                this.onload = function(e) {
+                var originalOnload = xhr.onload;
+                xhr.onload = function(e) {
                     if (e.target && e.target.status === 401) {
                         Auth.reAuthenticate(function(error, response) {
                             if(!error) {
@@ -289,10 +266,7 @@ define([
          * @return {String} user's client ID
          */
         function getPublicUserId() {
-            var serviceName = Utils.getObject('serviceName');
-            var speakEasy = Utils.getObject('services_' + serviceName);
-            var phoneNumber = Utils.get('publicId');
-            return phoneNumber + speakEasy.rtc.domain;
+            return localStorage.getItem('MyPublicUser');
         }
 
         /**
@@ -300,9 +274,8 @@ define([
          * @returns {String} user's VoipTnCipherRef
          */
         function getVoipTnCipherRef() {
-            var serviceName = Utils.getObject('serviceName');
-            var speakEasy = Utils.getObject('services_' + serviceName);
-            return speakEasy.networkIdentity.authenticationandCipheringReference;
+            var dynamicStorage = Utils.getDynamicStorage();
+            return dynamicStorage.getItem('VoipTnCipherRef');
         }
 
         /**
@@ -310,15 +283,28 @@ define([
          * @returns {*}
          */
         function getFcsApiConfig() {
-            var configSection = Config.useConfig;
-            var fcsapi = Config.fcsapi[configSection];
 
-            if(fcsapi) {
-                return fcsapi;
+            var env = Config.useConfig;
+
+            var fcsSettings = Config['fcs-api'];
+            var fcsServerSettings = Config['fcs-servers'][env];
+            var servers = JSON.parse(localStorage.getItem('RTCUris'));
+
+            fcsSettings.servers = [];
+            for (var rtcCounter=0; rtcCounter < servers.length; rtcCounter++) {
+                var rtcSegments = servers[rtcCounter].split(':');
+
+                fcsSettings.servers.push({
+                    protocol: fcsServerSettings.protocol,
+                    restUrl: fcsServerSettings.restUrl,
+                    restPort: fcsServerSettings.restPort,
+                    websocketProtocol: fcsServerSettings.websocketProtocol,
+                    websocketIP: rtcSegments[0],
+                    websocketPort: rtcSegments[1]
+                });
             }
-            else {
-                return Config.fcsapi.intg;
-            }
+
+            return fcsSettings;
         }
 
         /**

@@ -219,6 +219,19 @@ define([], function () {
             return value == null || typeof value == 'undefined';
         }
 
+        function getDynamicStorage() {
+
+            var dynamicStorage = (window.inBrowser) ? sessionStorage : localStorage;
+            if(window.location.href.indexOf("forceLocal=true") > -1) {
+                dynamicStorage = localStorage;
+            }
+            if(window.location.href.indexOf("forceLocal=false") > -1) {
+                dynamicStorage = sessionStorage;
+            }
+
+            return dynamicStorage;
+        }
+
         this.isValidUrl = isValidUrl;
         this.encodeParams = encodeParams;
         this.isFunction = isFunction;
@@ -231,6 +244,7 @@ define([], function () {
         this.extend = extend;
         this.isNotNull = isNotNull;
         this.isNull = isNull;
+        this.getDynamicStorage = getDynamicStorage;
 
     }
 
