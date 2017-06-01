@@ -102,6 +102,8 @@ define([
          */
         function authenticate(username, password, callback) {
 
+            localStorage.removeItem('WebRTCServerList');
+
             if (username.indexOf('@instalink') > 0 || window.location.pathname.lastIndexOf('/instant', 0) === 0) {
                 if (username.indexOf('@') < 0) {
                     username += '@instalink';
@@ -153,9 +155,7 @@ define([
 
             ctlIdRequest().then(function(err, request) {
                 if(err) {
-                    var errorMessage = 'Authentication failed. ';
-                    errorMessage += resolveErrorMessage(err.response);
-
+                    var errorMessage = resolveErrorMessage(err.response, err.status, true);
                     Utils.doCallback(callback, [ new Error(Error.Types.LOGIN, 0, errorMessage) ]);
                 }
                 else {
@@ -184,7 +184,7 @@ define([
 
                                 Utils.doCallback(callback, [ null, {
                                     loginType: 'ctlid',
-                                    response: null
+                                    response: ctlIdResponse
                                 }]);
                             }
                         });
@@ -240,10 +240,7 @@ define([
 
                     //clear local storage
                     Utils.removeAll();
-
-                    var errorMessage = 'Authentication failed. ';
-                    errorMessage += resolveErrorMessage(err.response);
-
+                    var errorMessage = resolveErrorMessage(err.response, err.status, true);
                     err = new Error(Error.Types.LOGIN, 0, errorMessage);
                 }
 
@@ -428,15 +425,46 @@ define([
          *
          * @private
          * @param {object} response
+         * @param {Number} status http status code
+         * @param {Boolean} login indicate parsing response after login request
          * @returns {string} Resolved error message
          */
-        function resolveErrorMessage(response) {
+        function resolveErrorMessage(response, status, login) {
             var errorMessage = '';
 
+            if(login) {
+                errorMessage = 'There was an error logging you into the system. Please try again later.';
+            }
+
             if(response) {
-                if(typeof response == 'object') {
+                if(typeof response === 'object') {
+
+                    if(status === 401 || status === 400) {
+                        if(response.hasOwnProperty('HomePreRegisterResponse')) {
+                            var errorCode = response.HomePreRegisterResponse.CtlIdResponse.ErrorCode;
+
+                            switch (errorCode) {
+                                case 'QC7500':
+                                    errorMessage = 'The username and/or password you have entered is incorrect.';
+                                    break;
+                                case 'QC7508':
+                                    errorMessage = 'Wrong user id/password combination given more than 5 times.  Wait for 10 minutes and try again.';
+                                    break;
+                            }
+                        }
+                    }
                     if(response.hasOwnProperty('responseMessage')) {
-                        errorMessage = response.responseMessage;
+
+                        var errorIndex = response.responseMessage.indexOf('{error=');
+                        if(errorIndex >= 0) {
+                            var errorMessageParts = response.responseMessage.split(', ');
+                            if(errorMessageParts.length > 0) {
+                                errorMessage = errorMessageParts[0].replace('{error=', '');
+                            }
+                        }
+                        else {
+                            errorMessage = response.responseMessage;
+                        }
                     }
                 }
                 else {
